@@ -9,13 +9,21 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "FrontRange",
-            targets: ["FrontRange"]),
+            targets: ["FrontRange"],
+        ),
+    ],
+    dependencies: [
+      .package(url: "https://github.com/jpsim/Yams.git", from: "6.1.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "FrontRange"),
+            name: "FrontRange",
+            dependencies: [
+              "Yams",
+            ],
+        ),
         .testTarget(
             name: "FrontRangeTests",
             dependencies: ["FrontRange"]
