@@ -16,7 +16,9 @@ let package = Package(
         ),
     ],
     dependencies: [
-      .package(url: "https://github.com/jpsim/Yams.git", from: "6.1.0"),
+      .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.3.3"), // CustomDump
+      .package(url: "https://github.com/pointfreeco/swift-parsing.git", from: "0.14.1"), // Parsing
+      .package(url: "https://github.com/jpsim/Yams.git", from: "6.1.0"), // Yams
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -24,12 +26,17 @@ let package = Package(
         .target(
             name: "FrontRange",
             dependencies: [
+              .product(name: "CustomDump", package: "swift-custom-dump"),
+              .product(name: "Parsing", package: "swift-parsing"),
               "Yams",
             ],
         ),
         .testTarget(
             name: "FrontRangeTests",
-            dependencies: ["FrontRange"]
+            dependencies: [
+              .product(name: "CustomDump", package: "swift-custom-dump"),
+              "FrontRange",
+            ]
         ),
     ]
 )
