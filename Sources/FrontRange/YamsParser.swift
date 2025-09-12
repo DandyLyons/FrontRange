@@ -9,7 +9,7 @@ import Foundation
 import Parsing
 import Yams
 
-/// A `swift-parsing` wrapper around the `Yams` YAML parser that parses a YAML document into a `[String: Any]` dictionary.
+/// A `swift-parsing` wrapper around the `Yams` YAML parser that parses a YAML document into a `FrontMatter`.
 public struct YamsParser: Parsing.ParserPrinter {
   var resolver: Yams.Resolver
   var constructor: Yams.Constructor
@@ -26,17 +26,18 @@ public struct YamsParser: Parsing.ParserPrinter {
   }
   
   public func print(
-    _ output: [String : Any],
+    _ output: FrontMatter,
     into input: inout Substring
   ) throws {
-    let yamlString = try Yams.dump(object: output)
+    let dict: [String: Any] = output.reduce(into: [:]) { $0[$1.key] = $1.value }
+    let yamlString = try Yams.dump(object: dict)
     input = Substring(yamlString.trimmingCharacters(in: .newlines)) + input
   }
   
   public typealias Input = Substring
-  public typealias Output = [String: Any]
+  public typealias Output = FrontMatter
   
-  public func parse(_ input: inout Substring) throws -> [String : Any] {
+  public func parse(_ input: inout Substring) throws -> FrontMatter {
     Swift.print("ℹ️ Parsing input string:\n\(input)")
     
     let dict = try Yams.load(
@@ -45,8 +46,7 @@ public struct YamsParser: Parsing.ParserPrinter {
       self.constructor,
       self.encoding,
     )
-    
-    guard let dict = dict as? [String: Any] else {
+    guard let dict = dict as? FrontMatter else {
       throw Error.notADictionary
     }
     
@@ -62,7 +62,7 @@ extension YamsParser {
     public var errorDescription: String? {
       switch self {
       case .notADictionary:
-        return "The top level of the YAML document is not an Object (Swift `[String: Any]`)."
+        return "The top level of the YAML document is not a `FrontMatter`."
       }
     }
   }

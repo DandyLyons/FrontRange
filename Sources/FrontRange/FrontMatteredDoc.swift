@@ -1,10 +1,11 @@
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
 
-import Yams
 import Parsing
+import Yams
 
-public typealias FrontMatter = [String: Any]
+public typealias FrontMatter = Dictionary<String, Any>
+
 public struct FrontMatteredDoc {
   public init(frontMatter: FrontMatter, body: String, schema: [(String, Any.Type)] = []) {
     self.frontMatter = frontMatter
@@ -40,8 +41,8 @@ public struct FrontMatteredDoc {
         errors.append("Key '\(key)' is not an Array of Doubles.")
       } else if type == [Bool].self, !(value is [Bool]) {
         errors.append("Key '\(key)' is not an Array of Bools.")
-      } else if type == [String: Any].self, !(value is [String: Any]) {
-        errors.append("Key '\(key)' is not a Dictionary.")
+      } else if type == FrontMatter.self, !(value is FrontMatter) {
+        errors.append("Key '\(key)' is not a FrontMatter.")
       }
     }
     return errors
@@ -100,7 +101,7 @@ extension FrontMatteredDoc {
       } with: {
         "---\n"
         PrefixUpTo("---\n")
-          .map(YAMLSubstringToDictionaryConversion()) // Substring -> [String: Any]
+          .map(YAMLSubstringToDictionaryConversion()) // Substring -> FrontMatter
         "---\n"
         Rest() // Substring -> Substring
       }

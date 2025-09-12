@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FrontRange
+
 // Helper function to compare [String: Any] dictionaries
 func compareDictionaries(_ dict1: [String: Any], _ dict2: [String: Any]) -> Bool {
   guard dict1.count == dict2.count else { return false }
@@ -43,7 +45,7 @@ func compareAnyValues(_ value1: Any, _ value2: Any) -> Bool {
   }
   
   // Compare dictionaries recursively
-  if let dict1 = value1 as? [String: Any], let dict2 = value2 as? [String: Any] {
+  if let dict1 = value1 as? FrontMatter, let dict2 = value2 as? FrontMatter {
     return compareDictionaries(dict1, dict2)
   }
 
