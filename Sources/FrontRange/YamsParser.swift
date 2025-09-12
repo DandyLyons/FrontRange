@@ -11,18 +11,59 @@ import Yams
 
 /// A `swift-parsing` wrapper around the `Yams` YAML parser that parses a YAML document into a `FrontMatter`.
 public struct YamsParser: Parsing.ParserPrinter {
-  var resolver: Yams.Resolver
-  var constructor: Yams.Constructor
-  var encoding: Yams.Parser.Encoding
+  public var resolver: Yams.Resolver
+  public var constructor: Yams.Constructor
+  public var encoding: Yams.Parser.Encoding
+  
+  public var canonical: Bool
+  public var indent: Int
+  public var width: Int
+  public var allowUnicode: Bool
+  public var lineBreak: Yams.Emitter.LineBreak
+  public var explicitStart: Bool
+  public var explicitEnd: Bool
+  public var version: (major: Int, minor: Int)?
+  public var sortKeys: Bool
+  public var sequenceStyle: Yams.Node.Sequence.Style
+  public var mappingStyle: Yams.Node.Mapping.Style
+  public var newLineScalarStyle: Yams.Node.Scalar.Style
+  public var redundancyAliasingStrategy: (any Yams.RedundancyAliasingStrategy)?
+  
   
   public init(
     resolver: Yams.Resolver = .default,
     constructor: Yams.Constructor = .default,
-    encoding: Yams.Parser.Encoding = .default
+    encoding: Yams.Parser.Encoding = .default,
+    canonical: Bool = false,
+    indent: Int = 2,
+    width: Int = 0,
+    allowUnicode: Bool = false,
+    lineBreak: Yams.Emitter.LineBreak = .ln,
+    explicitStart: Bool = false,
+    explicitEnd: Bool = false,
+    version: (major: Int, minor: Int)? = nil,
+    sortKeys: Bool = false,
+    sequenceStyle: Yams.Node.Sequence.Style = .any,
+    mappingStyle: Yams.Node.Mapping.Style = .any,
+    newLineScalarStyle: Yams.Node.Scalar.Style = .any,
+    redundancyAliasingStrategy: (any Yams.RedundancyAliasingStrategy)? = nil
   ) {
     self.resolver = resolver
     self.constructor = constructor
     self.encoding = encoding
+    self.canonical = canonical
+    self.indent = indent
+    self.width = width
+    self.allowUnicode = allowUnicode
+    self.lineBreak = lineBreak
+    self.explicitStart = explicitStart
+    self.explicitEnd = explicitEnd
+    self.version = version
+    self.sortKeys = sortKeys
+    self.sequenceStyle = sequenceStyle
+    self.mappingStyle = mappingStyle
+    self.newLineScalarStyle = newLineScalarStyle
+    self.redundancyAliasingStrategy = redundancyAliasingStrategy	
   }
   
   /// Serializes structured ``FrontMatter`` data into unstructured text data.
@@ -30,8 +71,23 @@ public struct YamsParser: Parsing.ParserPrinter {
     _ output: FrontMatter,
     into input: inout Substring
   ) throws {
-    let yamlString = try Yams.dump(object: output)
-    input = Substring(yamlString.trimmingCharacters(in: .newlines)) + input
+    let yamlString = try Yams.dump(
+      object: output,
+      canonical: canonical,
+      indent: indent,
+      width: width,
+      allowUnicode: allowUnicode,
+      lineBreak: lineBreak,
+      explicitStart: explicitStart,
+      explicitEnd: explicitEnd,
+      version: version,
+      sortKeys: sortKeys,
+      sequenceStyle: sequenceStyle,
+      mappingStyle: mappingStyle,
+      newLineScalarStyle: newLineScalarStyle,
+      redundancyAliasingStrategy: redundancyAliasingStrategy
+    )
+    input = yamlString.trimmingCharacters(in: .newlines) + input
   }
   
   public typealias Input = Substring

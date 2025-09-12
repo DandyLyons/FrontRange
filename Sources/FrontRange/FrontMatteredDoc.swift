@@ -7,8 +7,14 @@ import Yams
 public typealias FrontMatter = Dictionary<String, Any>
 
 public struct FrontMatteredDoc {
-  public init(frontMatter: FrontMatter, body: String, schema: [(String, Any.Type)] = []) {
+  public init(
+    frontMatter: FrontMatter,
+    formatting: Formatting = Formatting(),
+    body: String,
+    schema: [(String, Any.Type)] = []
+  ) {
     self.frontMatter = frontMatter
+    self.formatting = formatting
     self.body = body
     self.schema = schema
   }
@@ -17,6 +23,32 @@ public struct FrontMatteredDoc {
   public var frontMatter: FrontMatter
   public var body: String
   public var schema: [(String, Any.Type)] = []
+  
+  public var formatting: Formatting
+  public struct Formatting: Hashable {
+    public var indent: Int
+    public var width: Int
+    public var allowUnicode: Bool
+    public var lineBreak: Yams.Emitter.LineBreak
+    public var sortKeys: Bool
+    public var sequenceStyle: Yams.Node.Sequence.Style
+    
+    public init(
+      indent: Int = 0,
+      width: Int = 0,
+      allowUnicode: Bool = false,
+      lineBreak: Yams.Emitter.LineBreak = .ln,
+      sortKeys: Bool = true,
+      sequenceStyle: Yams.Node.Sequence.Style = .any,
+    ) {
+      self.indent = indent
+      self.width = width
+      self.allowUnicode = allowUnicode
+      self.lineBreak = lineBreak
+      self.sortKeys = sortKeys
+      self.sequenceStyle = sequenceStyle
+    }
+  }
   
   public func validateSchema() -> [String] {
     var errors: [String] = []
@@ -49,7 +81,18 @@ public struct FrontMatteredDoc {
   }
   
   public func renderFullText() throws -> String {
-    let printer = YamsParser()
+    let printer = YamsParser(
+      canonical: false,
+      indent: formatting.indent,
+      width: formatting.width,
+      allowUnicode: formatting.allowUnicode,
+      lineBreak: formatting.lineBreak,
+      explicitStart: false,
+      explicitEnd: false,
+      version: nil,
+      sortKeys: true,
+      sequenceStyle: formatting.sequenceStyle,
+    )
     var frontMatterSubstring = Substring()
     try printer.print(frontMatter, into: &frontMatterSubstring)
     return """
@@ -70,14 +113,27 @@ public struct FrontMatteredDoc {
 
 // MARK: Convenience Initializers
 extension FrontMatteredDoc {
-  public init(parsing input: Substring, schema: [(String, Any.Type)] = []) throws {
+  public init(
+    parsing input: Substring,
+    schema: [(String, Any.Type)] = [],
+    formatting: Formatting = Formatting(),
+  ) throws {
     var input = input
     self = try Self.Parser().parse(&input)
     self.schema = schema
+    self.formatting = formatting
   }
   
-  public init(parsing input: String, schema: [(String, Any.Type)] = []) throws {
-    try self.init(parsing: Substring(input), schema: schema)
+  public init(
+    parsing input: String,
+    schema: [(String, Any.Type)] = [],
+    formatting: Formatting = Formatting(),
+  ) throws {
+    try self.init(
+      parsing: Substring(input),
+      schema: schema,
+      formatting: formatting,
+    )
   }
 }
 

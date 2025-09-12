@@ -121,4 +121,23 @@ nested:
       try parser.parse(&input)
     }
   }
+  
+  @Test
+  func yamsParserConfiguration() async throws {
+    let parser = YamsParser()
+    #expect(parser.encoding == .default)
+    #expect(parser.canonical == false)
+    #expect(parser.indent == 2)
+    #expect(parser.width == 0)
+    #expect(parser.allowUnicode == false)
+    #expect(parser.lineBreak == .ln)
+    #expect(parser.explicitStart == false)
+    #expect(parser.explicitEnd == false)
+    #expect(parser.version == nil)
+    #expect(parser.sortKeys == false)
+    #expect(parser.sequenceStyle == .any)
+    #expect(parser.mappingStyle == .any)
+    #expect(parser.newLineScalarStyle == .any)
+    #expect(parser.redundancyAliasingStrategy == nil)
+  }
 }
