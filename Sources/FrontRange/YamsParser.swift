@@ -25,6 +25,7 @@ public struct YamsParser: Parsing.ParserPrinter {
     self.encoding = encoding
   }
   
+  /// Serializes structured ``FrontMatter`` data into unstructured text data.
   public func print(
     _ output: FrontMatter,
     into input: inout Substring
@@ -37,6 +38,7 @@ public struct YamsParser: Parsing.ParserPrinter {
   public typealias Input = Substring
   public typealias Output = FrontMatter
   
+  /// Parses unstructured text data into structured ``FrontMatter`` data.
   public func parse(_ input: inout Substring) throws -> FrontMatter {
     Swift.print("ℹ️ Parsing input string:\n\(input)")
     

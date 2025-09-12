@@ -21,9 +21,8 @@ let package = Package(
       .package(url: "https://github.com/jpsim/Yams.git", from: "6.1.0"), // Yams
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
+// A tool for parsing, mutating, serializing, and deserializing text documents with YAML front matter.
             name: "FrontRange",
             dependencies: [
               .product(name: "CustomDump", package: "swift-custom-dump"),
