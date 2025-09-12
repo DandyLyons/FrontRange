@@ -30,8 +30,7 @@ public struct YamsParser: Parsing.ParserPrinter {
     _ output: FrontMatter,
     into input: inout Substring
   ) throws {
-    let dict: [String: Any] = output.reduce(into: [:]) { $0[$1.key] = $1.value }
-    let yamlString = try Yams.dump(object: dict)
+    let yamlString = try Yams.dump(object: output)
     input = Substring(yamlString.trimmingCharacters(in: .newlines)) + input
   }
   
