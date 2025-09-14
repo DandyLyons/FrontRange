@@ -12,6 +12,7 @@ public typealias FrontMatter = Dictionary<String, Any>
 extension FrontMatter {
   public func isEqual(to other: Self) -> Bool {
     guard self.count == other.count else { return false }
+    guard self.keys.sorted() == other.keys.sorted() else { return false }
     
     for (key, value1) in self {
       // Unwrap value2 from the same key
