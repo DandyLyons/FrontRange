@@ -101,6 +101,9 @@ public struct FrontMatteredDoc {
       """
   }
   
+  public func hasKey(_ key: String) -> Bool {
+    frontMatter.keys.contains(key)
+  }
   public func getValue(forKey key: String) -> Any? {
     frontMatter[key]
   }

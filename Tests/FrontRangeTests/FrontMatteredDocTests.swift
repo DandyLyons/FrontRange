@@ -33,6 +33,13 @@ It can also include **Markdown** formatting.
 """
   
   @Test
+  func hasKey() throws {
+    let doc = try FrontMatteredDoc(parsing: docString)
+    #expect(doc.hasKey("title"))
+    #expect(!doc.hasKey("nonexistent"))
+  }
+  
+  @Test
   func testParsing() throws {
     let doc = try FrontMatteredDoc(parsing: docString)
     // Use custom comparison for dictionaries
