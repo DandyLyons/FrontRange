@@ -48,6 +48,13 @@ public struct FrontMatteredDoc {
     }
   }
   
+  /// Check if the content (front matter and body) is equal to another `FrontMatteredDoc`.
+  ///
+  /// Ignores everything else (e.g. schema, formatting configuration).
+  public func contentIsEqual(to other: FrontMatteredDoc) -> Bool {
+    self.frontMatter.isEqual(to: other.frontMatter) && self.body == other.body
+  }
+  
   public func validateSchema() -> [String] {
     var errors: [String] = []
     for (key, type) in schema {
