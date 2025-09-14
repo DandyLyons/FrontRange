@@ -88,7 +88,7 @@ public struct FrontMatteredDoc {
       explicitStart: false,
       explicitEnd: false,
       version: nil,
-      sortKeys: true,
+      sortKeys: false,
       sequenceStyle: formatting.sequenceStyle,
     )
     var frontMatterSubstring = Substring()
