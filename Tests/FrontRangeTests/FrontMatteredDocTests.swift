@@ -89,4 +89,60 @@ Updated body content.
     doc.setValue(["foo", "bar", "baz"], forKey: "tags")
     #expect((doc.getValue(forKey: "tags") as? [String]) == ["foo", "bar", "baz"])
   }
+  
+  @Suite
+  struct ArrayTests {
+    let docString1 = """
+---
+author: Jane Smith
+date: 2024-01-15 12:30:00 +0000
+tags: [swift, yaml, testing]
+title: Another Document
+starred: true
+---
+This document has a different body. It also uses a different format for the tags.
+"""
+    let docString2 = """
+---
+author: John Smith
+date: 2025-01-15 12:30:00 +0000
+tags: [swift, yaml, testing]
+title: Another Document
+starred: false
+---
+This document has a different body. It also uses a different format for the tags.
+"""
+    @Test
+    func testParsingMultipleYAMLStrings() throws {
+      let doc1 = try FrontMatteredDoc(parsing: docString1)
+      let doc2 = try FrontMatteredDoc(parsing: docString2)
+      let docs = [doc1, doc2]
+      let expectedDocs = [
+        FrontMatteredDoc(
+          frontMatter: [
+            "author": "Jane Smith",
+            "date": "2024-01-15 12:30:00 +0000",
+            "tags": ["swift", "yaml", "testing"],
+            "title": "Another Document",
+            "starred": true
+          ],
+          body: "This document has a different body. It also uses a different format for the tags."
+        ),
+        FrontMatteredDoc(
+          frontMatter: [
+            "author": "John Smith",
+            "date": "2025-01-15 12:30:00 +0000",
+            "tags": ["swift", "yaml", "testing"],
+            "title": "Another Document",
+            "starred": false
+            ],
+          body: "This document has a different body. It also uses a different format for the tags."
+        )
+      ]
+      for (doc, expectedDoc) in zip(docs, expectedDocs) {
+        #expect(doc.contentIsEqual(to: expectedDoc))
+      }
+    }
+    
+  }
 }
