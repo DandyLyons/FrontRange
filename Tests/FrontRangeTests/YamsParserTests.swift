@@ -45,8 +45,7 @@ nested:
     #expect(output.keys == expectedDict.keys)
     
     // Use helper function to compare the dictionaries
-//    #expect(compareDictionaries(output, expectedDict))
-    #expect(compareDictionaries(output, expectedDict))
+    #expect(expectedDict.isEqual(to: output))
     
     // Verify input was consumed
     #expect(input.isEmpty)
@@ -70,7 +69,7 @@ nested:
     #expect(Set(reparsedOutput.keys) == Set(expectedDict.keys))
     
     // Use helper function to compare the dictionaries
-    #expect(compareDictionaries(reparsedOutput, expectedDict))
+    #expect(reparsedOutput.isEqual(to: expectedDict))
   }
   
   @Test
@@ -83,15 +82,14 @@ nested:
     try parser.print(parsedDict, into: &printedSubstring)
     print(String(printedSubstring))
     
-    // Instead of comparing strings directly, parse both and compare the dictionaries
+    // Parse both dictionaries and compare them
     var originalCopy = Substring(yamlString)
     let originalParsed = try parser.parse(&originalCopy)
     
     var printedCopy = printedSubstring
     let reprintedParsed = try parser.parse(&printedCopy)
     
-    // Compare the semantic content rather than the string representation
-    #expect(compareDictionaries(originalParsed, reprintedParsed))
+    #expect(originalParsed.isEqual(to: reprintedParsed))
     
     // Optional: Print diff for debugging (this will show formatting differences)
     print("Original YAML:\n\(yamlString)")

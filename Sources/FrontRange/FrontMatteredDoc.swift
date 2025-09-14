@@ -4,8 +4,6 @@
 import Parsing
 import Yams
 
-public typealias FrontMatter = Dictionary<String, Any>
-
 public struct FrontMatteredDoc {
   public init(
     frontMatter: FrontMatter,

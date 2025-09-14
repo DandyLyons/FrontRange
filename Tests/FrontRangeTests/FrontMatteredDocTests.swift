@@ -20,7 +20,7 @@ This is the body of the document. It contains multiple lines of text.
 It can also include **Markdown** formatting.
 """
   
-  let expectedMetadata: FrontMatter = [
+  let expectedFrontMatter: FrontMatter = [
     "title": "Sample Document",
     "author": "Jane Doe",
     "date": "2023-10-01 00:00:00 +0000",
@@ -36,7 +36,7 @@ It can also include **Markdown** formatting.
   func testParsing() throws {
     let doc = try FrontMatteredDoc(parsing: docString)
     // Use custom comparison for dictionaries
-    #expect(compareDictionaries(doc.frontMatter, expectedMetadata))
+    #expect(doc.frontMatter.isEqual(to: expectedFrontMatter))
     #expect(doc.body == expectedBody)
   }
   
