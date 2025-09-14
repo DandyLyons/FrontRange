@@ -139,11 +139,11 @@ extension FrontMatteredDoc {
 }
 
 extension [FrontMatteredDoc] {
-  public func getValue(forKey key: String) -> [Any?] {
+  public func getValues(forKey key: String) -> [Any?] {
     self.map { $0.getValue(forKey: key) }
   }
    
-  mutating public func setValue(_ value: Any, forKey key: String) {
+  mutating public func setEachValue(_ value: Any, forKey key: String) {
     for index in self.indices {
       self[index].setValue(value, forKey: key)
     }
