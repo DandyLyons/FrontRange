@@ -77,4 +77,16 @@ Updated body content.
     let reRendered = try doc.renderFullText()
     expectNoDifference(reRendered, updatedDocString)
   }
+  
+  @Test
+  func mutatingFrontMatter() throws {
+    var doc = try FrontMatteredDoc(parsing: docString)
+    #expect(doc.getValue(forKey: "title") as? String == "Sample Document")
+    
+    doc.setValue("New Title", forKey: "title")
+    #expect(doc.getValue(forKey: "title") as? String == "New Title")
+    
+    doc.setValue(["foo", "bar", "baz"], forKey: "tags")
+    #expect((doc.getValue(forKey: "tags") as? [String]) == ["foo", "bar", "baz"])
+  }
 }
