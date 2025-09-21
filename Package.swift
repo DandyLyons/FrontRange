@@ -16,6 +16,7 @@ let package = Package(
         ),
     ],
     dependencies: [
+      .package(url: "https://github.com/apple/swift-collections.git", from: "1.2.1"), // Swift Collections
       .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.3.3"), // CustomDump
       .package(url: "https://github.com/pointfreeco/swift-parsing.git", from: "0.14.1"), // Parsing
       .package(url: "https://github.com/jpsim/Yams.git", from: "6.1.0"), // Yams
@@ -26,6 +27,7 @@ let package = Package(
             name: "FrontRange",
             dependencies: [
               .product(name: "CustomDump", package: "swift-custom-dump"),
+              .product(name: "OrderedCollections", package: "swift-collections"),
               .product(name: "Parsing", package: "swift-parsing"),
               "Yams",
             ],
@@ -34,6 +36,7 @@ let package = Package(
             name: "FrontRangeTests",
             dependencies: [
               .product(name: "CustomDump", package: "swift-custom-dump"),
+              .product(name: "OrderedCollections", package: "swift-collections"),
               "FrontRange",
             ]
         ),
