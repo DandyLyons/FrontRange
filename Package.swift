@@ -13,8 +13,13 @@ let package = Package(
             name: "FrontRange",
             targets: ["FrontRange"],
         ),
+        .executable(
+          name: "fr",
+          targets: ["FrontRangeCLI"]
+        ),
     ],
     dependencies: [
+      .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.1"), // ArgumentParser
       .package(url: "https://github.com/apple/swift-collections.git", from: "1.2.1"), // Swift Collections
       .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.3.3"), // CustomDump
       .package(url: "https://github.com/pointfreeco/swift-parsing.git", from: "0.14.1"), // Parsing
@@ -37,6 +42,21 @@ let package = Package(
               .product(name: "CustomDump", package: "swift-custom-dump"),
               .product(name: "OrderedCollections", package: "swift-collections"),
               "FrontRange",
+            ]
+        ),
+        
+        .executableTarget(
+// A command-line interface (CLI) for interacting with FrontRange functionalities.
+            name: "FrontRangeCLI",
+            dependencies: [
+              "FrontRange",
+              .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ],
+        ),
+        .testTarget(
+            name: "FrontRangeCLITests",
+            dependencies: [
+              "FrontRangeCLI",
             ]
         ),
     ]
