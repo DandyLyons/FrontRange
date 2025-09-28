@@ -12,7 +12,8 @@ import FrontRange
 extension FrontRangeCLIEntry {
   struct Remove: ParsableCommand {
     static let configuration = CommandConfiguration(
-      abstract: "Remove a key from frontmatter"
+      abstract: "Remove a key from frontmatter",
+      aliases: ["rm"],
     )
     
     @OptionGroup var options: GlobalOptions

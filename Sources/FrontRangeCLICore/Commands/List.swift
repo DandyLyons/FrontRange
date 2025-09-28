@@ -12,7 +12,8 @@ import FrontRange
 extension FrontRangeCLIEntry {
   struct List: ParsableCommand {
     static let configuration = CommandConfiguration(
-      abstract: "List all keys in frontmatter"
+      abstract: "List all keys in frontmatter",
+      aliases: ["ls"],
     )
     
     @OptionGroup var options: GlobalOptions
