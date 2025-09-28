@@ -5,26 +5,55 @@
 //  Created by Daniel Lyons on 9/27/25.
 //
 
+import ArgumentParser
 import Foundation
 import FrontRange
+
+public func printValue(_ value: Any?) {
+  outputValue(value, format: .plain)
+}
 
 // These would be implemented to handle the actual FrontRange operations and formatting
 
 private func outputValue(_ value: Any?, format: OutputFormat) {
-  // TODO: Format and output the value based on the specified format
+  switch value {
+    case let stringValue as String:
+      print(stringValue)
+    case let intValue as Int:
+      print(intValue)
+    case let doubleValue as Double:
+      print(doubleValue)
+    case let boolValue as Bool:
+      outputBoolean(boolValue, format: format)
+    case let arrayValue as [Any]:
+      // Handle array output recursively
+      for value in arrayValue {
+        outputValue(value, format: format)
+      }
+    case let dictValue as [String: Any]:
+      print("🔴 Dictionary output not yet implemented")
+    case let orderedDictValue as FrontMatter:
+      print("🔴 FrontMatter (OrderedDictionary) output not yet implemented")
+    default:
+      print("🔴 Unsupported value: \(String(describing: value))")
+  }
 }
 
 private func outputBoolean(_ value: Bool, format: OutputFormat) {
-  // TODO: Format and output the boolean based on the specified format
+  if value {
+    print("true")
+  } else {
+    print("false")
+  }
 }
 
 private func outputKeys(_ keys: [String], format: OutputFormat) {
-  // TODO: Format and output the keys based on the specified format
+  print("🔴 Key listing not yet implemented")
 }
 
-private func serializeDoc(_ doc: FrontMatteredDoc) -> String {
+private func serializeDoc(_ doc: FrontMatteredDoc) throws -> String {
   // TODO: Serialize the FrontMatteredDoc back to a string
   // This would use YamsParser.print to serialize the frontMatter
   // and combine it with the body
-  return ""
+  return try doc.renderFullText()
 }
