@@ -7,6 +7,7 @@
 
 import ArgumentParser
 import Foundation
+import FrontRange
 
 extension FrontRangeCLIEntry {
   struct List: ParsableCommand {
@@ -20,11 +21,10 @@ extension FrontRangeCLIEntry {
       // TODO: Implement using FrontRange
       print("Listing all keys in file '\(options.file)' in \(options.format) format")
       
-      // Placeholder implementation:
-      // let content = try String(contentsOfFile: options.file)
-      // let doc = try FrontMatteredDoc(parsing: content)
-      // let keys = Array(doc.frontMatter.keys)
-      // outputKeys(keys, format: options.format)
+      let content = try String(contentsOfFile: options.file)
+      let doc = try FrontMatteredDoc(parsing: content)
+      let keys = Array(doc.frontMatter.keys)
+      printKeys(keys)
     }
   }
 }

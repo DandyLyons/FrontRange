@@ -47,8 +47,18 @@ private func outputBoolean(_ value: Bool, format: OutputFormat) {
   }
 }
 
+public func printKeys(_ keys: [String]) {
+  outputKeys(keys, format: .plain)
+}
+  
+
 private func outputKeys(_ keys: [String], format: OutputFormat) {
-  print("🔴 Key listing not yet implemented")
+  print("Keys:")
+  print("-----")
+  for key in keys {
+    print(key)
+  }
+  print("-----")
 }
 
 public func serializeDoc(_ doc: FrontMatteredDoc) throws -> String {
