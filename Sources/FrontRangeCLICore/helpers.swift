@@ -51,9 +51,6 @@ private func outputKeys(_ keys: [String], format: OutputFormat) {
   print("🔴 Key listing not yet implemented")
 }
 
-private func serializeDoc(_ doc: FrontMatteredDoc) throws -> String {
-  // TODO: Serialize the FrontMatteredDoc back to a string
-  // This would use YamsParser.print to serialize the frontMatter
-  // and combine it with the body
+public func serializeDoc(_ doc: FrontMatteredDoc) throws -> String {
   return try doc.renderFullText()
 }

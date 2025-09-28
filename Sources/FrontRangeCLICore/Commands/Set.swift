@@ -7,6 +7,7 @@
 
 import ArgumentParser
 import Foundation
+import FrontRange
 
 extension FrontRangeCLIEntry {
   struct Set: ParsableCommand {
@@ -23,15 +24,16 @@ extension FrontRangeCLIEntry {
     var value: String
     
     func run() throws {
-      // TODO: Implement using FrontRange
-      print("Setting key '\(key)' to '\(value)' in file '\(options.file)'")
+      #if DEBUG
+      print("ℹ️Setting key '\(key)' to '\(value)' in file '\(options.file)'")
+      #endif
       
       // Placeholder implementation:
-      // let content = try String(contentsOfFile: options.file)
-      // var doc = try FrontMatteredDoc(parsing: content)
-      // doc.setValue(value, forKey: key)
-      // let updatedContent = serializeDoc(doc)
-      // try updatedContent.write(to: URL(fileURLWithPath: options.file), atomically: true, encoding: .utf8)
+      let content = try String(contentsOfFile: options.file)
+      var doc = try FrontMatteredDoc(parsing: content)
+      doc.setValue(value, forKey: key)
+      let updatedContent = try serializeDoc(doc)
+      try updatedContent.write(to: URL(fileURLWithPath: options.file), atomically: true, encoding: .utf8)
     }
   }
 }
