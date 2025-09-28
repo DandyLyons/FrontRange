@@ -117,6 +117,11 @@ nested:
     }
   }
   
+  @Test func `Duplicate Keys`() async throws {
+    // TODO: Decide what to do when there are duplicate keys
+    #expect(false)
+  }
+  
   @Test
   func parseEmptyInput() async throws {
     let parser = YamsParser()
