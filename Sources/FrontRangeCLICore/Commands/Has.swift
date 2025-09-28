@@ -1,5 +1,5 @@
 //
-//  List.swift
+//  Has.swift
 //  FrontRange
 //
 //  Created by Daniel Lyons on 9/27/25.
@@ -8,23 +8,26 @@
 import ArgumentParser
 import Foundation
 
-extension FrontRangeCLI {
-  struct List: ParsableCommand {
+extension FrontRangeCLIEntry {
+  struct Has: ParsableCommand {
     static let configuration = CommandConfiguration(
-      abstract: "List all keys in frontmatter"
+      abstract: "Check if a key exists in frontmatter"
     )
     
     @OptionGroup var options: GlobalOptions
     
+    @Argument(help: "The key to check")
+    var key: String
+    
     func run() throws {
       // TODO: Implement using FrontRange
-      print("Listing all keys in file '\(options.file)' in \(options.format) format")
+      print("Checking if key '\(key)' exists in file '\(options.file)' in \(options.format) format")
       
       // Placeholder implementation:
       // let content = try String(contentsOfFile: options.file)
       // let doc = try FrontMatteredDoc(parsing: content)
-      // let keys = Array(doc.frontMatter.keys)
-      // outputKeys(keys, format: options.format)
+      // let exists = doc.hasKey(key)
+      // outputBoolean(exists, format: options.format)
     }
   }
 }

@@ -8,7 +8,7 @@
 import ArgumentParser
 import Foundation
 
-extension FrontRangeCLI {
+extension FrontRangeCLIEntry {
   struct Remove: ParsableCommand {
     static let configuration = CommandConfiguration(
       abstract: "Remove a key from frontmatter"

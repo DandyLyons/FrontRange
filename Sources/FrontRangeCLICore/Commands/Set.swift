@@ -8,7 +8,7 @@
 import ArgumentParser
 import Foundation
 
-extension FrontRangeCLI {
+extension FrontRangeCLIEntry {
   struct Set: ParsableCommand {
     static let configuration = CommandConfiguration(
       abstract: "Set a value in frontmatter"

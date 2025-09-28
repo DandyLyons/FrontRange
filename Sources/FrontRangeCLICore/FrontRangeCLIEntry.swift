@@ -1,5 +1,5 @@
 //
-//  FrontRangeCLI.swift
+//  FrontRangeCLICore.swift
 //  FrontRange
 //
 //  Created by Daniel Lyons on 9/26/25.
@@ -8,9 +8,10 @@
 import ArgumentParser
 import Foundation
 
-@main
-struct FrontRangeCLI: ParsableCommand {
-  static let configuration = CommandConfiguration(
+/// The main entry point for the FrontRange CLI application.
+public struct FrontRangeCLIEntry: ParsableCommand {
+  public init() {}
+  public static let configuration = CommandConfiguration(
     commandName: "fr",
     abstract: "A utility for managing front matter in text files.",
     version: "0.1.0",
@@ -21,7 +22,7 @@ struct FrontRangeCLI: ParsableCommand {
   /// The main entry point for the CLI application.
   ///
   /// To call this CLI in the terminal for debugging, use: `swift run fr` from the package root.
-  mutating func run() throws {
+  public mutating func run() throws {
     print("Welcome to FrontRange CLI!")
   }
 }

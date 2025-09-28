@@ -13,6 +13,10 @@ let package = Package(
             name: "FrontRange",
             targets: ["FrontRange"],
         ),
+        .library(
+            name: "FrontRangeCLICore",
+            targets: ["FrontRangeCLICore"]
+        ),
         .executable(
           name: "fr",
           targets: ["FrontRangeCLI"]
@@ -45,19 +49,26 @@ let package = Package(
             ]
         ),
         
-        .executableTarget(
+        .target(
 // A command-line interface (CLI) for interacting with FrontRange functionalities.
-            name: "FrontRangeCLI",
+            name: "FrontRangeCLICore",
             dependencies: [
               "FrontRange",
               .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ],
         ),
         .testTarget(
-            name: "FrontRangeCLITests",
+            name: "FrontRangeCLICoreTests",
             dependencies: [
-              "FrontRangeCLI",
-            ]
+              .target(name: "FrontRangeCLICore"),
+            ],
         ),
+        
+          .executableTarget(
+            name: "FrontRangeCLI",
+            dependencies: [
+              .target(name: "FrontRangeCLICore"),
+            ],
+          ),
     ]
 )
