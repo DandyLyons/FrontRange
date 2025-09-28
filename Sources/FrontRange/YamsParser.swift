@@ -96,7 +96,9 @@ public struct YamsParser: Parsing.ParserPrinter {
   
   /// Parses unstructured text data into structured ``FrontMatter`` data.
   public func parse(_ input: inout Substring) throws -> FrontMatter {
+    #if DEBUG
     Swift.print("ℹ️ Parsing input string:\n\(input)")
+    #endif
     
     let dict = try parseYAMLToOrderedDictionary(
       String(input),
