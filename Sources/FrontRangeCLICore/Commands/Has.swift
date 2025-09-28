@@ -7,6 +7,7 @@
 
 import ArgumentParser
 import Foundation
+import FrontRange
 
 extension FrontRangeCLIEntry {
   struct Has: ParsableCommand {
@@ -23,11 +24,10 @@ extension FrontRangeCLIEntry {
       // TODO: Implement using FrontRange
       print("Checking if key '\(key)' exists in file '\(options.file)' in \(options.format) format")
       
-      // Placeholder implementation:
-      // let content = try String(contentsOfFile: options.file)
-      // let doc = try FrontMatteredDoc(parsing: content)
-      // let exists = doc.hasKey(key)
-      // outputBoolean(exists, format: options.format)
+      let content = try String(contentsOfFile: options.file)
+      let doc = try FrontMatteredDoc(parsing: content)
+      let exists = doc.hasKey(key)
+      printBoolean(exists)
     }
   }
 }

@@ -39,6 +39,10 @@ private func outputValue(_ value: Any?, format: OutputFormat) {
   }
 }
 
+public func printBoolean(_ value: Bool) {
+  outputBoolean(value, format: .plain)
+}
+
 private func outputBoolean(_ value: Bool, format: OutputFormat) {
   if value {
     print("true")
