@@ -15,7 +15,7 @@ public struct FrontRangeCLIEntry: ParsableCommand {
     commandName: "fr",
     abstract: "A utility for managing front matter in text files.",
     version: "0.1.0",
-    subcommands: [Get.self, Set.self, Has.self, List.self, Remove.self],
+    subcommands: [Get.self, Set.self, Has.self, List.self, Rename.self, Remove.self],
     helpNames: [.long, .short]
   )
   
