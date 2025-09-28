@@ -7,6 +7,7 @@
 
 import ArgumentParser
 import Foundation
+import FrontRange
 
 extension FrontRangeCLIEntry {
   struct Remove: ParsableCommand {
@@ -21,14 +22,15 @@ extension FrontRangeCLIEntry {
     
     func run() throws {
       // TODO: Implement using FrontRange
+      #if DEBUG
       print("Removing key '\(key)' from file '\(options.file)'")
+      #endif
       
-      // Placeholder implementation:
-      // let content = try String(contentsOfFile: options.file)
-      // var doc = try FrontMatteredDoc(parsing: content)
-      // doc.frontMatter.removeValue(forKey: key)
-      // let updatedContent = serializeDoc(doc)
-      // try updatedContent.write(to: URL(fileURLWithPath: options.file), atomically: true, encoding: .utf8)
+      let content = try String(contentsOfFile: options.file)
+      var doc = try FrontMatteredDoc(parsing: content)
+      doc.frontMatter.removeValue(forKey: key)
+      let updatedContent = try serializeDoc(doc)
+      try updatedContent.write(to: URL(fileURLWithPath: options.file), atomically: true, encoding: .utf8)
     }
   }
 }
