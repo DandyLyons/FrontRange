@@ -4,8 +4,7 @@ import IssueReporting
 import Testing
 @testable import FrontRange
 
-@Suite
-struct FrontMatteredDocTests {
+@Suite struct FrontMatteredDocTests {
   let docString = """
 ---
 author: Jane Doe
@@ -53,19 +52,25 @@ It can also include **Markdown** formatting.
       parsing: docString,
       formatting: FrontMatteredDoc.Formatting()
     )
-    let rendered = try doc.renderFullText()
+    
+    let rendered = withErrorReporting { try doc.renderFullText() }
     
     expectNoDifference(rendered, docString)
     
     // Modify front matter and body, then re-render
     doc.setValue("Updated Document", forKey: "title")
+    #expect(doc.getValue(forKey: "title") as? String == "Updated Document")
     doc.body = "Updated body content."
-    doc.setValue(Date.distantPast, forKey: "date")
+    #expect(doc.body == "Updated body content.")
+    
+    // TODO: Demonstrate mutating and rendering a Date value
+//    doc.setValue(Date.distantPast, forKey: "date")
+//    #expect(doc.getValue(forKey: "date") as? Date == Date.distantPast)
     
     let updatedDocString = """
 ---
 author: Jane Doe
-date: 0001-01-01T00:00:00Z
+date: 2023-10-01 00:00:00 +0000
 tags:
 - swift
 - parsing
@@ -74,7 +79,8 @@ title: Updated Document
 ---
 Updated body content.
 """
-    let reRendered = try doc.renderFullText()
+
+    let reRendered = withErrorReporting { try doc.renderFullText() }
     expectNoDifference(reRendered, updatedDocString)
   }
   

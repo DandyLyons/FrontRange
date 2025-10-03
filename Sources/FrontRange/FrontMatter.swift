@@ -1,14 +1,15 @@
 //
-//  File.swift
+//  FrontMatter.swift
 //  FrontRange
 //
 //  Created by Daniel Lyons on 9/13/25.
 //
 
+import OrderedCollections
 import Foundation
 
 @available(*, deprecated, message: "Use `Yams.Node.Mapping` instead")
-public typealias FrontMatter = Dictionary<String, Any>
+public typealias FrontMatter = OrderedDictionary<String, Any>
 
 extension FrontMatter {
   public func isEqual(to other: Self) -> Bool {

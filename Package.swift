@@ -1,4 +1,4 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -9,13 +9,21 @@ let package = Package(
       .macOS(.v10_15), .iOS(.v13), .tvOS(.v13), .watchOS(.v6), .macCatalyst(.v13),
     ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "FrontRange",
             targets: ["FrontRange"],
         ),
+        .library(
+            name: "FrontRangeCLICore",
+            targets: ["FrontRangeCLICore"]
+        ),
+        .executable(
+          name: "fr",
+          targets: ["FrontRangeCLI"]
+        ),
     ],
     dependencies: [
+      .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.1"), // ArgumentParser
       .package(url: "https://github.com/apple/swift-collections.git", from: "1.2.1"), // Swift Collections
       .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.3.3"), // CustomDump
       .package(url: "https://github.com/pointfreeco/swift-parsing.git", from: "0.14.1"), // Parsing
@@ -40,5 +48,27 @@ let package = Package(
               "FrontRange",
             ]
         ),
+        
+        .target(
+// A command-line interface (CLI) for interacting with FrontRange functionalities.
+            name: "FrontRangeCLICore",
+            dependencies: [
+              "FrontRange",
+              .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ],
+        ),
+        .testTarget(
+            name: "FrontRangeCLICoreTests",
+            dependencies: [
+              .target(name: "FrontRangeCLICore"),
+            ],
+        ),
+        
+          .executableTarget(
+            name: "FrontRangeCLI",
+            dependencies: [
+              .target(name: "FrontRangeCLICore"),
+            ],
+          ),
     ]
 )
