@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "18ECBF5A-CC2F-4816-AC54-92CD4C821A45",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "FrontRangeTests",
+        "name" : "FrontRangeTests"
+      }
+    }
+  ],
+  "version" : 1
+}

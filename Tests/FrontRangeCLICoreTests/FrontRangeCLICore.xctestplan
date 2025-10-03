@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "2E8249D2-465E-4219-9337-61F58D40FA14",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false,
+    "performanceAntipatternCheckerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "FrontRangeCLICoreTests",
+        "name" : "FrontRangeCLICoreTests"
+      }
+    }
+  ],
+  "version" : 1
+}
