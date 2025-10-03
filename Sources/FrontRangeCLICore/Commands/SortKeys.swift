@@ -8,6 +8,7 @@
 import ArgumentParser
 import Foundation
 import FrontRange
+import IssueReporting
 
 extension FrontRangeCLIEntry {
   struct SortKeys: ParsableCommand {
@@ -34,13 +35,14 @@ extension FrontRangeCLIEntry {
       #endif
       
       let content = try String(contentsOfFile: options.file)
-      var doc = try FrontMatteredDoc(parsing: content)
+      var doc = try FrontMatteredDoc_Node(parsing: content)
       
       switch sortMethod {
         case .alphabetical:
           doc.frontMatter.sort { $0.key < $1.key }
         case .length:
-          doc.frontMatter.sort { $0.key.count < $1.key.count }
+//          doc.frontMatter.sort { $0.key.count < $1.key.count }
+          reportIssue("Not yet implemented: sorting by length")
       }
       
       let updatedContent = try serializeDoc(doc)

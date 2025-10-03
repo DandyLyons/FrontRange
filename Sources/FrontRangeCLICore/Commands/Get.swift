@@ -27,9 +27,10 @@ extension FrontRangeCLIEntry {
       #endif
       
       let content = try String(contentsOfFile: options.file)
-      let doc = try FrontMatteredDoc(parsing: content)
+      let doc = try FrontMatteredDoc_Node(parsing: content)
       let value = doc.getValue(forKey: key)
-      printValue(value)
+//      printValue(value)
+      print(String(describing: value))
     }
   }
 }

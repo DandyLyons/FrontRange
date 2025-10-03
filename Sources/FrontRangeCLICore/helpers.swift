@@ -32,8 +32,8 @@ private func outputValue(_ value: Any?, format: OutputFormat) {
       }
     case let dictValue as [String: Any]:
       print("🔴 Dictionary output not yet implemented")
-    case let orderedDictValue as FrontMatter:
-      print("🔴 FrontMatter (OrderedDictionary) output not yet implemented")
+//    case let orderedDictValue as FrontMatter:
+//      print("🔴 FrontMatter (OrderedDictionary) output not yet implemented")
     default:
       print("🔴 Unsupported value: \(String(describing: value))")
   }
@@ -65,6 +65,6 @@ private func outputKeys(_ keys: [String], format: OutputFormat) {
   print("-----")
 }
 
-public func serializeDoc(_ doc: FrontMatteredDoc) throws -> String {
-  return try doc.renderFullText()
+public func serializeDoc(_ doc: FrontMatteredDoc_Node) throws -> String {
+  return try doc.render()
 }

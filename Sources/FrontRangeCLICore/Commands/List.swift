@@ -23,9 +23,8 @@ extension FrontRangeCLIEntry {
       print("Listing all keys in file '\(options.file)' in \(options.format) format")
       
       let content = try String(contentsOfFile: options.file)
-      let doc = try FrontMatteredDoc(parsing: content)
-      let keys = Array(doc.frontMatter.keys)
-      printKeys(keys)
+      let doc = try FrontMatteredDoc_Node(parsing: content)
+      print(doc.frontMatter.keys)
     }
   }
 }

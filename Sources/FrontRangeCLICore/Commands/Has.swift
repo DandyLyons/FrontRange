@@ -25,7 +25,7 @@ extension FrontRangeCLIEntry {
       print("Checking if key '\(key)' exists in file '\(options.file)' in \(options.format) format")
       
       let content = try String(contentsOfFile: options.file)
-      let doc = try FrontMatteredDoc(parsing: content)
+      let doc = try FrontMatteredDoc_Node(parsing: content)
       let exists = doc.hasKey(key)
       printBoolean(exists)
     }

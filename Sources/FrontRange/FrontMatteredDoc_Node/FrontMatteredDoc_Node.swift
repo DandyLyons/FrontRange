@@ -43,6 +43,18 @@ extension FrontMatteredDoc_Node {
 
 // MARK: Methods
 extension FrontMatteredDoc_Node {
+  public func render() throws -> String {
+    let frontMatterString = try Yams.serialize(node: .mapping(self.frontMatter))
+      .trimmingCharacters(in: .newlines) // remove leading/trailing newlines
+    
+    return """
+    ---
+    \(frontMatterString)
+    ---
+    \(self.body)
+    """
+  }
+  
   public func hasKey(_ key: String) -> Bool {
     return self.frontMatter.keys.contains(.scalar(.init(key)))
   }
@@ -70,6 +82,29 @@ extension FrontMatteredDoc_Node {
   mutating public func setValue(_ value: Int, forKey key: String) {
     setValue(.scalar(.init("\(value)")), forKey: key)
   }
+  
+  /// Removes the specified key and its associated value from the front matter.
+  mutating public func remove(key: String) {
+    var pairs = self.frontMatter._pairs
+    pairs.removeAll(where: { $0.key == .scalar(.init(key)) })
+    self.frontMatter._pairs = pairs
+  }
+  
+  mutating public func renameKey(from oldKey: String, to newKey: String) throws {
+    enum RenameKeyError: Error {
+      case oldKeyNotFound
+      case newKeyAlreadyExists
+    }
+    
+    guard let value = getValue(forKey: oldKey) else {
+      throw RenameKeyError.oldKeyNotFound
+    }
+    guard !hasKey(newKey) else {
+      throw RenameKeyError.newKeyAlreadyExists
+    }
+    remove(key: oldKey)
+    setValue(value, forKey: newKey)
+  }
 }
 
 // MARK: Convenience Initializers
@@ -77,7 +112,6 @@ extension FrontMatteredDoc_Node {
   public init(
     parsing input: Substring,
     schema: [(String, Any.Type)] = [],
-    formatting: YamsParser = YamsParser(),
   ) throws {
     var input = input
     self = try Self.Parser().parse(&input)
@@ -87,12 +121,10 @@ extension FrontMatteredDoc_Node {
   public init(
     parsing input: String,
     schema: [(String, Any.Type)] = [],
-    formatting: YamsParser = YamsParser(),
   ) throws {
     try self.init(
       parsing: Substring(input),
       schema: schema,
-      formatting: formatting,
     )
   }
 }
