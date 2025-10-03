@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(*, deprecated, message: "Use `Yams.Node.Mapping` instead")
 public typealias FrontMatter = Dictionary<String, Any>
 
 extension FrontMatter {

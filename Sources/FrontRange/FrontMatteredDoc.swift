@@ -4,6 +4,7 @@
 import Parsing
 import Yams
 
+@available(*, deprecated, renamed: "FrontMatteredDoc_Node", message: "Will be replaced with FrontMatteredDoc_Node in the future.")
 public struct FrontMatteredDoc {
   public init(
     frontMatter: FrontMatter,
