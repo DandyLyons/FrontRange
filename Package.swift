@@ -62,6 +62,9 @@ let package = Package(
             dependencies: [
               .target(name: "FrontRangeCLICore"),
             ],
+            resources: [
+              .process("../../Example.md"),
+            ],
         ),
         
           .executableTarget(
