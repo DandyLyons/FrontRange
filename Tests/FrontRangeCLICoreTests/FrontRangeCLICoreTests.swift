@@ -37,17 +37,17 @@ import Testing
     #expect(output == expectedOutput)
   }
   
-  @Test func `Has command` () async throws {
+  @Test func `Has command` () throws {
     var output = ""
-    let expectedOutput = "TRUE\n"
+    let expectedOutput = "true\n"
     output = try captureStandardOutput {
       var has = try FrontRangeCLIEntry.parseAsRoot(["has", exampleMDPath, "string"])
       try has.run()
     }
-    #expect(output == expectedOutput)
+    #expect(expectedOutput == output)
   }
   
-  @Test func `List command` () async throws {
+  @Test func `List command` () throws {
     var output = ""
     let expectedOutput = """
     - bool
@@ -62,5 +62,100 @@ import Testing
       try list.run()
     }
     expectNoDifference(output.trimmingCharacters(in: .whitespacesAndNewlines), expectedOutput)
+  }
+  
+  @Test func `Remove command` () throws {
+    var output = ""
+    let tempFileURL = try copyIntoTempFile(source: exampleMDPath)
+    
+    output = try captureStandardOutput {
+      var remove = try FrontRangeCLIEntry.parseAsRoot(["remove", tempFileURL.path(), "string"])
+      try remove.run()
+    }
+    #expect(output == "")
+    let updatedContent = try String(contentsOf: tempFileURL)
+    #expect(!updatedContent.contains("string: Hello, World!"))
+    
+    try FileManager.default.removeItem(at: tempFileURL)
+  }
+  
+  @Test func `Rename command` () throws {
+    var output = ""
+    let tempFileURL = try copyIntoTempFile(source: exampleMDPath)
+    
+    output = try captureStandardOutput {
+      var rename = try FrontRangeCLIEntry.parseAsRoot(["rename", tempFileURL.path(), "string", "newString"])
+      try rename.run()
+    }
+    #expect(output == "")
+    let updatedContent = try String(contentsOf: tempFileURL)
+    let expectedFrontMatter = """
+      ---
+      bool: true
+      int: 42
+      float: 3.14
+      list:
+      - item1
+      - item2
+      - item3
+      dict:
+        key1: value1
+      newString: "Hello, World!"
+      ---
+      # Example Markdown File
+
+      ## Example Section
+      This is an example markdown file with YAML front matter.
+      """
+    expectNoDifference(expectedFrontMatter, updatedContent)
+    
+    try FileManager.default.removeItem(at: tempFileURL)
+  }
+  
+  @Test func `Set command` () throws {
+    var output = ""
+    let tempFileURL = try copyIntoTempFile(source: exampleMDPath)
+    
+    output = try captureStandardOutput {
+      var set = try FrontRangeCLIEntry.parseAsRoot(["set", tempFileURL.path(), "string", "New Value"])
+      try set.run()
+    }
+    #expect(output == "")
+    let updatedContent = try String(contentsOf: tempFileURL)
+    #expect(updatedContent.contains("string: New Value"))
+    
+    try FileManager.default.removeItem(at: tempFileURL)
+  }
+  
+  @Test func `SortKeys command` () throws {
+    var output = ""
+    let tempFileURL = try copyIntoTempFile(source: exampleMDPath)
+    
+    output = try captureStandardOutput {
+      var sortKeys = try FrontRangeCLIEntry.parseAsRoot(["sort-keys", tempFileURL.path()])
+      try sortKeys.run()
+    }
+    #expect(output == "")
+    let updatedContent = try String(contentsOf: tempFileURL)
+    let expectedFrontMatter = """
+      ---
+      bool: true
+      dict:
+        key1: value1
+      float: 3.14
+      int: 42
+      list:
+      - item1
+      - item2
+      - item3
+      string: "Hello, World!"
+      ---
+      # Example Markdown File
+
+      ## Example Section
+      This is an example markdown file with YAML front matter.
+      """
+    expectNoDifference(expectedFrontMatter, updatedContent)
+    try FileManager.default.removeItem(at: tempFileURL)
   }
 }
