@@ -13,18 +13,35 @@ public func nodeToJSON(_ node: Node, options: JSONSerialization.WritingOptions =
   let constructor = Yams.Constructor.default
   let value: Any = constructor.any(from: node)
   
-  // Then convert to JSON data
-  let jsonData = try JSONSerialization.data(
-    withJSONObject: value,
-    options: options
-  )
-  
-  // Convert data to string
-  guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-    throw JSONConversionError.failedToConvertYamsNodeToJSON
+  // Then convert to JSON String
+  if JSONSerialization.isValidJSONObject(value) {
+    // `isValidJSONObject` only returns true for arrays and dictionaries
+    
+    let jsonData: Data = try JSONSerialization.data(
+      withJSONObject: value,
+      options: options
+    )
+    
+    // Convert data to string
+    guard let jsonString = String(data: jsonData, encoding: .utf8) else {
+      throw JSONConversionError.failedToConvertYamsNodeToJSON
+    }
+    
+    return jsonString
+  } else {
+    // `isValidJSONObject` evaluated to false, so value is likely a primitive type
+    
+    switch value {
+      case let string as String:
+        return string
+      case let stringConvertible as CustomStringConvertible:
+        return stringConvertible.description
+      default:
+        throw JSONConversionError.failedToConvertYamsNodeToJSON
+    }
   }
   
-  return jsonString
+  
 }
 
 public enum JSONConversionError: Error {
