@@ -64,7 +64,3 @@ private func outputKeys(_ keys: [String], format: OutputFormat) {
   }
   print("-----")
 }
-
-public func serializeDoc(_ doc: FrontMatteredDoc_Node) throws -> String {
-  return try doc.render()
-}

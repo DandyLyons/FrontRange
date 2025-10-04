@@ -32,7 +32,7 @@ extension FrontRangeCLIEntry {
       let content = try String(contentsOfFile: options.file)
       var doc = try FrontMatteredDoc_Node(parsing: content)
       doc.setValue(value, forKey: key)
-      let updatedContent = try serializeDoc(doc)
+      let updatedContent = try doc.render()
       try updatedContent.write(to: URL(fileURLWithPath: options.file), atomically: true, encoding: .utf8)
     }
   }
