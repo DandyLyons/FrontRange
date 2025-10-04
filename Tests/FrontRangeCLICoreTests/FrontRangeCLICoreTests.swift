@@ -51,11 +51,11 @@ import Testing
     var output = ""
     let expectedOutput = """
     - bool
-    - dict
-    - float
     - int
-    - list
+    - float
     - string
+    - list
+    - dict
     """
     output = try captureStandardOutput {
       var list = try FrontRangeCLIEntry.parseAsRoot(["list", exampleMDPath, "--format", "yaml"])
@@ -63,6 +63,4 @@ import Testing
     }
     expectNoDifference(output.trimmingCharacters(in: .whitespacesAndNewlines), expectedOutput)
   }
-  
-  
 }
