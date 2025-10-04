@@ -26,7 +26,8 @@ extension FrontRangeCLIEntry {
     
     func run() throws {
       #if DEBUG
-      print("Renaming key '\(key)' to '\(newKey)' inside file '\(options.file)'")
+      FrontRangeCLIEntry.logger(category: .cli)
+        .log("Renaming key '\(key)' to '\(newKey)' inside file '\(options.file)'")
       #endif
       
       let content = try String(contentsOfFile: options.file)

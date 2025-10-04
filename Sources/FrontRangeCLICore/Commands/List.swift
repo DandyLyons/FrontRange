@@ -19,8 +19,10 @@ extension FrontRangeCLIEntry {
     @OptionGroup var options: GlobalOptions
     
     func run() throws {
-      // TODO: Implement using FrontRange
-      print("Listing all keys in file '\(options.file)' in \(options.format) format")
+      #if DEBUG
+      FrontRangeCLIEntry.logger(category: .cli)
+        .log("Listing all keys in file '\(options.file)' in \(options.format.rawValue) format")
+      #endif
       
       let content = try String(contentsOfFile: options.file)
       let doc = try FrontMatteredDoc_Node(parsing: content)

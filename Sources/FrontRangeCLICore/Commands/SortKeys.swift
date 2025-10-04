@@ -31,7 +31,8 @@ extension FrontRangeCLIEntry {
     func run() throws {
       // TODO: Implement using FrontRange
       #if DEBUG
-      print("Sorting keys in file '\(options.file)' using method '\(sortMethod)'")
+      FrontRangeCLIEntry.logger(category: .cli)
+        .log("Sorting keys in file '\(options.file)' using method '\(sortMethod.rawValue)'")
       #endif
       
       let content = try String(contentsOfFile: options.file)

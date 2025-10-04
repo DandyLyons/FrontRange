@@ -30,8 +30,8 @@ extension FrontRangeCLIEntry {
     
     func run() throws {
       #if DEBUG
-      
-      print("ℹ️ Getting key '\(key)' from file '\(options.file)' in \(options.format) format")
+      FrontRangeCLIEntry.logger(category: .cli)
+        .log("ℹ️ Getting key '\(key)' from file '\(options.file)' in \(options.format.rawValue) format")
       #endif
       
       let content = try String(contentsOfFile: options.file)

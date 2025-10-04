@@ -22,9 +22,9 @@ extension FrontRangeCLIEntry {
     var key: String
     
     func run() throws {
-      // TODO: Implement using FrontRange
       #if DEBUG
-      print("Removing key '\(key)' from file '\(options.file)'")
+      FrontRangeCLIEntry.logger(category: .cli)
+        .log("Removing key '\(key)' from file '\(options.file)'")
       #endif
       
       let content = try String(contentsOfFile: options.file)

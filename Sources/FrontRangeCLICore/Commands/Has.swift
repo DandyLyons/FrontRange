@@ -21,8 +21,10 @@ extension FrontRangeCLIEntry {
     var key: String
     
     func run() throws {
-      // TODO: Implement using FrontRange
-      print("Checking if key '\(key)' exists in file '\(options.file)' in \(options.format) format")
+      #if DEBUG
+      FrontRangeCLIEntry.logger(category: .cli)
+        .log("Checking if key '\(key)' exists in file '\(options.file)' in \(options.format.rawValue) format")
+      #endif
       
       let content = try String(contentsOfFile: options.file)
       let doc = try FrontMatteredDoc_Node(parsing: content)

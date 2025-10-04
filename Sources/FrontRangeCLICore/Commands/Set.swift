@@ -25,7 +25,8 @@ extension FrontRangeCLIEntry {
     
     func run() throws {
       #if DEBUG
-      print("ℹ️Setting key '\(key)' to '\(value)' in file '\(options.file)'")
+      FrontRangeCLIEntry.logger(category: .cli)
+        .log("ℹ️Setting key '\(key)' to '\(value)' in file '\(options.file)'")
       #endif
       
       // Placeholder implementation:

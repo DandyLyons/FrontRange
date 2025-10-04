@@ -28,25 +28,21 @@ import Testing
   
   @Test func `Get command` () async throws {
     var output = ""
-    let expectedOutput = "Hello, World!"
+    let expectedOutput = "Hello, World!\n"
     output = try captureStandardOutput {
       var get = try FrontRangeCLIEntry.parseAsRoot(["get", exampleMDPath, "string"])
       try get.run()
     }
-    withKnownIssue("DEBUG print statements running in tests") {
-      #expect(output == expectedOutput)
-    }
+    #expect(output == expectedOutput)
   }
   
   @Test func `Has command` () async throws {
     var output = ""
-    let expectedOutput = "TRUE"
+    let expectedOutput = "TRUE\n"
     output = try captureStandardOutput {
       var has = try FrontRangeCLIEntry.parseAsRoot(["has", exampleMDPath, "string"])
       try has.run()
     }
-    withKnownIssue("DEBUG print statements running in tests") {
-      #expect(output == expectedOutput)
-    }
+    #expect(output == expectedOutput)
   }
 }
