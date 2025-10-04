@@ -29,7 +29,7 @@ extension FrontRangeCLIEntry {
       let content = try String(contentsOfFile: options.file)
       let doc = try FrontMatteredDoc_Node(parsing: content)
       let exists = doc.hasKey(key)
-      printBoolean(exists)
+      try printAny(exists, format: options.format)
     }
   }
 }

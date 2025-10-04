@@ -7,6 +7,8 @@
 
 import ArgumentParser
 import Foundation
+import FrontRange
+import IssueReporting
 import Yams
 
 enum OutputFormat: String, CaseIterable, ExpressibleByArgument {
@@ -23,14 +25,20 @@ enum OutputFormat: String, CaseIterable, ExpressibleByArgument {
   }
 }
 
-func print(node: Yams.Node?, format: OutputFormat) throws {
+func print(node: Yams.Node, format: OutputFormat) throws {
   switch format {
     case .json:
-      let jsonString = try node?.toJSON(options: [.prettyPrinted, .sortedKeys])
-      print(jsonString ?? "")
+      try printNodeAsJSON(node: node)
     case .yaml, .plainString:
-      guard let node else { print(""); return }
-      let yamlString = try Yams.serialize(node: node)
-      print(yamlString)
+      try printNodeAsYAML(node: node)
+  }
+}
+
+func printAny(_ any: Any, format: OutputFormat) throws {
+  switch format {
+    case .json:
+      print(try anyToJSON(any))
+    case .yaml, .plainString:
+      print(try anyToYAML(any))
   }
 }

@@ -9,16 +9,18 @@ import Foundation
 import Yams
 
 public func nodeToJSON(_ node: Node, options: JSONSerialization.WritingOptions = []) throws -> String {
-  // First, convert the Node to a Swift native type
+  // First, convert the Node to a Swift native `Any` type
   let constructor = Yams.Constructor.default
   let value: Any = constructor.any(from: node)
   
   // Then convert to JSON String
-  if JSONSerialization.isValidJSONObject(value) {
-    // `isValidJSONObject` only returns true for arrays and dictionaries
-    
+  return try anyToJSON(value, options: options)
+}
+
+public func anyToJSON(_ any: Any, options: JSONSerialization.WritingOptions = []) throws -> String {
+  if JSONSerialization.isValidJSONObject(any) {
     let jsonData: Data = try JSONSerialization.data(
-      withJSONObject: value,
+      withJSONObject: any,
       options: options
     )
     
@@ -31,17 +33,25 @@ public func nodeToJSON(_ node: Node, options: JSONSerialization.WritingOptions =
   } else {
     // `isValidJSONObject` evaluated to false, so value is likely a primitive type
     
-    switch value {
+    switch any {
       case let string as String:
         return string
       case let stringConvertible as CustomStringConvertible:
         return stringConvertible.description
       default:
-        throw JSONConversionError.failedToConvertYamsNodeToJSON
+        return String(describing: any)
     }
   }
-  
-  
+}
+
+public func anyToYAML(_ any: Any) throws -> String {
+  return try Yams.dump(
+    object: any,
+    sortKeys: true,
+    sequenceStyle: .block,
+    mappingStyle: .block,
+    newLineScalarStyle: .plain
+  )
 }
 
 public enum JSONConversionError: Error {

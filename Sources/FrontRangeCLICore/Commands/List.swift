@@ -26,7 +26,13 @@ extension FrontRangeCLIEntry {
       
       let content = try String(contentsOfFile: options.file)
       let doc = try FrontMatteredDoc_Node(parsing: content)
-      print(doc.frontMatter.keys)
+      let keys = Array(doc.frontMatter.keys)
+        .compactMap { $0.string }
+        .sorted()
+      try printAny(
+        keys,
+        format: options.format
+      )
     }
   }
 }

@@ -20,14 +20,6 @@ func printNodeAsJSON(node: Yams.Node) throws {
   print(jsonString)
 }
 
-public func printBoolean(_ value: Bool) {
-  if value {
-    print("TRUE")
-  } else {
-    print("FALSE")
-  }
-}
-
 public func printKeys(_ keys: [String]) {
   print("Keys:")
   print("-----")

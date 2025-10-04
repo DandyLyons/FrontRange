@@ -40,12 +40,8 @@ extension FrontRangeCLIEntry {
         print("Key '\(key)' not found in frontmatter.")
         return
       }
-      switch options.format {
-        case .json:
-          try printNodeAsJSON(node: value)
-        case .yaml, .plainString:
-          try printNodeAsYAML(node: value)
-      }
+      
+      try print(node: value, format: options.format)
     }
   }
 }

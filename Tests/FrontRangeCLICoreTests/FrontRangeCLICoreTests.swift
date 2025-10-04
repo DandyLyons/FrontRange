@@ -5,6 +5,7 @@
 //  Created by Daniel Lyons on 9/26/25.
 //
 
+import CustomDump
 import Foundation
 import Testing
 @testable import FrontRangeCLICore
@@ -45,4 +46,23 @@ import Testing
     }
     #expect(output == expectedOutput)
   }
+  
+  @Test func `List command` () async throws {
+    var output = ""
+    let expectedOutput = """
+    - bool
+    - dict
+    - float
+    - int
+    - list
+    - string
+    """
+    output = try captureStandardOutput {
+      var list = try FrontRangeCLIEntry.parseAsRoot(["list", exampleMDPath, "--format", "yaml"])
+      try list.run()
+    }
+    expectNoDifference(output.trimmingCharacters(in: .whitespacesAndNewlines), expectedOutput)
+  }
+  
+  
 }
