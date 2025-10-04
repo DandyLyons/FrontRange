@@ -64,4 +64,17 @@ import Yams
     }
   }
   
+  /// This test demonstrates that Yams can parse JSON strings as valid YAML.
+  ///
+  /// This is because YAML is designed to be a superset of JSON. (There are some edge cases where
+  /// valid JSON is not valid YAML, but they are rare and mostly academic. See: https://metacpan.org/pod/JSON::XS#JSON-and-YAML ).
+  @Test func `Parse JSON as YAML` () throws {
+    guard let jsonLoadedThruYams = try? Yams.load(yaml: expectedJSONString) else {
+      reportIssue("Failed to parse JSON string using Yams.load")
+      return
+    }
+    let yamlOutput = try Yams.dump(object: jsonLoadedThruYams)
+      .trimmingCharacters(in: .whitespacesAndNewlines) // For some reason Yams.dump adds a trailing newline
+    expectNoDifference(yamlString, yamlOutput)
+  }
 }
