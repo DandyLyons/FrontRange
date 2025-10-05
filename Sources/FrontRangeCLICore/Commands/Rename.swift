@@ -18,7 +18,8 @@ extension FrontRangeCLIEntry {
     
     @OptionGroup var options: GlobalOptions
     
-    @Option(help: "The key to rename")
+    @Option(name: .shortAndLong,
+      help: "The key to rename")
     var key: String
     
     @Option(help: "The new key name")

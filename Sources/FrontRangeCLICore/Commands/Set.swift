@@ -17,7 +17,8 @@ extension FrontRangeCLIEntry {
     
     @OptionGroup var options: GlobalOptions
     
-    @Option(help: "The key to set")
+    @Option(name: .shortAndLong,
+      help: "The key to set")
     var key: String
     
     @Option(help: "The value to set")

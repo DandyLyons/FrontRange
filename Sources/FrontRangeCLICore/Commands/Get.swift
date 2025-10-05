@@ -25,7 +25,8 @@ extension FrontRangeCLIEntry {
     
     @OptionGroup var options: GlobalOptions
     
-    @Option(help: "The key to retrieve")
+    @Option(name: .shortAndLong,
+      help: "The key to get")
     var key: String
     
     func run() throws {
