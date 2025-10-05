@@ -25,7 +25,10 @@ extension FrontRangeCLIEntry {
     var value: String
     
     func run() throws {
-      for file in options.files {
+      let files = options.files
+        .allFilePaths(withExtensions: options.extensions, recursively: options.recursive)
+      
+      for file in files {
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
           .log("ℹ️Setting key '\(key)' to '\(value)' in file '\(file)'")

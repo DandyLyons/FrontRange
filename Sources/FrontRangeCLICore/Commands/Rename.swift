@@ -26,7 +26,10 @@ extension FrontRangeCLIEntry {
     var newKey: String
     
     func run() throws {
-      for file in options.files {
+      let files = options.files
+        .allFilePaths(withExtensions: options.extensions, recursively: options.recursive)
+      
+      for file in files {
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
           .log("Renaming key '\(key)' to '\(newKey)' inside file '\(file)'")
