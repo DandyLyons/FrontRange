@@ -29,25 +29,26 @@ extension FrontRangeCLIEntry {
       
     
     func run() throws {
-      // TODO: Implement using FrontRange
-      #if DEBUG
-      FrontRangeCLIEntry.logger(category: .cli)
-        .log("Sorting keys in file '\(options.file)' using method '\(sortMethod.rawValue)'")
-      #endif
-      
-      let content = try String(contentsOfFile: options.file)
-      var doc = try FrontMatteredDoc_Node(parsing: content)
-      
-      switch sortMethod {
-        case .alphabetical:
-          doc.frontMatter.sort { $0.key < $1.key }
-        case .length:
-//          doc.frontMatter.sort { $0.key.count < $1.key.count }
-          reportIssue("Not yet implemented: sorting by length")
+      for file in options.files {
+#if DEBUG
+        FrontRangeCLIEntry.logger(category: .cli)
+          .log("Sorting keys in file '\(file)' using method '\(sortMethod.rawValue)'")
+#endif
+        
+        let content = try String(contentsOfFile: file)
+        var doc = try FrontMatteredDoc_Node(parsing: content)
+        
+        switch sortMethod {
+          case .alphabetical:
+            doc.frontMatter.sort { $0.key < $1.key }
+          case .length:
+            //          doc.frontMatter.sort { $0.key.count < $1.key.count }
+            reportIssue("Not yet implemented: sorting by length")
+        }
+        
+        let updatedContent = try doc.render()
+        try updatedContent.write(to: URL(fileURLWithPath: file), atomically: true, encoding: .utf8)
       }
-      
-      let updatedContent = try doc.render()
-      try updatedContent.write(to: URL(fileURLWithPath: options.file), atomically: true, encoding: .utf8)
     }
   }
 }

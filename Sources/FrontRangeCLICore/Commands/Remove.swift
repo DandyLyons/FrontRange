@@ -18,20 +18,22 @@ extension FrontRangeCLIEntry {
     
     @OptionGroup var options: GlobalOptions
     
-    @Argument(help: "The key to remove")
+    @Option(help: "The key to remove")
     var key: String
     
     func run() throws {
-      #if DEBUG
-      FrontRangeCLIEntry.logger(category: .cli)
-        .log("Removing key '\(key)' from file '\(options.file)'")
-      #endif
-      
-      let content = try String(contentsOfFile: options.file)
-      var doc = try FrontMatteredDoc_Node(parsing: content)
-      doc.remove(key: key)
-      let updatedContent = try doc.render()
-      try updatedContent.write(to: URL(fileURLWithPath: options.file), atomically: true, encoding: .utf8)
+      for file in options.files {
+#if DEBUG
+        FrontRangeCLIEntry.logger(category: .cli)
+          .log("Removing key '\(key)' from files '\(file)'")
+#endif
+        
+        let content = try String(contentsOfFile: file)
+        var doc = try FrontMatteredDoc_Node(parsing: content)
+        doc.remove(key: key)
+        let updatedContent = try doc.render()
+        try updatedContent.write(to: URL(fileURLWithPath: file), atomically: true, encoding: .utf8)
+      }
     }
   }
 }

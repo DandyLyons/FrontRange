@@ -25,23 +25,25 @@ extension FrontRangeCLIEntry {
     
     @OptionGroup var options: GlobalOptions
     
-    @Argument(help: "The key to retrieve")
+    @Option(help: "The key to retrieve")
     var key: String
     
     func run() throws {
-      #if DEBUG
-      FrontRangeCLIEntry.logger(category: .cli)
-        .log("ℹ️ Getting key '\(key)' from file '\(options.file)' in \(options.format.rawValue) format")
-      #endif
-      
-      let content = try String(contentsOfFile: options.file)
-      let doc = try FrontMatteredDoc_Node(parsing: content)
-      guard let value = doc.getValue(forKey: key) else {
-        print("Key '\(key)' not found in frontmatter.")
-        return
+      for file in options.files {
+#if DEBUG
+        FrontRangeCLIEntry.logger(category: .cli)
+          .log("ℹ️ Getting key '\(key)' from file '\(file)' in \(options.format.rawValue) format")
+#endif
+        
+        let content = try String(contentsOfFile: file)
+        let doc = try FrontMatteredDoc_Node(parsing: content)
+        guard let value = doc.getValue(forKey: key) else {
+          print("Key '\(key)' not found in frontmatter.")
+          return
+        }
+        
+        try print(node: value, format: options.format)
       }
-      
-      try print(node: value, format: options.format)
     }
   }
 }

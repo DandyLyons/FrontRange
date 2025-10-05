@@ -17,19 +17,35 @@ extension FrontRangeCLIEntry {
     
     @OptionGroup var options: GlobalOptions
     
-    @Argument(help: "The key to check")
+    @Option(help: "The key to check")
     var key: String
     
     func run() throws {
-      #if DEBUG
-      FrontRangeCLIEntry.logger(category: .cli)
-        .log("Checking if key '\(key)' exists in file '\(options.file)' in \(options.format.rawValue) format")
-      #endif
+      var filesWithKey: [String] = []
+      var filesWithoutKey: [String] = []
       
-      let content = try String(contentsOfFile: options.file)
-      let doc = try FrontMatteredDoc_Node(parsing: content)
-      let exists = doc.hasKey(key)
-      try printAny(exists, format: options.format)
+      for file in options.files {
+        
+#if DEBUG
+        FrontRangeCLIEntry.logger(category: .cli)
+          .log("Checking if key '\(key)' exists in files '\(options.files.commaSeparated())' in \(options.format.rawValue) format")
+#endif
+        
+        let content = try String(contentsOfFile: file)
+        let doc = try FrontMatteredDoc_Node(parsing: content)
+        if doc.hasKey(key) {
+          filesWithKey.append(file)
+        } else {
+          filesWithoutKey.append(file)
+        }
+      }
+      print("""
+      Files containing key '\(key)':
+      \(filesWithKey.isEmpty ? "None" : filesWithKey.joined(separator: "\n"))
+      
+      Files NOT containing key '\(key)':
+      \(filesWithoutKey.isEmpty ? "None" : filesWithoutKey.joined(separator: "\n"))
+      """)
     }
   }
 }

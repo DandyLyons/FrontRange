@@ -13,5 +13,5 @@ struct GlobalOptions: ParsableArguments {
   var format: OutputFormat = .json
   
   @Argument(help: "Path to the file")
-  var file: String
+  var files: [String]
 }

@@ -31,7 +31,7 @@ import Testing
     var output = ""
     let expectedOutput = "Hello, World!\n"
     output = try captureStandardOutput {
-      var get = try FrontRangeCLIEntry.parseAsRoot(["get", exampleMDPath, "string"])
+      var get = try FrontRangeCLIEntry.parseAsRoot(["get", exampleMDPath, "--key", "string"])
       try get.run()
     }
     #expect(output == expectedOutput)
@@ -39,12 +39,19 @@ import Testing
   
   @Test func `Has command` () throws {
     var output = ""
-    let expectedOutput = "true\n"
+    let expectedOutput = """
+      Files containing key 'string':
+      \(exampleMDPath)
+      
+      Files NOT containing key 'string':
+      None
+      
+      """
     output = try captureStandardOutput {
-      var has = try FrontRangeCLIEntry.parseAsRoot(["has", exampleMDPath, "string"])
+      var has = try FrontRangeCLIEntry.parseAsRoot(["has", exampleMDPath, "--key", "string"])
       try has.run()
     }
-    #expect(expectedOutput == output)
+    expectNoDifference(expectedOutput, output)
   }
   
   @Test func `List command` () throws {
@@ -69,7 +76,7 @@ import Testing
     let tempFileURL = try copyIntoTempFile(source: exampleMDPath)
     
     output = try captureStandardOutput {
-      var remove = try FrontRangeCLIEntry.parseAsRoot(["remove", tempFileURL.path(), "string"])
+      var remove = try FrontRangeCLIEntry.parseAsRoot(["remove", tempFileURL.path(), "--key", "string"])
       try remove.run()
     }
     #expect(output == "")
@@ -84,7 +91,7 @@ import Testing
     let tempFileURL = try copyIntoTempFile(source: exampleMDPath)
     
     output = try captureStandardOutput {
-      var rename = try FrontRangeCLIEntry.parseAsRoot(["rename", tempFileURL.path(), "string", "newString"])
+      var rename = try FrontRangeCLIEntry.parseAsRoot(["rename", tempFileURL.path(), "--key", "string", "--new-key", "newString"])
       try rename.run()
     }
     #expect(output == "")
@@ -117,7 +124,7 @@ import Testing
     let tempFileURL = try copyIntoTempFile(source: exampleMDPath)
     
     output = try captureStandardOutput {
-      var set = try FrontRangeCLIEntry.parseAsRoot(["set", tempFileURL.path(), "string", "New Value"])
+      var set = try FrontRangeCLIEntry.parseAsRoot(["set", tempFileURL.path(), "--key", "string", "--value", "New Value"])
       try set.run()
     }
     #expect(output == "")

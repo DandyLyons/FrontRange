@@ -17,24 +17,26 @@ extension FrontRangeCLIEntry {
     
     @OptionGroup var options: GlobalOptions
     
-    @Argument(help: "The key to set")
+    @Option(help: "The key to set")
     var key: String
     
-    @Argument(help: "The value to set")
+    @Option(help: "The value to set")
     var value: String
     
     func run() throws {
-      #if DEBUG
-      FrontRangeCLIEntry.logger(category: .cli)
-        .log("ℹ️Setting key '\(key)' to '\(value)' in file '\(options.file)'")
-      #endif
-      
-      // Placeholder implementation:
-      let content = try String(contentsOfFile: options.file)
-      var doc = try FrontMatteredDoc_Node(parsing: content)
-      doc.setValue(value, forKey: key)
-      let updatedContent = try doc.render()
-      try updatedContent.write(to: URL(fileURLWithPath: options.file), atomically: true, encoding: .utf8)
+      for file in options.files {
+#if DEBUG
+        FrontRangeCLIEntry.logger(category: .cli)
+          .log("ℹ️Setting key '\(key)' to '\(value)' in file '\(file)'")
+#endif
+        
+        // Placeholder implementation:
+        let content = try String(contentsOfFile: file)
+        var doc = try FrontMatteredDoc_Node(parsing: content)
+        doc.setValue(value, forKey: key)
+        let updatedContent = try doc.render()
+        try updatedContent.write(to: URL(fileURLWithPath: file), atomically: true, encoding: .utf8)
+      }
     }
   }
 }
