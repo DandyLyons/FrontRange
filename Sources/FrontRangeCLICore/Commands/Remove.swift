@@ -25,7 +25,7 @@ extension FrontRangeCLIEntry {
     
     func run() throws {
       
-      for path in options.paths {
+      for path in try options.paths {
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
           .log("Removing key '\(key)' from file '\(path.string)'")

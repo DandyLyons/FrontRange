@@ -20,18 +20,20 @@ extension FrontRangeCLIEntry {
     @OptionGroup var options: GlobalOptions
     
     func validate() throws {
-      guard options.paths.count == 1 else {
+      guard try options.paths.count == 1 else {
         throw ValidationError("The 'list' command only supports a single file at a time.")
       }
     }
     
     func run() throws {
+      let paths = try options.paths
+      
       #if DEBUG
       FrontRangeCLIEntry.logger(category: .cli)
-        .log("Listing all keys in file '\(options.paths[0])' in \(options.format.rawValue) format")
+        .log("Listing all keys in file '\(paths[0])' in \(options.format.rawValue) format")
       #endif
       
-      let content = try options.paths[0].read(.utf8)
+      let content = try paths[0].read(.utf8)
       let doc = try FrontMatteredDoc_Node(parsing: content)
       let keys = Array(doc.frontMatter.keys)
         .compactMap { $0.string }

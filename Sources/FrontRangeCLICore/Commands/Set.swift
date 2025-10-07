@@ -26,7 +26,7 @@ extension FrontRangeCLIEntry {
     var value: String
     
     func run() throws {
-      for path in options.paths {
+      for path in try options.paths {
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
           .log("ℹ️Setting key '\(key)' to '\(value)' in file '\(path)'")

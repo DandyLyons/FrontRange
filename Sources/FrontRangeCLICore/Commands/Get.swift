@@ -33,7 +33,7 @@ extension FrontRangeCLIEntry {
     
     func run() throws {
       
-      for path in options.paths {
+      for path in try options.paths {
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
           .log("ℹ️ Getting key '\(key)' from file '\(path)' in \(options.format.rawValue) format")

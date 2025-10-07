@@ -29,7 +29,7 @@ extension FrontRangeCLIEntry {
       
     
     func run() throws {
-      for path in options.paths {
+      for path in try options.paths {
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
           .log("Sorting keys in file '\(path)' using method '\(sortMethod.rawValue)'")

@@ -26,7 +26,7 @@ extension FrontRangeCLIEntry {
     var newKey: String
     
     func run() throws {
-      for path in options.paths {
+      for path in try options.paths {
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
           .log("Renaming key '\(key)' to '\(newKey)' inside file '\(path.absolute())'")

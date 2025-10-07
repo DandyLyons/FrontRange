@@ -24,12 +24,13 @@ extension FrontRangeCLIEntry {
     func run() throws {
       var filesWithKey: [String] = []
       var filesWithoutKey: [String] = []
+      let paths = try options.paths
       
-      for path in options.paths {
+      for path in paths {
         
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
-          .log("Checking if key '\(key)' exists in files '\(options.paths)' in \(options.format.rawValue) format")
+          .log("Checking if key '\(key)' exists in files '\(paths)' in \(options.format.rawValue) format")
 #endif
         
         let content = try path.read(.utf8)
