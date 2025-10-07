@@ -25,22 +25,19 @@ extension FrontRangeCLIEntry {
       var filesWithKey: [String] = []
       var filesWithoutKey: [String] = []
       
-      let files = options.files
-        .allFilePaths(withExtensions: options.extensions, recursively: options.recursive)
-      
-      for file in files {
+      for path in options.paths {
         
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
-          .log("Checking if key '\(key)' exists in files '\(options.files.commaSeparated())' in \(options.format.rawValue) format")
+          .log("Checking if key '\(key)' exists in files '\(options.paths)' in \(options.format.rawValue) format")
 #endif
         
-        let content = try String(contentsOfFile: file)
+        let content = try path.read(.utf8)
         let doc = try FrontMatteredDoc_Node(parsing: content)
         if doc.hasKey(key) {
-          filesWithKey.append(file)
+          filesWithKey.append(path.absolute().string)
         } else {
-          filesWithoutKey.append(file)
+          filesWithoutKey.append(path.absolute().string)
         }
       }
       print("""

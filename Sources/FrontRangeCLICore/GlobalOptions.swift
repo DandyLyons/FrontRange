@@ -7,6 +7,7 @@
 
 import ArgumentParser
 import Foundation
+import PathKit
 
 struct GlobalOptions: ParsableArguments {
   @Option(name: [.short, .long], help: "Output format")
@@ -23,8 +24,6 @@ struct GlobalOptions: ParsableArguments {
   var extensions: String = "md,markdown,yml,yaml"
   
   @Argument(help: "Path(s) to the file(s)/directory(ies) to process")
-  var files: [String]
+  var paths: [Path]
 }
-
-
 

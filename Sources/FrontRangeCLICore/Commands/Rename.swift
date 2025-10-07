@@ -26,20 +26,17 @@ extension FrontRangeCLIEntry {
     var newKey: String
     
     func run() throws {
-      let files = options.files
-        .allFilePaths(withExtensions: options.extensions, recursively: options.recursive)
-      
-      for file in files {
+      for path in options.paths {
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
-          .log("Renaming key '\(key)' to '\(newKey)' inside file '\(file)'")
+          .log("Renaming key '\(key)' to '\(newKey)' inside file '\(path.absolute())'")
 #endif
         
-        let content = try String(contentsOfFile: file)
+        let content = try path.read(.utf8)
         var doc = try FrontMatteredDoc_Node(parsing: content)
         try doc.renameKey(from: key, to: newKey)
         let updatedContent = try doc.render()
-        try updatedContent.write(to: URL(fileURLWithPath: file), atomically: true, encoding: .utf8)
+        try path.write(updatedContent)
       }
     }
   }

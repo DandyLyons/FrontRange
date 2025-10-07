@@ -8,6 +8,7 @@
 import ArgumentParser
 import Foundation
 import FrontRange
+import PathKit
 
 extension FrontRangeCLIEntry {
   struct Remove: ParsableCommand {
@@ -23,20 +24,18 @@ extension FrontRangeCLIEntry {
     var key: String
     
     func run() throws {
-      let files = options.files
-        .allFilePaths(withExtensions: options.extensions, recursively: options.recursive)
       
-      for file in files {
+      for path in options.paths {
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
-          .log("Removing key '\(key)' from files '\(file)'")
+          .log("Removing key '\(key)' from file '\(path.string)'")
 #endif
         
-        let content = try String(contentsOfFile: file)
+        let content = try path.read(.utf8)
         var doc = try FrontMatteredDoc_Node(parsing: content)
         doc.remove(key: key)
         let updatedContent = try doc.render()
-        try updatedContent.write(to: URL(fileURLWithPath: file), atomically: true, encoding: .utf8)
+        try updatedContent.write(to: URL(fileURLWithPath: path.string), atomically: true, encoding: .utf8)
       }
     }
   }

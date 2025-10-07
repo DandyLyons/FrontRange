@@ -32,16 +32,14 @@ extension FrontRangeCLIEntry {
     
     
     func run() throws {
-      let files = options.files
-        .allFilePaths(withExtensions: options.extensions, recursively: options.recursive)
       
-      for file in files {
+      for path in options.paths {
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
-          .log("ℹ️ Getting key '\(key)' from file '\(file)' in \(options.format.rawValue) format")
+          .log("ℹ️ Getting key '\(key)' from file '\(path)' in \(options.format.rawValue) format")
 #endif
         
-        let content = try String(contentsOfFile: file)
+        let content = try path.read(.utf8)
         let doc = try FrontMatteredDoc_Node(parsing: content)
         guard let value = doc.getValue(forKey: key) else {
           print("Key '\(key)' not found in frontmatter.")

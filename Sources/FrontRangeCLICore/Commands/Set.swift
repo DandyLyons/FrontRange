@@ -8,6 +8,7 @@
 import ArgumentParser
 import Foundation
 import FrontRange
+import PathKit
 
 extension FrontRangeCLIEntry {
   struct Set: ParsableCommand {
@@ -25,21 +26,17 @@ extension FrontRangeCLIEntry {
     var value: String
     
     func run() throws {
-      let files = options.files
-        .allFilePaths(withExtensions: options.extensions, recursively: options.recursive)
-      
-      for file in files {
+      for path in options.paths {
 #if DEBUG
         FrontRangeCLIEntry.logger(category: .cli)
-          .log("ℹ️Setting key '\(key)' to '\(value)' in file '\(file)'")
+          .log("ℹ️Setting key '\(key)' to '\(value)' in file '\(path)'")
 #endif
         
-        // Placeholder implementation:
-        let content = try String(contentsOfFile: file)
+        let content = try path.read(.utf8)
         var doc = try FrontMatteredDoc_Node(parsing: content)
         doc.setValue(value, forKey: key)
         let updatedContent = try doc.render()
-        try updatedContent.write(to: URL(fileURLWithPath: file), atomically: true, encoding: .utf8)
+        try path.write(updatedContent)
       }
     }
   }
