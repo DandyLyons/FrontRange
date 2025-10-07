@@ -23,6 +23,6 @@ public struct FrontRangeCLIEntry: ParsableCommand {
   ///
   /// To call this CLI in the terminal for debugging, use: `swift run fr` from the package root.
   public mutating func run() throws {
-    print("Welcome to FrontRange CLI!")
+    print(Self.helpMessage())
   }
 }
