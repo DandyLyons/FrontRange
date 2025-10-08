@@ -28,8 +28,7 @@ extension FrontRangeCLIEntry {
     func run() throws {
       for path in try options.paths {
 #if DEBUG
-        FrontRangeCLIEntry.logger(category: .cli)
-          .log("ℹ️Setting key '\(key)' to '\(value)' in file '\(path)'")
+        print("ℹ️Setting key '\(key)' to '\(value)' in file '\(path)'")
 #endif
         
         let content = try path.read(.utf8)

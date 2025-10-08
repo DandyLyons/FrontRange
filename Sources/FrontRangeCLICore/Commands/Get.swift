@@ -35,8 +35,7 @@ extension FrontRangeCLIEntry {
       
       for path in try options.paths {
 #if DEBUG
-        FrontRangeCLIEntry.logger(category: .cli)
-          .log("ℹ️ Getting key '\(key)' from file '\(path)' in \(options.format.rawValue) format")
+        print("ℹ️ Getting key '\(key)' from file '\(path)' in \(options.format.rawValue) format")
 #endif
         
         let content = try path.read(.utf8)

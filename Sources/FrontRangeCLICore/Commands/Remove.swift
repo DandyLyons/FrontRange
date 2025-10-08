@@ -27,8 +27,7 @@ extension FrontRangeCLIEntry {
       
       for path in try options.paths {
 #if DEBUG
-        FrontRangeCLIEntry.logger(category: .cli)
-          .log("Removing key '\(key)' from file '\(path.string)'")
+        print("ℹ️ Removing key '\(key)' from file '\(path.string)'")
 #endif
         
         let content = try path.read(.utf8)

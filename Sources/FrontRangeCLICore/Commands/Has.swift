@@ -29,8 +29,7 @@ extension FrontRangeCLIEntry {
       for path in paths {
         
 #if DEBUG
-        FrontRangeCLIEntry.logger(category: .cli)
-          .log("Checking if key '\(key)' exists in files '\(paths)' in \(options.format.rawValue) format")
+        print("ℹ️ Checking if key '\(key)' exists in files '\(paths)' in \(options.format.rawValue) format")
 #endif
         
         let content = try path.read(.utf8)

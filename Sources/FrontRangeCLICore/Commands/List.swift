@@ -29,8 +29,7 @@ extension FrontRangeCLIEntry {
       let paths = try options.paths
       
       #if DEBUG
-      FrontRangeCLIEntry.logger(category: .cli)
-        .log("Listing all keys in file '\(paths[0])' in \(options.format.rawValue) format")
+      print("ℹ️ Listing all keys in file '\(paths[0])' in \(options.format.rawValue) format")
       #endif
       
       let content = try paths[0].read(.utf8)

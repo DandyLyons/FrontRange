@@ -28,8 +28,7 @@ extension FrontRangeCLIEntry {
     func run() throws {
       for path in try options.paths {
 #if DEBUG
-        FrontRangeCLIEntry.logger(category: .cli)
-          .log("Renaming key '\(key)' to '\(newKey)' inside file '\(path.absolute())'")
+        print("ℹ️ Renaming key '\(key)' to '\(newKey)' inside file '\(path.absolute())'")
 #endif
         
         let content = try path.read(.utf8)
