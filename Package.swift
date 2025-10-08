@@ -62,7 +62,7 @@ let package = Package(
               .target(name: "FrontRangeCLICore"),
             ],
             resources: [
-              .process("../../Example.md"),
+              .copy("../../ExampleFiles"),
             ],
         ),
         

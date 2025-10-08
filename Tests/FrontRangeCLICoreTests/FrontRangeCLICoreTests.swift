@@ -12,7 +12,7 @@ import Testing
 
 @Suite(.serialized) struct FrontRangeCLITests {
   let exampleMDPath = Bundle.module
-    .url(forResource: "Example", withExtension: "md")!
+    .url(forResource: "Example", withExtension: "md", subdirectory: "ExampleFiles")!
     .path()
   
   @Test func `CLI runs without arguments` () async throws {
@@ -21,7 +21,7 @@ import Testing
   }
   
   @Test func `CLI shows help with --help` () async throws {
-    try FrontRangeCLIEntry.parseAsRoot(["--help"])
+    let _ = try FrontRangeCLIEntry.parseAsRoot(["--help"])
     #expect(throws: (any Error).self) {
       try FrontRangeCLIEntry.parseAsRoot(["--hello"])
     }
@@ -34,7 +34,7 @@ import Testing
       var get = try FrontRangeCLIEntry.parseAsRoot(["get", exampleMDPath, "--key", "string"])
       try get.run()
     }
-    #expect(output == expectedOutput)
+    expectNoDifference(output, expectedOutput)
   }
   
   @Test func `Has command` () throws {

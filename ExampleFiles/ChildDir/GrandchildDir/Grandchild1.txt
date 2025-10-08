@@ -1,0 +1,16 @@
+---
+bool: false
+int: 44
+float: 3.15
+string: Pancakes
+list:
+  - item4
+  - item5
+  - item6
+dict:
+  key2: value2
+---
+# Child1 Markdown File
+
+## Example Section
+This is an example markdown file with YAML front matter.
