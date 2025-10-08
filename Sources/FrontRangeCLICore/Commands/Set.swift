@@ -27,9 +27,7 @@ extension FrontRangeCLIEntry {
     
     func run() throws {
       for path in try options.paths {
-#if DEBUG
-        print("ℹ️Setting key '\(key)' to '\(value)' in file '\(path)'")
-#endif
+        printIfDebug("ℹ️Setting key '\(key)' to '\(value)' in file '\(path)'")
         
         let content = try path.read(.utf8)
         var doc = try FrontMatteredDoc_Node(parsing: content)

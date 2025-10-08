@@ -30,9 +30,7 @@ extension FrontRangeCLIEntry {
     
     func run() throws {
       for path in try options.paths {
-#if DEBUG
-        print("ℹ️ Sorting keys in file '\(path)' using method '\(sortMethod.rawValue)'")
-#endif
+        printIfDebug("ℹ️ Sorting keys in file '\(path)' using method '\(sortMethod.rawValue)'")
         
         let content = try path.read(.utf8)
         var doc = try FrontMatteredDoc_Node(parsing: content)

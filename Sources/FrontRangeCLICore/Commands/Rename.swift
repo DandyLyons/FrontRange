@@ -27,9 +27,7 @@ extension FrontRangeCLIEntry {
     
     func run() throws {
       for path in try options.paths {
-#if DEBUG
-        print("ℹ️ Renaming key '\(key)' to '\(newKey)' inside file '\(path.absolute())'")
-#endif
+        printIfDebug("ℹ️ Renaming key '\(key)' to '\(newKey)' inside file '\(path.absolute())'")
         
         let content = try path.read(.utf8)
         var doc = try FrontMatteredDoc_Node(parsing: content)

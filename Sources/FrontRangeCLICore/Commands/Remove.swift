@@ -26,9 +26,7 @@ extension FrontRangeCLIEntry {
     func run() throws {
       
       for path in try options.paths {
-#if DEBUG
-        print("ℹ️ Removing key '\(key)' from file '\(path.string)'")
-#endif
+        printIfDebug("ℹ️ Removing key '\(key)' from file '\(path.string)'")
         
         let content = try path.read(.utf8)
         var doc = try FrontMatteredDoc_Node(parsing: content)

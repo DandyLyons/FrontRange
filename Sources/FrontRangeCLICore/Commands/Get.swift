@@ -8,6 +8,7 @@
 import ArgumentParser
 import Foundation
 import FrontRange
+import IssueReporting
 
 extension FrontRangeCLIEntry {
   struct Get: ParsableCommand {
@@ -34,9 +35,7 @@ extension FrontRangeCLIEntry {
     func run() throws {
       
       for path in try options.paths {
-#if DEBUG
-        print("ℹ️ Getting key '\(key)' from file '\(path)' in \(options.format.rawValue) format")
-#endif
+        printIfDebug("ℹ️ Getting key '\(key)' from file '\(path)' in \(options.format.rawValue) format")
         
         let content = try path.read(.utf8)
         let doc = try FrontMatteredDoc_Node(parsing: content)

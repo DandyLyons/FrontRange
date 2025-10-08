@@ -27,10 +27,7 @@ extension FrontRangeCLIEntry {
       let paths = try options.paths
       
       for path in paths {
-        
-#if DEBUG
-        print("ℹ️ Checking if key '\(key)' exists in files '\(paths)' in \(options.format.rawValue) format")
-#endif
+        printIfDebug("ℹ️ Checking if key '\(key)' exists in files '\(paths)' in \(options.format.rawValue) format")
         
         let content = try path.read(.utf8)
         let doc = try FrontMatteredDoc_Node(parsing: content)
