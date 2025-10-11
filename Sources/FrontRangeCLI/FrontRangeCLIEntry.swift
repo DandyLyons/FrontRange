@@ -9,6 +9,7 @@ import ArgumentParser
 import Foundation
 
 /// The main entry point for the FrontRange CLI application.
+@main
 public struct FrontRangeCLIEntry: ParsableCommand {
   public init() {}
   public static let configuration = CommandConfiguration(
