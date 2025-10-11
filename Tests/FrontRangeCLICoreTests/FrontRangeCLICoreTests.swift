@@ -5,6 +5,7 @@
 //  Created by Daniel Lyons on 9/26/25.
 //
 
+import Command
 import CustomDump
 import Foundation
 import Testing
@@ -15,30 +16,52 @@ import Testing
     .url(forResource: "Example", withExtension: "md", subdirectory: "ExampleFiles")!
     .path()
   
-  @Test func `CLI runs without arguments` () async throws {
-    var cli = FrontRangeCLIEntry()
-    try cli.run()
-  }
+  let commandRunner = CommandRunner(logger: nil)
+  let cliPath = "\(#filePath)/../../../.build/debug/fr"
   
-  @Test func `CLI shows help with --help` () async throws {
-    let _ = try FrontRangeCLIEntry.parseAsRoot(["--help"])
-    #expect(throws: (any Error).self) {
-      try FrontRangeCLIEntry.parseAsRoot(["--hello"])
-    }
+  @Test func `CLI runs without arguments` () async throws {
+    let output = try await commandRunner.run(
+      arguments: [cliPath],
+    ).concatenatedString()
+    
+    let expected = """
+    OVERVIEW: A utility for managing front matter in text files.
+
+    USAGE: fr <subcommand>
+
+    OPTIONS:
+      --version               Show the version.
+      -h, --help              Show help information.
+
+    SUBCOMMANDS:
+      get                     Get a value from frontmatter by providing its key
+      set                     Set a value in frontmatter
+      has                     Check if a key exists in frontmatter
+      list, ls                List all keys in frontmatter
+      rename, rn              Rename a key from frontmatter
+      remove, rm              Remove a key from frontmatter
+      sort-keys, sk           Sort keys in frontmatter
+
+      See 'fr help <subcommand>' for detailed help.
+    
+    """
+    
+    expectNoDifference(output, expected)
   }
   
   @Test func `Get command` () async throws {
-    var output = ""
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "get", exampleMDPath, "--key", "string"],
+    ).concatenatedString()
     let expectedOutput = "Hello, World!\n"
-    output = try captureStandardOutput {
-      var get = try FrontRangeCLIEntry.parseAsRoot(["get", exampleMDPath, "--key", "string"])
-      try get.run()
-    }
     expectNoDifference(output, expectedOutput)
   }
   
-  @Test func `Has command` () throws {
-    var output = ""
+  @Test func `Has command` () async throws {
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "has", exampleMDPath, "--key", "string"],
+    ).concatenatedString()
+    
     let expectedOutput = """
       Files containing key 'string':
       \(exampleMDPath)
@@ -47,15 +70,13 @@ import Testing
       None
       
       """
-    output = try captureStandardOutput {
-      var has = try FrontRangeCLIEntry.parseAsRoot(["has", exampleMDPath, "--key", "string"])
-      try has.run()
-    }
     expectNoDifference(expectedOutput, output)
   }
   
-  @Test func `List command` () throws {
-    var output = ""
+  @Test func `List command` () async throws {
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "list", exampleMDPath, "--format", "yaml"],
+    ).concatenatedString()
     let expectedOutput = """
     - bool
     - int
@@ -64,36 +85,25 @@ import Testing
     - list
     - dict
     """
-    output = try captureStandardOutput {
-      var list = try FrontRangeCLIEntry.parseAsRoot(["list", exampleMDPath, "--format", "yaml"])
-      try list.run()
-    }
     expectNoDifference(output.trimmingCharacters(in: .whitespacesAndNewlines), expectedOutput)
   }
   
-  @Test func `Remove command` () throws {
-    var output = ""
-    let tempFileURL = try copyIntoTempFile(source: exampleMDPath)
-    
-    output = try captureStandardOutput {
-      var remove = try FrontRangeCLIEntry.parseAsRoot(["remove", tempFileURL.path(), "--key", "string"])
-      try remove.run()
-    }
+  @Test func `Remove command` () async throws {
+    let tempFilePath = try copyIntoTempFile(source: exampleMDPath).path()
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "remove", tempFilePath, "--key", "string"],
+    ).concatenatedString()
     #expect(output == "")
-    let updatedContent = try String(contentsOf: tempFileURL)
+    let updatedContent = try String(contentsOf: URL(fileURLWithPath: tempFilePath))
     #expect(!updatedContent.contains("string: Hello, World!"))
-    
-    try FileManager.default.removeItem(at: tempFileURL)
+    try FileManager.default.removeItem(atPath: tempFilePath)
   }
   
-  @Test func `Rename command` () throws {
-    var output = ""
+  @Test func `Rename command` () async throws {
     let tempFileURL = try copyIntoTempFile(source: exampleMDPath)
-    
-    output = try captureStandardOutput {
-      var rename = try FrontRangeCLIEntry.parseAsRoot(["rename", tempFileURL.path(), "--key", "string", "--new-key", "newString"])
-      try rename.run()
-    }
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "rename", tempFileURL.path(), "--key", "string", "--new-key", "newString"],
+    ).concatenatedString()
     #expect(output == "")
     let updatedContent = try String(contentsOf: tempFileURL)
     let expectedFrontMatter = """
@@ -119,14 +129,12 @@ import Testing
     try FileManager.default.removeItem(at: tempFileURL)
   }
   
-  @Test func `Set command` () throws {
-    var output = ""
+  @Test func `Set command` () async throws {
     let tempFileURL = try copyIntoTempFile(source: exampleMDPath)
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "set", tempFileURL.path(), "--key", "string", "--value", "New Value"],
+    ).concatenatedString()
     
-    output = try captureStandardOutput {
-      var set = try FrontRangeCLIEntry.parseAsRoot(["set", tempFileURL.path(), "--key", "string", "--value", "New Value"])
-      try set.run()
-    }
     #expect(output == "")
     let updatedContent = try String(contentsOf: tempFileURL)
     #expect(updatedContent.contains("string: New Value"))
@@ -134,14 +142,12 @@ import Testing
     try FileManager.default.removeItem(at: tempFileURL)
   }
   
-  @Test func `SortKeys command` () throws {
-    var output = ""
+  @Test func `SortKeys command` () async throws {
     let tempFileURL = try copyIntoTempFile(source: exampleMDPath)
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "sort-keys", tempFileURL.path()],
+    ).concatenatedString()
     
-    output = try captureStandardOutput {
-      var sortKeys = try FrontRangeCLIEntry.parseAsRoot(["sort-keys", tempFileURL.path()])
-      try sortKeys.run()
-    }
     #expect(output == "")
     let updatedContent = try String(contentsOf: tempFileURL)
     let expectedFrontMatter = """
