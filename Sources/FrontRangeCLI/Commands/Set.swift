@@ -30,7 +30,7 @@ extension FrontRangeCLIEntry {
         printIfDebug("ℹ️Setting key '\(key)' to '\(value)' in file '\(path)'")
         
         let content = try path.read(.utf8)
-        var doc = try FrontMatteredDoc_Node(parsing: content)
+        var doc = try FrontMatteredDoc(parsing: content)
         doc.setValue(value, forKey: key)
         let updatedContent = try doc.render()
         try path.write(updatedContent)

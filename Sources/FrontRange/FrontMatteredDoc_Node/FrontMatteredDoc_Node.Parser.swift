@@ -1,5 +1,5 @@
 //
-//  FrontMatteredDoc_Node.Parser.swift
+//  FrontMatteredDoc.Parser.swift
 //  FrontRange
 //
 //  Created by Daniel Lyons on 2025-10-02.
@@ -9,10 +9,10 @@ import Foundation
 import Parsing
 import Yams
 
-extension FrontMatteredDoc_Node {
+extension FrontMatteredDoc {
   public struct Parser: Parsing.ParserPrinter {
     public typealias Input = Substring
-    public typealias Output = FrontMatteredDoc_Node
+    public typealias Output = FrontMatteredDoc
     
     public enum ParsingError: Swift.Error {
       /// The root object of the YAML string is not a mapping.
@@ -23,7 +23,7 @@ extension FrontMatteredDoc_Node {
     
     public var body: some Parsing.Parser<Input, Output> {
       Parse(input: Substring.self) {
-        FrontMatteredDoc_Node(frontMatter: $0, body: String($1))
+        FrontMatteredDoc(frontMatter: $0, body: String($1))
       } with: {
         "---\n"
         PrefixUpTo("---\n")
@@ -33,7 +33,7 @@ extension FrontMatteredDoc_Node {
       }
     }
     
-    public func print(_ output: FrontMatteredDoc_Node, into input: inout Substring) throws {
+    public func print(_ output: FrontMatteredDoc, into input: inout Substring) throws {
       input = """
               ---
               \(output.frontMatterAsString)
@@ -50,10 +50,10 @@ public struct YAMLSubstringToNodeMappingConversion: Conversion {
   
   public func apply(_ input: Substring) throws -> Yams.Node.Mapping {
     guard let node = try? Yams.compose(yaml: String(input)) else {
-      throw FrontMatteredDoc_Node.Parser.ParsingError.notANode
+      throw FrontMatteredDoc.Parser.ParsingError.notANode
     }
     guard let mapping = node.mapping else {
-      throw FrontMatteredDoc_Node.Parser.ParsingError.notAMapping
+      throw FrontMatteredDoc.Parser.ParsingError.notAMapping
     }
     return mapping
   }

@@ -30,7 +30,7 @@ extension FrontRangeCLIEntry {
         printIfDebug("ℹ️ Renaming key '\(key)' to '\(newKey)' inside file '\(path.absolute())'")
         
         let content = try path.read(.utf8)
-        var doc = try FrontMatteredDoc_Node(parsing: content)
+        var doc = try FrontMatteredDoc(parsing: content)
         try doc.renameKey(from: key, to: newKey)
         let updatedContent = try doc.render()
         try path.write(updatedContent)

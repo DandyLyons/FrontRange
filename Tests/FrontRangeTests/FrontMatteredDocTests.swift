@@ -1,5 +1,5 @@
 //
-//  FrontMatteredDoc_NodeTests.swift
+//  FrontMatteredDocTests.swift
 //  FrontRange
 //
 //  Created by Daniel Lyons on 2025-10-02.
@@ -12,7 +12,7 @@ import Testing
 import Yams
 @testable import FrontRange
 
-@Suite struct FrontMatteredDoc_NodeTests {
+@Suite struct FrontMatteredDocTests {
   let docString = """
 ---
 author: Jane Doe

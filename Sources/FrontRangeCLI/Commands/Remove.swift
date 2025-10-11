@@ -29,7 +29,7 @@ extension FrontRangeCLIEntry {
         printIfDebug("ℹ️ Removing key '\(key)' from file '\(path.string)'")
         
         let content = try path.read(.utf8)
-        var doc = try FrontMatteredDoc_Node(parsing: content)
+        var doc = try FrontMatteredDoc(parsing: content)
         doc.remove(key: key)
         let updatedContent = try doc.render()
         try updatedContent.write(to: URL(fileURLWithPath: path.string), atomically: true, encoding: .utf8)

@@ -30,7 +30,7 @@ extension FrontRangeCLIEntry {
         printIfDebug("ℹ️ Checking if key '\(key)' exists in files '\(paths)' in \(options.format.rawValue) format")
         
         let content = try path.read(.utf8)
-        let doc = try FrontMatteredDoc_Node(parsing: content)
+        let doc = try FrontMatteredDoc(parsing: content)
         if doc.hasKey(key) {
           filesWithKey.append(path.absolute().string)
         } else {

@@ -38,7 +38,7 @@ extension FrontRangeCLIEntry {
         printIfDebug("ℹ️ Getting key '\(key)' from file '\(path)' in \(options.format.rawValue) format")
         
         let content = try path.read(.utf8)
-        let doc = try FrontMatteredDoc_Node(parsing: content)
+        let doc = try FrontMatteredDoc(parsing: content)
         guard let value = doc.getValue(forKey: key) else {
           print("Key '\(key)' not found in frontmatter.")
           return

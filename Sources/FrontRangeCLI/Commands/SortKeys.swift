@@ -33,7 +33,7 @@ extension FrontRangeCLIEntry {
         printIfDebug("ℹ️ Sorting keys in file '\(path)' using method '\(sortMethod.rawValue)'")
         
         let content = try path.read(.utf8)
-        var doc = try FrontMatteredDoc_Node(parsing: content)
+        var doc = try FrontMatteredDoc(parsing: content)
         
         switch sortMethod {
           case .alphabetical:

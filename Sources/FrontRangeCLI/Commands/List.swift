@@ -30,7 +30,7 @@ extension FrontRangeCLIEntry {
       printIfDebug("ℹ️ Listing all keys in file '\(paths[0])' in \(options.format.rawValue) format")
       
       let content = try paths[0].read(.utf8)
-      let doc = try FrontMatteredDoc_Node(parsing: content)
+      let doc = try FrontMatteredDoc(parsing: content)
       let keys = Array(doc.frontMatter.keys)
         .compactMap { $0.string }
       try printAny(

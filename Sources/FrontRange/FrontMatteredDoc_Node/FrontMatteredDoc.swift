@@ -1,5 +1,5 @@
 //
-//  FrontMatteredDoc_Node.swift
+//  FrontMatteredDoc.swift
 //  FrontRange
 //
 //  Created by Daniel Lyons on 2025-10-02.
@@ -8,29 +8,30 @@
 import Foundation
 import Yams
 
-/// Experimental. A reimplementation ``FrontMatteredDoc`` that uses a `Yams.Node` for its frontmatter representation instead of a `FrontMatter` dictionary.
-///
-/// This type is designed to eventually replace ``FrontMatteredDoc``.
-public struct FrontMatteredDoc_Node {
+/// A representation of a text document with YAML front matter.
+public struct FrontMatteredDoc {
   public var frontMatter: Yams.Node.Mapping
   public var body: String
   
   /// Experimental. Not yet implemented.
-  public var schema: [(String, Any.Type)] = []
+  public var _schema: [(String, Any.Type)] = []
   
+  /// The root initializer. Usually you will want to use one of the parsing initializers instead.
+  ///
+  /// Only use this parser if your data is already parsed or for some reason you want to use your own custom parser.
   public init(
     frontMatter: Yams.Node.Mapping,
     body: String,
-    schema: [(String, Any.Type)] = []
+    _schema: [(String, Any.Type)] = []
   ) {
     self.frontMatter = frontMatter
     self.body = body
-    self.schema = schema
+    self._schema = _schema
   }
 }
 
 // MARK: Computed Properties
-extension FrontMatteredDoc_Node {
+extension FrontMatteredDoc {
   public var frontMatterAsString: String {
     do {
       return try Yams.serialize(node: .mapping(self.frontMatter))
@@ -42,7 +43,7 @@ extension FrontMatteredDoc_Node {
 }
 
 // MARK: Methods
-extension FrontMatteredDoc_Node {
+extension FrontMatteredDoc {
   public func render() throws -> String {
     let frontMatterString = try Yams.serialize(node: .mapping(self.frontMatter))
       .trimmingCharacters(in: .newlines) // remove leading/trailing newlines
@@ -108,23 +109,23 @@ extension FrontMatteredDoc_Node {
 }
 
 // MARK: Convenience Initializers
-extension FrontMatteredDoc_Node {
+extension FrontMatteredDoc {
   public init(
     parsing input: Substring,
-    schema: [(String, Any.Type)] = [],
+    _schema: [(String, Any.Type)] = [],
   ) throws {
     var input = input
     self = try Self.Parser().parse(&input)
-    self.schema = schema
+    self._schema = _schema
   }
   
   public init(
     parsing input: String,
-    schema: [(String, Any.Type)] = [],
+    _schema: [(String, Any.Type)] = [],
   ) throws {
     try self.init(
       parsing: Substring(input),
-      schema: schema,
+      _schema: _schema,
     )
   }
 }
