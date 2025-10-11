@@ -27,6 +27,7 @@ let package = Package(
     .package(url: "https://github.com/jpsim/Yams.git", from: "6.1.0"), // Yams
   ],
   targets: [
+    // MARK: FrontRange
     .target(
       // A tool for parsing, mutating, serializing, and deserializing text documents with YAML front matter.
       name: "FrontRange",
@@ -43,6 +44,15 @@ let package = Package(
         "FrontRange",
       ]
     ),
+    // MARK: FrontRangeCLI (fr)
+    .executableTarget(
+      name: "FrontRangeCLI",
+      dependencies: [
+        "FrontRange",
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        .product(name: "PathKit", package: "PathKit"),
+      ],
+    ),
     .testTarget(
       name: "FrontRangeCLITests",
       dependencies: [
@@ -51,14 +61,6 @@ let package = Package(
       ],
       resources: [
         .copy("../../ExampleFiles"),
-      ],
-    ),
-    .executableTarget(
-      name: "FrontRangeCLI",
-      dependencies: [
-        "FrontRange",
-        .product(name: "ArgumentParser", package: "swift-argument-parser"),
-        .product(name: "PathKit", package: "PathKit"),
       ],
     ),
   ]
