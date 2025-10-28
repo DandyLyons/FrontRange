@@ -42,7 +42,10 @@ let package = Package(
       dependencies: [
         .product(name: "CustomDump", package: "swift-custom-dump"),
         "FrontRange",
-      ]
+      ],
+      exclude: [
+        "FrontRange.xctestplan",
+      ],
     ),
     // MARK: FrontRangeCLI (fr)
     .executableTarget(
@@ -58,6 +61,9 @@ let package = Package(
       dependencies: [
         .product(name: "Command", package: "command"),
         .target(name: "FrontRangeCLI"),
+      ],
+      exclude: [
+        "FrontRangeCLICore.xctestplan",
       ],
       resources: [
         .copy("../../ExampleFiles"),
