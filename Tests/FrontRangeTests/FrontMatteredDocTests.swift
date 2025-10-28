@@ -42,13 +42,13 @@ It can also include **Markdown** formatting.
 """
   
   @Test func `has key`() throws {
-    let doc = try FrontMatteredDoc_Node(parsing: docString)
+    let doc = try FrontMatteredDoc(parsing: docString)
     #expect(doc.hasKey("title"))
     #expect(!doc.hasKey("nonexistent"))
   }
   
   @Test func `parsing`() throws {
-    let doc = try FrontMatteredDoc_Node(parsing: docString)
+    let doc = try FrontMatteredDoc(parsing: docString)
     #expect(doc.frontMatter == expectedNode)
     #expect(doc.body == expectedBody)
     let expectedFrontMatterString = """
@@ -65,16 +65,16 @@ It can also include **Markdown** formatting.
   }
   
   @Test func `printing` () throws {
-    let doc = try FrontMatteredDoc_Node(
+    let doc = try FrontMatteredDoc(
       parsing: docString,
     )
-    let printed = try FrontMatteredDoc_Node.Parser().print(doc)
+    let printed = try FrontMatteredDoc.Parser().print(doc)
     
     expectNoDifference(docString, String(printed))
   }
   
   @Test func `mutating front matter` () throws {
-    var doc = try FrontMatteredDoc_Node(parsing: docString)
+    var doc = try FrontMatteredDoc(parsing: docString)
     #expect(doc.getValue(forKey: "author") == "Jane Doe")
     #expect(doc.getValue(forKey: "date") == "2023-10-01 00:00:00 +0000")
     #expect(doc.getValue(forKey: "age") == 42)
@@ -99,12 +99,12 @@ It can also include **Markdown** formatting.
                            
                            """
     #expect(throws: (any Error).self) {
-      try FrontMatteredDoc_Node(parsing: invalidDocString)
+      try FrontMatteredDoc(parsing: invalidDocString)
     }
   }
   
   @Test func `reverse order`() throws {
-    var doc = try FrontMatteredDoc_Node(parsing: docString)
+    var doc = try FrontMatteredDoc(parsing: docString)
     doc.frontMatter.reverse()
     let expected: Node.Mapping = [
       "title": "Sample Document",
@@ -117,7 +117,7 @@ It can also include **Markdown** formatting.
   }
   
   @Test func `sort by`() throws {
-    var doc = try FrontMatteredDoc_Node(parsing: docString)
+    var doc = try FrontMatteredDoc(parsing: docString)
     doc.frontMatter.sort(by: { $0.key < $1.key })
     let expected: Node.Mapping = [
       "age": 42,
@@ -130,7 +130,7 @@ It can also include **Markdown** formatting.
   }
   
   @Test func `remove item for key`() throws {
-    var doc = try FrontMatteredDoc_Node(parsing: docString)
+    var doc = try FrontMatteredDoc(parsing: docString)
     doc.frontMatter.removeItem(forKey: "age")
     #expect(doc.getValue(forKey: "age") == nil)
     let expected: Node.Mapping = [
@@ -143,7 +143,7 @@ It can also include **Markdown** formatting.
   }
   
   @Test func `removeLast`() throws {
-    var doc = try FrontMatteredDoc_Node(parsing: docString)
+    var doc = try FrontMatteredDoc(parsing: docString)
     doc.frontMatter.removeLast()
     let expected: Node.Mapping = [
       "author": "Jane Doe",
@@ -155,7 +155,7 @@ It can also include **Markdown** formatting.
   }
   
   @Test func `remove at index`() throws {
-    var doc = try FrontMatteredDoc_Node(parsing: docString)
+    var doc = try FrontMatteredDoc(parsing: docString)
     if let index = doc.frontMatter.index(forKey: "age") {
       doc.frontMatter.remove(at: index)
     } else {
