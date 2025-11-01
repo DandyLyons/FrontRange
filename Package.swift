@@ -52,14 +52,14 @@ let package = Package(
       name: "FrontRangeCLI",
       dependencies: [
         "FrontRange",
-        .product(name: "ArgumentParser", package: "swift-argument-parser"),
-        .product(name: "PathKit", package: "PathKit"),
+        .product(name: "ArgumentParser", package: "swift-argument-parser"), // CLI argument parsing
+        .product(name: "PathKit", package: "PathKit"), // For file path handling
       ],
     ),
     .testTarget(
       name: "FrontRangeCLITests",
       dependencies: [
-        .product(name: "Command", package: "command"),
+        .product(name: "Command", package: "command"), // Programmatic CLI testing
         .target(name: "FrontRangeCLI"),
       ],
       exclude: [
