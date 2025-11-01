@@ -64,6 +64,10 @@ extension Substring {
 
 extension String {
   /// Extracts a substring corresponding to the specified 1-based line number range.
+  ///
+  /// If the ending line number exceeds the total number of lines in the string,
+  /// the substring will include all lines up to the end of the string.
+  /// 
   /// - Parameter lines: A closed range of 1-based line numbers to extract where the lowerbound represents the starting line number and the upperbound represents the ending line number (within the original string).
   /// - Returns: A `Substring` containing the lines in the specified range, or `nil` if the range is invalid or exceeds the string bounds.
   public func substring(lines: ClosedRange<Int>) -> Substring? {
