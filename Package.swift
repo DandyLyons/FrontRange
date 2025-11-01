@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
   name: "FrontRange",
   platforms: [
-    .macOS(.v11), .iOS(.v14), .tvOS(.v14), .watchOS(.v7), .macCatalyst(.v14),
+    .macOS(.v13), .iOS(.v16), .tvOS(.v16), .watchOS(.v9), .macCatalyst(.v16),
   ],
   products: [
     .library(
