@@ -6,11 +6,14 @@
 //
 
 import Foundation
+import MCP
 import Testing
 
 @Suite struct FrontRangeMCPTests {
-  @Test func exampleTest() {
-    // Example test case
-    #expect(1 + 1 == 2)
+  @Test func exampleTest() async throws {
+    let (client, server) = await MCP.InMemoryTransport.createConnectedPair()
+    
+    let _ = try await server.connect()
+    let _ = await client.disconnect()
   }
 }
