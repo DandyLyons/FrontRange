@@ -8,6 +8,18 @@
 import Foundation
 import MCP
 
+/// A simple MCP server that implements a "hello_world" tool.
+///
+/// ## Development
+/// To run this MCP server for development, you should use the [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector).
+/// To run the MCP Inspector, use the following command:
+/// ```bash
+/// # Start the FrontRange MCP Server
+/// swift run frontrange-mcp
+///
+/// # Start the MCP Inspector
+/// npx @modelcontextprotocol/inspector --config "Absolute/path/to/mcp-inspector.config.json"
+/// ```
 let server = MCP.Server(
   name: "FrontRangeMCP",
   version: "0.0.1",
@@ -16,5 +28,26 @@ let server = MCP.Server(
   configuration: .default
 )
 
+let tool = Tool(
+  name: "hello_world",
+  description: "A simple tool that returns a greeting message.",
+  inputSchema: .object([
+    "type": .string("object")
+  ])
+)
+
+await server.withMethodHandler(ListTools.self) { params in
+  ListTools.Result(tools: [tool])
+}
+
+await server.withMethodHandler(CallTool.self) { params in
+  guard params.name == tool.name else {
+    throw MCPError.invalidParams("Wrong tool name: \(params.name)")
+  }
+  return CallTool.Result(content: [.text("Hello, World! I am a funky monkey.")])
+}
+
 let transport = MCP.StdioTransport()
 try await server.start(transport: transport)
+
+await server.waitUntilCompleted()
