@@ -1,9 +1,0 @@
-{
-    "mcpServers": {
-        "frontrange-mcp": {
-            "command": "/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.build/arm64-apple-macosx/debug/frontrange-mcp",
-            "args": [],
-            "type": "stdio"
-        }
-    }
-}

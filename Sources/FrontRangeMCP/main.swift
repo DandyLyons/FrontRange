@@ -18,7 +18,7 @@ import MCP
 /// swift run frontrange-mcp
 ///
 /// # Start the MCP Inspector
-/// npx @modelcontextprotocol/inspector --config "Absolute/path/to/mcp-inspector.config.json"
+/// npx @modelcontextprotocol/inspector /Users/daniellyons/Developer/MySwiftPackages/FrontRange/.build/arm64-apple-macosx/debug/frontrange-mcp run
 /// ```
 let server = MCP.Server(
   name: "FrontRangeMCP",
