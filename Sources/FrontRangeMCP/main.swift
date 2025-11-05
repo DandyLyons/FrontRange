@@ -32,8 +32,9 @@ let tool = Tool(
   name: "hello_world",
   description: "A simple tool that returns a greeting message.",
   inputSchema: .object([
-    "type": .string("object")
-  ])
+    "type": .string("object"),
+    "properties": .object([:]),
+  ]),
 )
 
 await server.withMethodHandler(ListTools.self) { params in
