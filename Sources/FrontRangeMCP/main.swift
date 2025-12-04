@@ -8,6 +8,8 @@
 import Foundation
 import MCP
 
+enum ThisServer {}
+
 /// A simple MCP server that implements a "hello_world" tool.
 ///
 /// ## Development
@@ -28,27 +30,20 @@ let server = MCP.Server(
   configuration: .default
 )
 
-let tool = Tool(
-  name: "hello_world",
-  description: "A simple tool that returns a greeting message.",
-  inputSchema: .object([
-    "type": .string("object"),
-    "properties": .object([:]),
-  ]),
-)
-
 await server.withMethodHandler(ListTools.self) { params in
-  ListTools.Result(tools: [tool])
+  ListTools.Result(tools: ThisServer.tools)
 }
 
 await server.withMethodHandler(CallTool.self) { params in
-  guard params.name == tool.name else {
-    throw MCPError.invalidParams("Wrong tool name: \(params.name)")
+  if let toolName = ThisServer.ToolNames(rawValue: params.name) {
+    try await runTool(withName: toolName, params: params)
+  } else {
+    throw MCPError.methodNotFound("Tool with name '\(params.name)' not found.")
   }
-  return CallTool.Result(content: [.text("Hello, World! I am a funky monkey.")])
 }
 
 let transport = MCP.StdioTransport()
 try await server.start(transport: transport)
 
 await server.waitUntilCompleted()
+
