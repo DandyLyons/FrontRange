@@ -13,11 +13,6 @@ func runTool(
   params: CallTool.Parameters
 ) async throws -> CallTool.Result {
   switch name {
-    case .hello_world:
-      return CallTool.Result(
-        content: [.text("Hello, World! I am a funky monkey!")],
-      )
-
     case .get:
       return try await runGetTool(params: params)
 

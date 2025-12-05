@@ -15,7 +15,6 @@ extension ThisServer {
       ToolNames.allCases.map { $0.rawValue }
     }
 
-    case hello_world
     case get
     case set
     case has
@@ -27,11 +26,6 @@ extension ThisServer {
   }
 
   static let tools: [Tool] = [
-    Tool(
-      name: .hello_world,
-      description: "A simple tool that returns a greeting message.",
-      params: [:],
-    ),
     Tool(
       name: .get,
       description: "Get a value from frontmatter by providing its key and file path. Returns the value in the specified format (json, yaml, or plainString).",
