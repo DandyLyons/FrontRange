@@ -30,6 +30,12 @@ public func printIfDebug(
   line: Int = #line
 ) {
   #if DEBUG
+  // Only print if FRONTRANGE_DEBUG environment variable is set to "1"
+  // This makes tests deterministic and gives users explicit control
+  guard ProcessInfo.processInfo.environment["FRONTRANGE_DEBUG"] == "1" else {
+    return
+  }
+
   if IssueReporting.isTesting && !whileTesting {
     return
   } else {

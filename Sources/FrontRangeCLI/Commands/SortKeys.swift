@@ -22,6 +22,9 @@ extension FrontRangeCLIEntry {
     @Option(help: "The sorting method to use (alphabetical, length)")
     var sortMethod: SortMethod = .alphabetical
     
+    @Flag(help: "Reverse the sorting order")
+    var reverse: Bool = false
+    
     enum SortMethod: String, CaseIterable, ExpressibleByArgument {
       case alphabetical
       case length
@@ -41,6 +44,10 @@ extension FrontRangeCLIEntry {
           case .length:
             //          doc.frontMatter.sort { $0.key.count < $1.key.count }
             reportIssue("Not yet implemented: sorting by length")
+        }
+        
+        if reverse {
+          doc.frontMatter.reverse()
         }
         
         let updatedContent = try doc.render()
