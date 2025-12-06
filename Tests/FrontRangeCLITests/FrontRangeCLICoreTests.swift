@@ -41,9 +41,10 @@ import Testing
       rename, rn              Rename a key from frontmatter
       remove, rm              Remove a key from frontmatter
       sort-keys, sk           Sort keys in frontmatter
+      lines                   Extract a range of lines from a file
 
       See 'fr help <subcommand>' for detailed help.
-    
+
     """
     
     expectNoDifference(output, expected)
