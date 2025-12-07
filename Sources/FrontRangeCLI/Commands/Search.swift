@@ -104,23 +104,21 @@ extension FrontRangeCLIEntry {
         let errorMessage: String
 
         // Try to extract the message from patterns like: compileTime("message") or runtime("message")
-        if let match = errorDescription.range(of: #"compileTime\("([^"]+)"\)"#, options: .regularExpression) {
-          let captureRange = errorDescription.range(of: #""([^"]+)""#, options: .regularExpression, range: match)
-          if let captureRange = captureRange {
-            errorMessage = String(errorDescription[captureRange].dropFirst().dropLast())
-          } else {
-            errorMessage = errorDescription
+        let patterns = [
+          #"compileTime\("([^"]+)"\)"#,
+          #"runtime\("([^"]+)"\)"#
+        ]
+
+        var extractedMessage: String? = nil
+        for pattern in patterns {
+          if let match = errorDescription.range(of: pattern, options: .regularExpression),
+             let captureRange = errorDescription.range(of: #""([^"]+)""#, options: .regularExpression, range: match) {
+            extractedMessage = String(errorDescription[captureRange].dropFirst().dropLast())
+            break
           }
-        } else if let match = errorDescription.range(of: #"runtime\("([^"]+)"\)"#, options: .regularExpression) {
-          let captureRange = errorDescription.range(of: #""([^"]+)""#, options: .regularExpression, range: match)
-          if let captureRange = captureRange {
-            errorMessage = String(errorDescription[captureRange].dropFirst().dropLast())
-          } else {
-            errorMessage = errorDescription
-          }
-        } else {
-          errorMessage = error.localizedDescription
         }
+
+        errorMessage = extractedMessage ?? error.localizedDescription
 
         throw ValidationError("""
           Invalid JMESPath expression: "\(query)"
