@@ -50,10 +50,10 @@ The FrontRangeMCP server implements the Model Context Protocol. To develop and t
 swift run frontrange-mcp
 
 # Start the MCP Inspector (requires Node.js/npm)
-npx @modelcontextprotocol/inspector /Users/daniellyons/Developer/MySwiftPackages/FrontRange/.build/arm64-apple-macosx/debug/frontrange-mcp
+npx @modelcontextprotocol/inspector /path/to/FrontRange/.build/debug/frontrange-mcp
 ```
 
-Note: The MCP server is currently in early development. Most tools are placeholders and not fully implemented.
+Note: The MCP server is currently in early development.
 
 ## Architecture
 

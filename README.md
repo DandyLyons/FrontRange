@@ -69,13 +69,13 @@ if let title = doc.getValue(forKey: "title") {
 
 // Set values
 var mutableDoc = doc
-try mutableDoc.setValue("New Title", forKey: "title")
+mutableDoc.setValue("New Title", forKey: "title")
 
 // Check for keys
 let hasAuthor = mutableDoc.hasKey("author") // true
 
 // Remove keys
-try mutableDoc.remove(forKey: "tags")
+mutableDoc.remove(key: "tags")
 
 // Render back to string
 let output = try mutableDoc.render()
@@ -174,6 +174,8 @@ FRONTRANGE_DEBUG=1 fr get document.md --key title
 ### MCP Server (FrontRangeMCP)
 
 The FrontRangeMCP server implements the [Model Context Protocol](https://modelcontextprotocol.io), allowing AI assistants like Claude to manage front matter in your documents.
+
+**Note:** The MCP server is currently in early development.
 
 #### Running the Server
 

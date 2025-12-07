@@ -60,18 +60,18 @@ extension FrontRangeCLIEntry {
       guard let lines = contents.substring(lines: start...end) else {
         throw ValidationError("File does not have enough lines to extract the specified range")
       }
-      
+
       printIfDebug("ℹ️ Extracting lines \(start)-\(end) from file '\(file)'")
       let toBePrinted: String
       if numbered {
-        toBePrinted = lines.enumerated()
+        toBePrinted = lines.split(separator: "\n", omittingEmptySubsequences: false)
+          .enumerated()
           .map { index, line in
             let lineNumber = start + index
             return "\(lineNumber): \(line)"
-          }.joined()
+          }.joined(separator: "\n")
       } else {
-        toBePrinted = lines.map { String($0) }
-          .joined()
+        toBePrinted = String(lines)
       }
       print(toBePrinted)
     }

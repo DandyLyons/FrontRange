@@ -10,7 +10,8 @@ import MCP
 
 enum ThisServer {}
 
-/// A simple MCP server that implements a "hello_world" tool.
+/// An MCP server that implements multiple tools for front matter management,
+/// including: get, set, has, list, rename, remove, sort_keys, and lines.
 ///
 /// ## Development
 /// To run this MCP server for development, you should use the [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector).
@@ -20,7 +21,7 @@ enum ThisServer {}
 /// swift run frontrange-mcp
 ///
 /// # Start the MCP Inspector
-/// npx @modelcontextprotocol/inspector /Users/daniellyons/Developer/MySwiftPackages/FrontRange/.build/arm64-apple-macosx/debug/frontrange-mcp run
+/// npx @modelcontextprotocol/inspector <path-to-your-build-artifact>/frontrange-mcp
 /// ```
 let server = MCP.Server(
   name: "FrontRangeMCP",
