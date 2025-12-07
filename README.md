@@ -14,6 +14,7 @@ FrontRange provides three complementary tools for working with front-mattered do
 
 - Parse documents with YAML front matter
 - Get, set, check, list, rename, and remove front matter keys
+- **Search files using JMESPath queries** (filter by front matter values)
 - Sort front matter keys alphabetically or in reverse order
 - Extract specific line ranges from files
 - Support for multiple output formats (JSON, YAML, plain text)
@@ -156,6 +157,26 @@ fr lines document.md --start 5
 fr lines document.md --end 20
 # Extract from start to line 20
 ```
+
+#### Search files with JMESPath queries
+
+Search for files whose front matter matches a JMESPath expression:
+
+```bash
+# Find all draft files
+fr search 'draft == `true`' ./posts
+
+# Find files with specific tag
+fr search 'contains(tags, `"swift"`)' .
+
+# Complex queries
+fr search 'draft == `false` && contains(tags, `"tutorial"`)' ./content
+
+# Output formats
+fr search 'draft == `true`' . --format json
+```
+
+**Important**: Use single quotes around queries to prevent shell interpretation of backticks. Boolean and number literals in JMESPath require backticks (`` `true` ``, `` `false` ``, `` `42` ``).
 
 #### Global Options
 

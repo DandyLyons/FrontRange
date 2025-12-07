@@ -75,7 +75,7 @@ Note: The MCP server is currently in early development.
 **Entry Point** (Sources/FrontRangeCLI/FrontRangeCLIEntry.swift)
 - Uses swift-argument-parser
 - Main command: `fr`
-- Subcommands: `get`, `set`, `has`, `list`, `rename`, `remove`, `sort-keys`, `lines`
+- Subcommands: `get`, `set`, `has`, `list`, `rename`, `remove`, `sort-keys`, `lines`, `search`
 
 **Subcommand Pattern**
 - Each subcommand is a struct conforming to `ParsableCommand`
@@ -99,11 +99,34 @@ Note: The MCP server is currently in early development.
 - Tool execution handled by `runTool()` function
 - Current tools: `hello_world` (working), `get` (placeholder)
 
+### Search Command (FrontRangeCLI)
+
+**Search.swift** (Sources/FrontRangeCLI/Commands/Search.swift)
+- Search files by evaluating JMESPath expressions against front matter
+- Recursively searches directories for matching files
+- Converts `Yams.Node.Mapping` to Swift dictionaries for JMESPath evaluation
+- Returns file paths of matches (supports JSON, YAML, plain text output)
+- Important: JMESPath literals require backticks (`` `true` ``, `` `false` ``, `` `42` ``)
+- Shell quoting: Use single quotes around queries to avoid backtick interpretation
+
+**Example usage:**
+```bash
+# Find draft files
+fr search 'draft == `true`' ./posts
+
+# Find files with specific tags
+fr search 'contains(tags, `"swift"`)' .
+
+# Complex queries
+fr search 'draft == `false` && contains(tags, `"tutorial"`)' ./content
+```
+
 ## Dependencies
 
 - **Yams** - YAML parsing and serialization
 - **swift-parsing** - Parser combinators for FrontMatteredDoc parser
 - **swift-argument-parser** - CLI argument parsing
+- **JMESPath** - JMESPath query language for searching/filtering
 - **PathKit** - File path handling in CLI
 - **swift-custom-dump** - Testing utilities
 - **Command** - Programmatic CLI testing
