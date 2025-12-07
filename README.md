@@ -178,6 +178,56 @@ fr search 'draft == `true`' . --format json
 
 **Important**: Use single quotes around queries to prevent shell interpretation of backticks. Boolean and number literals in JMESPath require backticks (`` `true` ``, `` `false` ``, `` `42` ``).
 
+### Workflow Examples
+
+#### Bulk Update Files with Search + Set
+
+A powerful pattern is to pipe search results into the `set` command for bulk updates:
+
+```bash
+# Find all draft posts and mark them as published
+fr search 'draft == `true`' ./posts | xargs fr set --key draft --value false
+
+# Add a "reviewed" tag to all tutorial posts
+fr search 'contains(tags, `"tutorial"`)' ./content | xargs fr set --key reviewed --value true
+
+# Update author on all posts from a specific category
+fr search 'category == `"getting-started"`' . | \
+  xargs fr set --key author --value "Documentation Team"
+```
+
+**How it works:**
+1. `fr search` outputs matching file paths (one per line)
+2. `xargs` reads those paths and passes them to `fr set`
+3. `fr set` updates all files with the specified key-value pair
+
+**Using `-I` for complex pipelines:**
+
+For more control, use `xargs -I {}` to place file paths explicitly:
+
+```bash
+# Archive old drafts by adding an archive date
+fr search 'draft == `true` && year < `2024`' ./posts | \
+  xargs -I {} fr set {} --key archived_date --value "2025-12-06"
+
+# Chain multiple operations
+fr search 'status == `"review"`' ./posts | while read -r file; do
+  fr set "$file" --key status --value "published"
+  fr set "$file" --key published_date --value "$(date +%Y-%m-%d)"
+done
+```
+
+**Real-world use case:** Publishing a batch of blog posts
+
+```bash
+# Step 1: Find all ready-to-publish posts
+fr search 'draft == `true` && ready == `true`' ./blog/posts
+
+# Step 2: Review the list, then publish them all
+fr search 'draft == `true` && ready == `true`' ./blog/posts | \
+  xargs fr set --key draft --value false
+```
+
 #### Global Options
 
 - `--format, -f`: Output format (json, yaml, plainString)

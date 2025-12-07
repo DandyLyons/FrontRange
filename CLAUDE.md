@@ -121,6 +121,23 @@ fr search 'contains(tags, `"swift"`)' .
 fr search 'draft == `false` && contains(tags, `"tutorial"`)' ./content
 ```
 
+**Piping to other commands:**
+The search command outputs file paths (one per line), making it ideal for piping to other `fr` commands for bulk operations:
+
+```bash
+# Bulk update: mark all drafts as published
+fr search 'draft == `true`' ./posts | xargs fr set --key draft --value false
+
+# Chain operations with while loop
+fr search 'ready == `true`' . | while read -r file; do
+  fr set "$file" --key published --value true
+  fr set "$file" --key date --value "$(date +%Y-%m-%d)"
+done
+
+# Remove a key from matching files
+fr search 'deprecated == `true`' . | xargs fr remove --key temporary
+```
+
 ## Dependencies
 
 - **Yams** - YAML parsing and serialization

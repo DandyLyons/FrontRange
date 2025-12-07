@@ -57,6 +57,22 @@ extension FrontRangeCLIEntry {
             Some shells (like Zsh and Bash) will misinterpret backticks inside double quotes.
           ✗ Wrong - missing backticks: fr search "draft == true" .
             (without backticks, JMESPath will treat "true" as a field name, not boolean!)
+
+        PIPING TO OTHER COMMANDS:
+          The search command outputs file paths (one per line), making it perfect
+          for piping into other commands:
+
+          # Bulk update: mark all drafts as published
+          fr search 'draft == `true`' ./posts | xargs fr set --key draft --value false
+
+          # Chain operations: publish posts and add date
+          fr search 'ready == `true`' . | while read -r file; do
+            fr set "$file" --key published --value true
+            fr set "$file" --key date --value "$(date +%Y-%m-%d)"
+          done
+
+          # Remove a key from matching files
+          fr search 'deprecated == `true`' . | xargs fr remove --key temporary
         """
     )
 
