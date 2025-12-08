@@ -9,7 +9,6 @@ import Command
 import CustomDump
 import Foundation
 import Testing
-@testable import FrontRangeCLICore
 
 @Suite(.serialized) struct FrontRangeCLITests {
   let exampleMDPath = Bundle.module
