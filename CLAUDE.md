@@ -106,8 +106,14 @@ Note: The MCP server is currently in early development.
 - Recursively searches directories for matching files
 - Converts `Yams.Node.Mapping` to Swift dictionaries for JMESPath evaluation
 - Returns file paths of matches (supports JSON, YAML, plain text output)
-- Important: JMESPath literals require backticks (`` `true` ``, `` `false` ``, `` `42` ``)
-- Shell quoting: Use single quotes around queries to avoid backtick interpretation
+
+**JMESPath Literal Syntax - THE ONE TRUE WAY:**
+- **ALWAYS** use backticks for ALL literal values:
+  - Booleans: `` `true` ``, `` `false` ``
+  - Strings: `` `"text"` ``
+  - Numbers: `` `42` ``, `` `3.14` ``
+  - Null: `` `null` ``
+- **ALWAYS** wrap queries in shell single quotes to prevent backtick interpretation
 
 **Example usage:**
 ```bash
@@ -117,7 +123,7 @@ fr search 'draft == `true`' ./posts
 # Find files with specific tags
 fr search 'contains(tags, `"swift"`)' .
 
-# Complex queries
+# Complex queries with mixed types
 fr search 'draft == `false` && contains(tags, `"tutorial"`)' ./content
 ```
 

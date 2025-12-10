@@ -169,14 +169,47 @@ fr search 'draft == `true`' ./posts
 # Find files with specific tag
 fr search 'contains(tags, `"swift"`)' .
 
-# Complex queries
+# Complex queries with mixed types
 fr search 'draft == `false` && contains(tags, `"tutorial"`)' ./content
 
 # Output formats
 fr search 'draft == `true`' . --format json
 ```
 
-**Important**: Use single quotes around queries to prevent shell interpretation of backticks. Boolean and number literals in JMESPath require backticks (`` `true` ``, `` `false` ``, `` `42` ``).
+##### Understanding JMESPath + Shell Syntax
+
+**The conflict:** JMESPath uses backticks (`` ` ``) for literals, but shells use backticks for command substitution. This creates a syntax challenge.
+
+**The solution:**
+
+1. **Always use backticks for ALL JMESPath literal values:**
+   - Booleans: `` `true` ``, `` `false` ``
+   - Strings: `` `"text"` `` (backticks + quotes)
+   - Numbers: `` `42` ``, `` `3.14` ``
+   - Null: `` `null` ``
+
+2. **Always wrap the entire query in shell single quotes:**
+   ```bash
+   fr search 'draft == `true` && author == `"Jane"`' .
+   ```
+
+This combination prevents the shell from interpreting backticks as command substitution while allowing JMESPath to recognize all literals correctly.
+
+**Common mistakes:**
+```bash
+# ✗ Wrong - shell interprets backticks
+fr search "draft == `true`" .
+
+# ✗ Wrong - JMESPath treats "true" as field name
+fr search 'draft == true' .
+
+# ✗ Wrong - JMESPath treats "swift" as field reference
+fr search 'contains(tags, "swift")' .
+
+# ✓ Correct - single quotes + backtick literals
+fr search 'draft == `true`' .
+fr search 'contains(tags, `"swift"`)' .
+```
 
 ### Workflow Examples
 

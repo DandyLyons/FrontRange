@@ -25,38 +25,39 @@ extension FrontRangeCLIEntry {
         Directories are searched recursively.
 
         EXAMPLES:
-          # Find all draft files (use single quotes around query for shell safety)
+          # Find all draft files
           fr search 'draft == `true`' .
 
-          # Find files with specific tag (both string syntaxes work)
-          fr search "contains(tags, 'swift')" ./posts
+          # Find files with specific tag
           fr search 'contains(tags, `"swift"`)' ./posts
 
           # Complex query with multiple conditions
           fr search 'draft == `false` && author == `"John"`' .
 
         JMESPATH SYNTAX:
+          Use backticks for ALL literal values:
+          - Booleans: `true`, `false`
+          - Strings: `"text"`
+          - Numbers: `42`, `3.14`
+          - Null: `null`
           - Comparisons: ==, !=, <, <=, >, >=
-          - Literals:
-            - Booleans (use backticks): `true`, `false`
-            - Numbers (use backticks): `42`, `3.14`
-            - Strings (two syntaxes work):
-              • Simple: 'text' or "text"
-              • Literal: `"text"` or `'text'` (with backticks)
-            - Null: `null`
           - Functions: contains(), length(), starts_with(), etc.
           - Logical: &&, ||, !
           - See https://jmespath.org for full syntax
 
-        SHELL ESCAPING TIPS:
-          Backticks (`) are special in some shells (command substitution).
-          Use appropriate shell quoting to avoid issues:
+        SHELL QUOTING:
+          Always wrap your entire query in single quotes to prevent shell interpretation:
 
-          ✓ Single quotes (safest):    fr search 'draft == `true`' .
-          ✓ Double quotes (careful):   fr search "contains(tags, 'swift')" .
-            Some shells (like Zsh and Bash) will misinterpret backticks inside double quotes.
-          ✗ Wrong - missing backticks: fr search "draft == true" .
-            (without backticks, JMESPath will treat "true" as a field name, not boolean!)
+          ✓ Correct:   fr search 'draft == `true`' .
+          ✓ Correct:   fr search 'contains(tags, `"swift"`)' .
+          ✓ Correct:   fr search 'draft == `false` && author == `"Jane"`' .
+
+          ✗ Wrong:     fr search "draft == `true`" .
+                       (backticks will be interpreted by shell as command substitution)
+          ✗ Wrong:     fr search 'draft == true' .
+                       (missing backticks - JMESPath treats "true" as a field name!)
+          ✗ Wrong:     fr search 'contains(tags, "swift")' .
+                       (missing backticks - "swift" is a field reference, not a string!)
 
         PIPING TO OTHER COMMANDS:
           The search command outputs file paths (one per line), making it perfect
@@ -73,6 +74,9 @@ extension FrontRangeCLIEntry {
 
           # Remove a key from matching files
           fr search 'deprecated == `true`' . | xargs fr remove --key temporary
+
+          # Complex query with mixed types
+          fr search 'draft == `false` && contains(tags, `"tutorial"`)' . | xargs fr list
         """
     )
 
@@ -128,43 +132,14 @@ extension FrontRangeCLIEntry {
           """)
       }
 
-      var matchingFiles: [String] = []
       let processedPaths = try expandPaths()
 
-      for path in processedPaths {
-        printIfDebug("ℹ️ Checking file: \(path.string)")
-
-        // Parse the file
-        let content: String
-        let doc: FrontMatteredDoc
-        do {
-          content = try path.read(.utf8)
-          doc = try FrontMatteredDoc(parsing: content)
-        } catch {
-          printIfDebug("⚠️ Failed to parse \(path.string): \(error.localizedDescription) - skipping")
-          continue
-        }
-
-        // Convert Yams.Node.Mapping to Swift dictionary for JMESPath
-        let constructor = Yams.Constructor.default
-        let frontMatterDict: Any = constructor.any(from: .mapping(doc.frontMatter))
-
-        // Evaluate the JMESPath expression against the front matter
-        do {
-          let result = try expression.search(object: frontMatterDict)
-
-          // Check if result is truthy
-          if isTruthy(result) {
-            matchingFiles.append(path.absolute().string)
-            printIfDebug("✅ Match found in: \(path.string)")
-          } else {
-            printIfDebug("❌ No match in: \(path.string)")
-          }
-        } catch {
-          printIfDebug("⚠️ Query evaluation failed for \(path.string): \(error.localizedDescription) - skipping")
-          continue
-        }
-      }
+      // Process files in batches of 500
+      let matchingFiles = processBatches(
+        processedPaths,
+        batchSize: 500,
+        using: expression
+      )
 
       // Output results based on format
       if matchingFiles.isEmpty {
@@ -215,6 +190,112 @@ extension FrontRangeCLIEntry {
       return allPaths
     }
 
+    /// Process file paths in batches to avoid memory pressure and provide progress feedback
+    private func processBatches(
+      _ paths: [Path],
+      batchSize: Int = 500,
+      using expression: JMESExpression
+    ) -> [String] {
+      var allMatches: [String] = []
+      let totalBatches = (paths.count + batchSize - 1) / batchSize
+
+      for (batchIndex, batch) in paths.chunked(into: batchSize).enumerated() {
+        let batchNumber = batchIndex + 1
+        printIfDebug("📦 Processing batch \(batchNumber)/\(totalBatches) (\(batch.count) files)")
+
+        // Show progress to stderr (only for multi-batch operations)
+        if paths.count > batchSize {
+          fputs("Processing batch \(batchNumber)/\(totalBatches)...\n", stderr)
+        }
+
+        let batchMatches = processBatch(batch, using: expression)
+        allMatches.append(contentsOf: batchMatches)
+      }
+
+      return allMatches
+    }
+
+    /// Process a single batch of files
+    private func processBatch(_ paths: [Path], using expression: JMESExpression) -> [String] {
+      var matches: [String] = []
+      let constructor = Yams.Constructor.default
+
+      for path in paths {
+        printIfDebug("ℹ️ Checking file: \(path.string)")
+
+        // Parse the file
+        let content: String
+        let doc: FrontMatteredDoc
+        do {
+          content = try path.read(.utf8)
+          doc = try FrontMatteredDoc(parsing: content)
+        } catch {
+          printIfDebug("⚠️ Failed to parse \(path.string): \(error.localizedDescription) - skipping")
+          continue
+        }
+
+        // Convert Yams.Node.Mapping to Swift dictionary for JMESPath
+        // Validate that all keys can be converted to strings to avoid Yams crashes
+        if !isValidMapping(doc.frontMatter) {
+          printIfDebug("⚠️ Skipping \(path.string): front matter contains non-string keys")
+          continue
+        }
+
+        let frontMatterDict: Any = constructor.any(from: .mapping(doc.frontMatter))
+
+        // Evaluate the JMESPath expression
+        do {
+          let result = try expression.search(object: frontMatterDict)
+
+          if isTruthy(result) {
+            matches.append(path.absolute().string)
+            printIfDebug("✅ Match found in: \(path.string)")
+          } else {
+            printIfDebug("❌ No match in: \(path.string)")
+          }
+        } catch {
+          printIfDebug("⚠️ Query evaluation failed for \(path.string): \(error.localizedDescription) - skipping")
+          continue
+        }
+      }
+
+      return matches
+    }
+
+    /// Validates that a YAML mapping has only string keys (recursively)
+    /// This prevents crashes in Yams.Constructor.any() which force-unwraps string keys
+    private func isValidMapping(_ mapping: Yams.Node.Mapping) -> Bool {
+      for (key, value) in mapping {
+        // Check if key can be constructed as a string
+        guard case .scalar = key else {
+          return false
+        }
+        guard String.construct(from: key) != nil else {
+          return false
+        }
+
+        // Recursively validate nested mappings
+        if case .mapping(let nestedMapping) = value {
+          if !isValidMapping(nestedMapping) {
+            return false
+          }
+        }
+
+        // Recursively validate sequences containing mappings
+        if case .sequence(let sequence) = value {
+          // Iterate using index since .nodes is private
+          for i in 0..<sequence.count {
+            if case .mapping(let nestedMapping) = sequence[i] {
+              if !isValidMapping(nestedMapping) {
+                return false
+              }
+            }
+          }
+        }
+      }
+      return true
+    }
+
     /// Determines if a value is "truthy" for the purposes of filtering
     /// - JMESPath returns various types; we treat non-false, non-nil, non-empty as truthy
     private func isTruthy(_ value: Any?) -> Bool {
@@ -238,6 +319,18 @@ extension FrontRangeCLIEntry {
 
       // For other types (numbers, objects), consider them truthy if non-nil
       return true
+    }
+  }
+}
+
+// MARK: - Array Utilities
+
+private extension Array {
+  /// Split array into chunks of specified size
+  func chunked(into size: Int) -> [[Element]] {
+    guard size > 0 else { return [self] }
+    return stride(from: 0, to: count, by: size).map {
+      Array(self[$0..<Swift.min($0 + size, count)])
     }
   }
 }

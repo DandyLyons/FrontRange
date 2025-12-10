@@ -21,6 +21,7 @@ import Testing
   // MARK: - Basic Equality Tests
 
   @Test func `Search finds files where draft equals true`() async throws {
+    // swift run fr search 'draft == `true`' ./ExampleFiles/
     let output = try await commandRunner.run(
       arguments: [cliPath, "search", "draft == `true`", exampleFilesDir]
     ).concatenatedString()
@@ -31,6 +32,7 @@ import Testing
   }
 
   @Test func `Search finds files where draft equals false`() async throws {
+    // swift run fr search 'draft == `false`' ./ExampleFiles/
     let output = try await commandRunner.run(
       arguments: [cliPath, "search", "draft == `false`", exampleFilesDir]
     ).concatenatedString()
@@ -43,8 +45,9 @@ import Testing
   // MARK: - Array Contains Tests
 
   @Test func `Search finds files where aliases contains Blue`() async throws {
+    // swift run fr search 'contains(aliases, `"Blue"`)' ./ExampleFiles/
     let output = try await commandRunner.run(
-      arguments: [cliPath, "search", "contains(aliases, 'Blue')", exampleFilesDir]
+      arguments: [cliPath, "search", "contains(aliases, `\"Blue\"`)", exampleFilesDir]
     ).concatenatedString()
 
     #expect(output.contains("test-aliases.md"))
@@ -53,8 +56,9 @@ import Testing
   }
 
   @Test func `Search finds files where tags contains swift`() async throws {
+    // swift run fr search 'contains(tags, `"swift"`)' ./ExampleFiles/
     let output = try await commandRunner.run(
-      arguments: [cliPath, "search", "contains(tags, 'swift')", exampleFilesDir]
+      arguments: [cliPath, "search", "contains(tags, `\"swift\"`)", exampleFilesDir]
     ).concatenatedString()
 
     #expect(output.contains("test-draft-true.md"))
@@ -64,8 +68,9 @@ import Testing
   // MARK: - No Matches Tests
 
   @Test func `Search shows helpful message when no files match`() async throws {
+    // swift run fr search 'contains(aleases, `"Blue"`)' ./ExampleFiles/
     let (stdout, stderr) = try await runAndSeparateOutput(
-      arguments: [cliPath, "search", "contains(aleases, 'Blue')", exampleFilesDir]
+      arguments: [cliPath, "search", "contains(aleases, `\"Blue\"`)", exampleFilesDir]
     )
 
     // No results in stdout
@@ -73,7 +78,7 @@ import Testing
 
     // Helpful message in stderr
     #expect(stderr.contains("No files matched the query"))
-    #expect(stderr.contains("contains(aleases, 'Blue')"))
+    #expect(stderr.contains("contains(aleases, `\"Blue\"`)"))
     #expect(stderr.contains("Searched"))
     #expect(stderr.contains("file(s)"))
   }
@@ -101,8 +106,9 @@ import Testing
   }
 
   @Test func `Search with nonexistent key returns no matches`() async throws {
+    // swift run fr search 'nonexistent == `"value"`' ./ExampleFiles/
     let stderr = try await commandRunner.run(
-      arguments: [cliPath, "search", "nonexistent == 'value'", exampleFilesDir]
+      arguments: [cliPath, "search", "nonexistent == `\"value\"`", exampleFilesDir]
     ).concatenatedString(including: [.standardError])
 
     #expect(stderr.contains("No files matched the query"))
@@ -111,6 +117,7 @@ import Testing
   // MARK: - Output Format Tests
 
   @Test func `Search outputs JSON format`() async throws {
+    // swift run fr search 'draft == `true`' --format json ./ExampleFiles/
     let output = try await commandRunner.run(
       arguments: [cliPath, "search", "draft == `true`", "--format", "json", exampleFilesDir]
     ).concatenatedString()
@@ -122,6 +129,7 @@ import Testing
   }
 
   @Test func `Search outputs YAML format`() async throws {
+    // swift run fr search 'draft == `true`' --format yaml ./ExampleFiles/
     let output = try await commandRunner.run(
       arguments: [cliPath, "search", "draft == `true`", "--format", "yaml", exampleFilesDir]
     ).concatenatedString()
@@ -132,6 +140,7 @@ import Testing
   }
 
   @Test func `Search outputs plain text format by default`() async throws {
+    // swift run fr search 'draft == `true`' ./ExampleFiles/
     let output = try await commandRunner.run(
       arguments: [cliPath, "search", "draft == `true`", exampleFilesDir]
     ).concatenatedString()
@@ -148,8 +157,9 @@ import Testing
   // MARK: - Complex Query Tests
 
   @Test func `Search with AND condition`() async throws {
+    // swift run fr search 'draft == `false` && contains(tags, `"swift"`)' ./ExampleFiles/
     let output = try await commandRunner.run(
-      arguments: [cliPath, "search", "draft == `false` && contains(tags, 'swift')", exampleFilesDir]
+      arguments: [cliPath, "search", "draft == `false` && contains(tags, `\"swift\"`)", exampleFilesDir]
     ).concatenatedString()
 
     #expect(output.contains("test-draft-false.md"))
@@ -158,8 +168,9 @@ import Testing
   }
 
   @Test func `Search with OR condition`() async throws {
+    // swift run fr search 'draft == `true` || contains(aliases, `"Blue"`)' ./ExampleFiles/
     let output = try await commandRunner.run(
-      arguments: [cliPath, "search", "draft == `true` || contains(aliases, 'Blue')", exampleFilesDir]
+      arguments: [cliPath, "search", "draft == `true` || contains(aliases, `\"Blue\"`)", exampleFilesDir]
     ).concatenatedString()
 
     #expect(output.contains("test-draft-true.md"))
@@ -171,6 +182,7 @@ import Testing
 
   @Test func `Search with invalid JMESPath expression shows error`() async throws {
     // Invalid JMESPath will cause the command to fail with a validation error
+    // swift run fr search 'invalid {{{{ syntax' ./ExampleFiles/
     let stream = commandRunner.run(arguments: [cliPath, "search", "invalid {{{{ syntax", exampleFilesDir])
     var stderr = ""
     var didFail = false
@@ -203,6 +215,7 @@ import Testing
 
   @Test func `Search works with single file path`() async throws {
     let singleFile = "\(exampleFilesDir)/test-draft-true.md"
+    // swift run fr search 'draft == `true`' ./ExampleFiles/test-draft-true.md
     let output = try await commandRunner.run(
       arguments: [cliPath, "search", "draft == `true`", singleFile]
     ).concatenatedString()
@@ -212,7 +225,7 @@ import Testing
 
   @Test func `Search single file that does not match returns no results`() async throws {
     let singleFile = "\(exampleFilesDir)/test-draft-false.md"
-
+    // swift run fr search 'draft == `true`' ./ExampleFiles/test-draft-false.md
     let (stdout, stderr) = try await runAndSeparateOutput(
       arguments: [cliPath, "search", "draft == `true`", singleFile]
     )
@@ -226,6 +239,7 @@ import Testing
 
   @Test func `Search respects extension filtering`() async throws {
     // Only search .md files (default behavior)
+    // swift run fr search 'bool == `true`' ./ExampleFiles/
     let output = try await commandRunner.run(
       arguments: [cliPath, "search", "bool == `true`", exampleFilesDir]
     ).concatenatedString()
