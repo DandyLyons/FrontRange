@@ -9,7 +9,6 @@ import Command
 import CustomDump
 import Foundation
 import Testing
-@testable import FrontRangeCLI
 
 @Suite(.serialized) struct FrontRangeCLITests {
   let exampleMDPath = Bundle.module
@@ -40,6 +39,7 @@ import Testing
       list, ls                List all keys in frontmatter
       rename, rn              Rename a key from frontmatter
       remove, rm              Remove a key from frontmatter
+      search                  Search for files matching a JMESPath query
       sort-keys, sk           Sort keys in frontmatter
       lines                   Extract a range of lines from a file
 

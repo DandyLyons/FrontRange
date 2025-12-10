@@ -79,7 +79,7 @@ Note: The MCP server is currently in early development.
 **Entry Point** (Sources/FrontRangeCLI/FrontRangeCLIEntry.swift)
 - Uses swift-argument-parser
 - Main command: `fr`
-- Subcommands: `get`, `set`, `has`, `list`, `rename`, `remove`, `sort-keys`, `lines`
+- Subcommands: `get`, `set`, `has`, `list`, `rename`, `remove`, `sort-keys`, `lines`, `search`
 
 **Subcommand Pattern**
 - Each subcommand is a struct conforming to `ParsableCommand`
@@ -103,11 +103,57 @@ Note: The MCP server is currently in early development.
 - Tool execution handled by `runTool()` function
 - Current tools: `hello_world` (working), `get` (placeholder)
 
+### Search Command (FrontRangeCLI)
+
+**Search.swift** (Sources/FrontRangeCLI/Commands/Search.swift)
+- Search files by evaluating JMESPath expressions against front matter
+- Recursively searches directories for matching files
+- Converts `Yams.Node.Mapping` to Swift dictionaries for JMESPath evaluation
+- Returns file paths of matches (supports JSON, YAML, plain text output)
+
+**JMESPath Literal Syntax - THE ONE TRUE WAY:**
+- **ALWAYS** use backticks for ALL literal values:
+  - Booleans: `` `true` ``, `` `false` ``
+  - Strings: `` `"text"` ``
+  - Numbers: `` `42` ``, `` `3.14` ``
+  - Null: `` `null` ``
+- **ALWAYS** wrap queries in shell single quotes to prevent backtick interpretation
+
+**Example usage:**
+```bash
+# Find draft files
+fr search 'draft == `true`' ./posts
+
+# Find files with specific tags
+fr search 'contains(tags, `"swift"`)' .
+
+# Complex queries with mixed types
+fr search 'draft == `false` && contains(tags, `"tutorial"`)' ./content
+```
+
+**Piping to other commands:**
+The search command outputs file paths (one per line), making it ideal for piping to other `fr` commands for bulk operations:
+
+```bash
+# Bulk update: mark all drafts as published
+fr search 'draft == `true`' ./posts | xargs fr set --key draft --value false
+
+# Chain operations with while loop
+fr search 'ready == `true`' . | while read -r file; do
+  fr set "$file" --key published --value true
+  fr set "$file" --key date --value "$(date +%Y-%m-%d)"
+done
+
+# Remove a key from matching files
+fr search 'deprecated == `true`' . | xargs fr remove --key temporary
+```
+
 ## Dependencies
 
 - **Yams** - YAML parsing and serialization
 - **swift-parsing** - Parser combinators for FrontMatteredDoc parser
 - **swift-argument-parser** - CLI argument parsing
+- **JMESPath** - JMESPath query language for searching/filtering
 - **PathKit** - File path handling in CLI
 - **swift-custom-dump** - Testing utilities
 - **Command** - Programmatic CLI testing
