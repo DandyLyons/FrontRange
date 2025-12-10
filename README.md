@@ -23,6 +23,24 @@ FrontRange provides three complementary tools for working with front-mattered do
 
 ## Installation
 
+### Homebrew (Beta)
+
+Install the CLI tool and MCP server via Homebrew:
+
+```bash
+# Tap the FrontRange repository
+brew tap dandylyons/frontrange
+
+# Install FrontRange
+brew install frontrange
+```
+
+This installs both:
+- `fr` - The command-line tool
+- `frontrange-mcp` - The MCP server
+
+**Note**: This is a beta release. For production use, consider building from source or using Swift Package Manager.
+
 ### Swift Package Manager
 
 Add FrontRange to your `Package.swift`:

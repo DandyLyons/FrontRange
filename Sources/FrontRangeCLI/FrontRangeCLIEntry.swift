@@ -15,7 +15,7 @@ public struct FrontRangeCLIEntry: ParsableCommand {
   public static let configuration = CommandConfiguration(
     commandName: "fr",
     abstract: "A utility for managing front matter in text files.",
-    version: "0.1.0",
+    version: "0.1.0-beta",
     subcommands: [Get.self, Set.self, Has.self, List.self, Rename.self, Remove.self, Search.self, SortKeys.self, Lines.self],
     helpNames: [.long, .short]
   )

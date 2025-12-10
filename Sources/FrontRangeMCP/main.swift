@@ -25,7 +25,7 @@ enum ThisServer {}
 /// ```
 let server = MCP.Server(
   name: "FrontRangeMCP",
-  version: "0.0.1",
+  version: "0.1.0-beta",
   instructions: nil,
   capabilities: .init(tools: .init(listChanged: false)),
   configuration: .default
