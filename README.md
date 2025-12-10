@@ -85,7 +85,24 @@ print(output)
 
 ### CLI Tool (fr)
 
-The `fr` command-line tool provides quick access to front matter operations:
+The `fr` command-line tool provides quick access to front matter operations.
+
+#### Installation & Running
+
+**For regular use (recommended):**
+```bash
+# Install globally (method depends on your setup)
+# Once installed, invoke directly:
+fr <command> [options]
+```
+
+**For development/testing:**
+```bash
+# From the FrontRange project directory:
+swift run fr <command> [options]
+```
+
+This guide assumes `fr` is installed and available in your PATH. Use `swift run fr` only when developing or testing FrontRange itself.
 
 #### Get a value
 
@@ -160,10 +177,10 @@ fr lines document.md --end 20
 
 #### Search files with JMESPath queries
 
-Search for files whose front matter matches a JMESPath expression:
+Search for files whose front matter matches a JMESPath expression. The `search` command **always searches recursively** through all subdirectories.
 
 ```bash
-# Find all draft files
+# Find all draft files (automatically recursive)
 fr search 'draft == `true`' ./posts
 
 # Find files with specific tag
@@ -175,6 +192,20 @@ fr search 'draft == `false` && contains(tags, `"tutorial"`)' ./content
 # Output formats
 fr search 'draft == `true`' . --format json
 ```
+
+**Understanding search output:**
+
+The search command outputs file paths (one per line) to stdout. Progress messages like "Processing batch..." are sent to stderr and won't interfere with piping:
+
+```bash
+$ fr search 'draft == `true`' ./posts
+Processing batch 1/4...  # stderr - progress indicator
+Processing batch 2/4...  # stderr - progress indicator
+/Users/user/posts/draft1.md  # stdout - actual results
+/Users/user/posts/draft2.md  # stdout - actual results
+```
+
+To suppress progress messages: `fr search 'draft == `true`' . 2>/dev/null`
 
 ##### Understanding JMESPath + Shell Syntax
 
@@ -215,7 +246,24 @@ fr search 'contains(tags, `"swift"`)' .
 
 #### Bulk Update Files with Search + Set
 
-A powerful pattern is to pipe search results into the `set` command for bulk updates:
+A powerful pattern is to pipe search results into other `fr` commands for bulk updates. However, there are important considerations for reliable bulk operations.
+
+##### Choosing the Right Approach
+
+Different scenarios call for different piping strategies:
+
+| Scenario                                                  | Recommended Method   | Reason                        |
+| --------------------------------------------------------- | -------------------- | ----------------------------- |
+| Few files (<100), no spaces in paths                      | `xargs`              | Fast and simple               |
+| Few files (<100), paths with spaces or special characters | `xargs -I`           | Handles spaces in paths       |
+| Paths with spaces or special characters                   | `while read -r` loop | Handles quoting correctly     |
+| Large file sets (100+ files)                              | `while read -r` loop | Avoids system argument limits |
+| Multi-step operations per file                            | `while read -r` loop | Easier to read and debug      |
+| Generating structured output (JSON, etc.)                 | Bash script file     | Full control over formatting  |
+
+##### Using xargs (Simple Cases)
+
+For straightforward operations on small file sets without spaces in paths:
 
 ```bash
 # Find all draft posts and mark them as published
@@ -223,42 +271,175 @@ fr search 'draft == `true`' ./posts | xargs fr set --key draft --value false
 
 # Add a "reviewed" tag to all tutorial posts
 fr search 'contains(tags, `"tutorial"`)' ./content | xargs fr set --key reviewed --value true
-
-# Update author on all posts from a specific category
-fr search 'category == `"getting-started"`' . | \
-  xargs fr set --key author --value "Documentation Team"
 ```
 
-**How it works:**
-1. `fr search` outputs matching file paths (one per line)
-2. `xargs` reads those paths and passes them to `fr set`
-3. `fr set` updates all files with the specified key-value pair
+**Important limitations of xargs:**
 
-**Using `-I` for complex pipelines:**
+1. **System argument limits:** Most systems limit total arguments to ~4096. With thousands of files, you'll hit this limit:
+   ```bash
+   # May fail: too many arguments (5008) -- limit is 4096
+   fr search 'tags' large-directory/ | xargs fr get --key tags
 
-For more control, use `xargs -I {}` to place file paths explicitly:
+   # Solution: batch with -n flag
+   fr search 'tags' large-directory/ | xargs -n 50 fr get --key tags
+   ```
+
+2. **Spaces in paths:** By default, xargs treats spaces as delimiters:
+   ```bash
+   # Fails with paths like "/path/My Documents/file.md"
+   fr search 'tags' . | xargs fr get --key tags
+
+   # Solution: use -I flag for explicit placement
+   fr search 'tags' . | xargs -I {} fr get --key tags "{}"
+   ```
+
+##### Using while read Loops (Recommended for Most Cases)
+
+The `while read -r` pattern handles spaces, special characters, and large file counts reliably:
 
 ```bash
-# Archive old drafts by adding an archive date
-fr search 'draft == `true` && year < `2024`' ./posts | \
-  xargs -I {} fr set {} --key archived_date --value "2025-12-06"
-
-# Chain multiple operations
-fr search 'status == `"review"`' ./posts | while read -r file; do
-  fr set "$file" --key status --value "published"
+# Publish and date-stamp matching posts
+fr search 'draft == `true` && ready == `true`' ./posts | while read -r file; do
+  fr set "$file" --key draft --value false
+  fr set "$file" --key published --value true
   fr set "$file" --key published_date --value "$(date +%Y-%m-%d)"
+  fr remove "$file" --key ready
 done
 ```
 
-**Real-world use case:** Publishing a batch of blog posts
+**Benefits:**
+- Handles spaces and special characters in paths automatically
+- No argument count limits
+- Easy to add error handling
+- Clear multi-step logic
+
+**With error handling:**
 
 ```bash
-# Step 1: Find all ready-to-publish posts
-fr search 'draft == `true` && ready == `true`' ./blog/posts
+# Only process files that actually have the key
+fr search 'tags' . | while read -r file; do
+  tags=$(fr get --key tags "$file" 2>&1)
 
-# Step 2: Review the list, then publish them all
-fr search 'draft == `true` && ready == `true`' ./blog/posts | \
-  xargs fr set --key draft --value false
+  # Skip files where key wasn't found
+  if [[ ! "$tags" =~ "not found" ]] && [[ ! "$tags" =~ "Error" ]]; then
+    echo "$file: $tags"
+  fi
+done
+```
+
+##### Advanced: Complex Operations with Bash Scripts
+
+For repeatable operations or generating structured output, create a standalone bash script:
+
+```bash
+#!/bin/bash
+# Save as publish_drafts.sh
+
+echo "Publishing drafts..."
+count=0
+
+fr search 'draft == `true` && ready == `true`' ./posts | while read -r file; do
+  echo "Processing: $file"
+
+  # Multiple operations per file
+  fr set "$file" --key draft --value false
+  fr set "$file" --key published --value true
+  fr set "$file" --key published_date --value "$(date +%Y-%m-%d)"
+  fr remove "$file" --key ready
+
+  count=$((count + 1))
+done
+
+echo "Published $count posts"
+```
+
+Run it: `chmod +x publish_drafts.sh && ./publish_drafts.sh`
+
+**Real-world example: Extracting structured data**
+
+When you need to generate JSON or other structured output from many files with complex paths:
+
+```bash
+#!/bin/bash
+# extract_tags.sh - Generate JSON mapping of book names to tags
+
+echo "{"
+
+books=(
+  "/Users/user/Library/The Bible (WEB)/01 - Genesis/Genesis.md"
+  "/Users/user/Library/The Bible (WEB)/02 - Exodus/Exodus.md"
+  # ... more files with spaces and special characters
+)
+
+total=${#books[@]}
+count=0
+
+for book_path in "${books[@]}"; do
+  count=$((count + 1))
+
+  if [ -f "$book_path" ]; then
+    book_name=$(basename "$book_path" .md)
+    tags=$(fr get --key tags "$book_path" 2>&1)
+
+    # Only output if tags were found
+    if [[ ! "$tags" =~ "not found" ]] && [[ ! "$tags" =~ "Error" ]]; then
+      echo -n "  \"$book_name\": $tags"
+
+      # Add comma except for last item
+      if [ $count -lt $total ]; then
+        echo ","
+      else
+        echo ""
+      fi
+    fi
+  fi
+done
+
+echo "}"
+```
+
+Output: `./extract_tags.sh > bible_tags.json`
+
+This approach provides:
+- Full control over output format
+- Proper handling of special characters
+- Error handling and validation
+- Maintainable, reusable code
+
+#### Handling Missing Keys and Errors
+
+Not all files will have all front matter keys. When a key is missing, `fr` commands output an error message:
+
+```bash
+$ fr get document.md --key tags
+Error: Key 'tags' not found in frontmatter.
+```
+
+**Strategies for handling missing keys:**
+
+1. **Filter first with search** - Only process files that have the key:
+```bash
+# Search only returns files where 'tags' exists
+fr search 'tags' . | while read -r file; do
+  fr get --key tags "$file"
+done
+```
+
+2. **Suppress expected errors** - When it's normal for some files to be missing the key:
+```bash
+# Get tags from all files, quietly skip files without tags
+fr get --key tags posts/ -r 2>/dev/null
+```
+
+3. **Check for errors in scripts** - Handle errors programmatically:
+```bash
+tags=$(fr get --key tags "$file" 2>&1)
+
+if [[ ! "$tags" =~ "not found" ]] && [[ ! "$tags" =~ "Error" ]]; then
+  echo "Tags found: $tags"
+else
+  echo "No tags in $file"
+fi
 ```
 
 #### Global Options
@@ -328,6 +509,9 @@ The server provides 8 tools that mirror the CLI functionality:
 - **lines** - Extract line ranges from files
 
 #### Example MCP Usage
+
+> [!NOTE] Early Development
+> The MCP server is in early development and may have limited functionality or stability. Feedback and issues are much appreciated.
 
 Once configured, you can ask Claude:
 
@@ -399,11 +583,7 @@ Front matter is stored as `Yams.Node.Mapping`, preserving YAML semantics rather 
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-[Add your license here]
+Please submitt issues via GitHub for bugs or feature requests. Pull requests are welcome, but I won't accept any until I first decide on the license for this project.
 
 ## Acknowledgments
 
