@@ -18,28 +18,47 @@ public func nodeToJSON(_ node: Node, options: JSONSerialization.WritingOptions =
 }
 
 public func anyToJSON(_ any: Any, options: JSONSerialization.WritingOptions = []) throws -> String {
-  if JSONSerialization.isValidJSONObject(any) {
+  // Recursively convert AnyHashable keys to Strings for JSON serialization
+  func convertToJSONCompatible(_ value: Any) -> Any {
+    if let dict = value as? [AnyHashable: Any] {
+      return dict.reduce(into: [String: Any]()) { result, pair in
+        result[String(describing: pair.key)] = convertToJSONCompatible(pair.value)
+      }
+    } else if let array = value as? [Any] {
+      return array.map { convertToJSONCompatible($0) }
+    } else if let date = value as? Date {
+      // Convert Date to ISO8601 string for JSON
+      let formatter = ISO8601DateFormatter()
+      return formatter.string(from: date)
+    } else {
+      return value
+    }
+  }
+
+  let convertedAny = convertToJSONCompatible(any)
+
+  if JSONSerialization.isValidJSONObject(convertedAny) {
     let jsonData: Data = try JSONSerialization.data(
-      withJSONObject: any,
+      withJSONObject: convertedAny,
       options: options
     )
-    
+
     // Convert data to string
     guard let jsonString = String(data: jsonData, encoding: .utf8) else {
       throw JSONConversionError.failedToConvertYamsNodeToJSON
     }
-    
+
     return jsonString
   } else {
     // `isValidJSONObject` evaluated to false, so value is likely a primitive type
-    
-    switch any {
+
+    switch convertedAny {
       case let string as String:
         return string
       case let stringConvertible as CustomStringConvertible:
         return stringConvertible.description
       default:
-        return String(describing: any)
+        return String(describing: convertedAny)
     }
   }
 }

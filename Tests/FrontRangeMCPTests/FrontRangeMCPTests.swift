@@ -48,6 +48,6 @@ import Testing
 
   @Test func toolRegistryCount() {
     // Verify all tools are registered
-    #expect(ThisServer.tools.count == 8)
+    #expect(ThisServer.tools.count == 9) // get, set, has, list, rename, remove, sort_keys, lines, dump
   }
 }

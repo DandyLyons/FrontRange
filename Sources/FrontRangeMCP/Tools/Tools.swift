@@ -23,6 +23,7 @@ extension ThisServer {
     case remove
     case sort_keys
     case lines
+    case dump
   }
 
   static let tools: [Tool] = [
@@ -93,6 +94,15 @@ extension ThisServer {
         "start": .object(["type": .string("integer"), "description": .string("Starting line number (1-indexed)")]),
         "end": .object(["type": .string("integer"), "description": .string("Ending line number (1-indexed, inclusive)")]),
         "numbered": .object(["type": .string("boolean"), "description": .string("Show line numbers in output (default: false)")]),
+      ],
+    ),
+    Tool(
+      name: .dump,
+      description: "Dump entire front matter in specified format (json, yaml, raw, plist). Returns the complete front matter content.",
+      params: [
+        "path": .object(["type": .string("string"), "description": .string("Path to the file to process")]),
+        "format": .object(["type": .string("string"), "description": .string("Output format: json (default), yaml, raw, or plist")]),
+        "includeDelimiters": .object(["type": .string("boolean"), "description": .string("Include --- delimiters for YAML/raw output (default: false)")]),
       ],
     ),
   ]

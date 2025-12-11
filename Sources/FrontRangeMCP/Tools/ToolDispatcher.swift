@@ -36,5 +36,8 @@ func runTool(
 
     case .lines:
       return try await runLinesTool(params: params)
+
+    case .dump:
+      return try await runDumpTool(params: params)
   }
 }

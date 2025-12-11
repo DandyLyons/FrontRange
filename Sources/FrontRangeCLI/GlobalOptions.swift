@@ -8,9 +8,30 @@ import ArgumentParser
 import Foundation
 import PathKit
 
+enum MultiFormat: String, CaseIterable, ExpressibleByArgument {
+  case cat
+  case json
+  case yaml
+  case raw
+  case plist
+
+  var defaultValueDescription: String {
+    switch self {
+      case .cat: return "cat (default)"
+      case .json: return "json"
+      case .yaml: return "yaml"
+      case .raw: return "raw"
+      case .plist: return "plist"
+    }
+  }
+}
+
 struct GlobalOptions: ParsableArguments {
   @Option(name: [.short, .long], help: "Output format")
   var format: OutputFormat = .json
+
+  @Option(name: .long, help: "Format for representing multiple files")
+  var multiFormat: MultiFormat = .cat
   
   @Flag(name: [.short, .long])
   var recursive: Bool = false
