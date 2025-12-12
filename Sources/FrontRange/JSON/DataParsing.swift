@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(CoreFoundation)
+import CoreFoundation
+#endif
 import Yams
 
 /// Errors that can occur when parsing data formats into Yams nodes

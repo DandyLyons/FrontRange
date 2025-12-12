@@ -12,6 +12,12 @@ import JMESPath
 import PathKit
 import Yams
 
+#if canImport(Darwin)
+@preconcurrency import Darwin.C
+#elseif canImport(Glibc)
+@preconcurrency import Glibc
+#endif
+
 extension FrontRangeCLIEntry {
   struct Search: ParsableCommand {
     static let configuration = CommandConfiguration(
@@ -95,6 +101,7 @@ extension FrontRangeCLIEntry {
     )
     var extensions: String = "md,markdown,yml,yaml"
 
+    @preconcurrency
     func run() throws {
       printIfDebug("🔍 Searching files with query: '\(query)'")
 
@@ -143,9 +150,9 @@ extension FrontRangeCLIEntry {
 
       // Output results based on format
       if matchingFiles.isEmpty {
-        // Print helpful message to stderr (doesn't interfere with piping stdout)
-        fputs("No files matched the query: \"\(query)\"\n", stderr)
-        fputs("Searched \(processedPaths.count) file(s)\n", stderr)
+        // Print helpful message
+        print("No files matched the query: \"\(query)\"")
+        print("Searched \(processedPaths.count) file(s)")
       } else {
         switch format {
         case .json:
@@ -203,9 +210,9 @@ extension FrontRangeCLIEntry {
         let batchNumber = batchIndex + 1
         printIfDebug("📦 Processing batch \(batchNumber)/\(totalBatches) (\(batch.count) files)")
 
-        // Show progress to stderr (only for multi-batch operations)
+        // Show progress (only for multi-batch operations)
         if paths.count > batchSize {
-          fputs("Processing batch \(batchNumber)/\(totalBatches)...\n", stderr)
+          print("Processing batch \(batchNumber)/\(totalBatches)...")
         }
 
         let batchMatches = processBatch(batch, using: expression)

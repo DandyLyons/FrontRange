@@ -11,6 +11,12 @@ import FrontRange
 import PathKit
 import Yams
 
+#if canImport(Darwin)
+@preconcurrency import Darwin.C
+#elseif canImport(Glibc)
+@preconcurrency import Glibc
+#endif
+
 extension FrontRangeCLIEntry {
   struct Replace: ParsableCommand {
     static let configuration = CommandConfiguration(
@@ -73,6 +79,7 @@ extension FrontRangeCLIEntry {
     @Argument(help: "Path(s) to the file(s) to process")
     var paths: [Path]
 
+    @preconcurrency
     func run() throws {
       // Validate input options
       guard data != nil || fromFile != nil else {
@@ -109,12 +116,13 @@ extension FrontRangeCLIEntry {
       }
     }
 
+    @preconcurrency
     private func replaceInFile(path: Path, newFrontMatter: Yams.Node.Mapping) throws {
       printIfDebug("ℹ️ Processing '\(path)'")
 
       // Prompt for confirmation (interactive)
       print("⚠️  This will REPLACE the entire front matter in '\(path)'. Continue? (y/n): ", terminator: "")
-      fflush(stdout)
+      // Note: fflush removed due to Swift 6 concurrency safety requirements
 
       guard let response = readLine()?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) else {
         print("Cancelled (no input).")
