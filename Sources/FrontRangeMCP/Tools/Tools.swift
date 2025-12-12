@@ -21,6 +21,7 @@ extension ThisServer {
     case list
     case rename
     case remove
+    case replace
     case sort_keys
     case lines
   }
@@ -93,6 +94,15 @@ extension ThisServer {
         "start": .object(["type": .string("integer"), "description": .string("Starting line number (1-indexed)")]),
         "end": .object(["type": .string("integer"), "description": .string("Ending line number (1-indexed, inclusive)")]),
         "numbered": .object(["type": .string("boolean"), "description": .string("Show line numbers in output (default: false)")]),
+      ],
+    ),
+    Tool(
+      name: .replace,
+      description: "Replace entire front matter with new structured data. Accepts JSON, YAML, or plist format.",
+      params: [
+        "path": .object(["type": .string("string"), "description": .string("Path to the file to modify")]),
+        "data": .object(["type": .string("string"), "description": .string("New front matter data as a string")]),
+        "format": .object(["type": .string("string"), "description": .string("Data format: json (default), yaml, or plist")]),
       ],
     ),
   ]

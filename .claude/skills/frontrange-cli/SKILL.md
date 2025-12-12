@@ -343,6 +343,130 @@ Processing batch 1/4...  # stderr - safe to ignore
 
 Suppress progress: `fr search 'draft' . 2>/dev/null`
 
+### 10. **replace** - Replace entire front matter
+
+**DESTRUCTIVE** - Replace the complete front matter with new structured data.
+
+**IMPORTANT:** This command prompts for confirmation before making changes.
+
+**Input Methods:**
+
+You must provide data using ONE of these options:
+- `--data`: Inline data string
+- `--from-file`: Read from a file
+
+**Supported Formats:**
+- `json`: JavaScript Object Notation
+- `yaml`: YAML Ain't Markup Language
+- `plist`: Apple PropertyList XML
+
+**Validation:**
+Front matter must be a dictionary/mapping. Arrays and scalars are rejected.
+
+```bash
+# Replace with inline JSON
+fr replace post.md --data '{"title": "New Title", "draft": false}' --format json
+
+# Replace from YAML file
+fr replace post.md --from-file new-metadata.yaml --format yaml
+
+# Replace from plist file
+fr replace post.md --from-file config.plist --format plist
+
+# Process multiple files (prompted once per file)
+fr replace post1.md post2.md --data '{"status": "published"}' --format json
+
+# Process directory recursively
+fr replace posts/ -r --from-file standard-metadata.yaml --format yaml
+```
+
+**Options:**
+- Path arguments: File(s) and/or directory(ies) to process (required)
+- `--data`: Inline data string (mutually exclusive with --from-file)
+- `--from-file`: Path to file containing data (mutually exclusive with --data)
+- `--format` / `-f`: Data format - json (default), yaml, or plist
+- `--recursive` / `-r`: Recursively process directories (default: false)
+- `--extensions` / `-e`: File extensions to process (default: md,markdown,yml,yaml)
+- `--debug` / `-d`: Enable debug output
+- Alias: `r`
+
+**Confirmation:**
+The command prompts for confirmation (y/n) before replacing each file. This prevents accidental data loss.
+
+**Use Cases:**
+- Standardize front matter across multiple files
+- Migrate from one schema to another
+- Bulk reset metadata
+- Apply template front matter
+- Convert between data formats
+
+**Safety:**
+- Always use version control (git)
+- Test on a copy first
+- The command shows the file path and waits for confirmation
+- Type 'y' or 'yes' to proceed, anything else cancels
+
+**Examples:**
+
+```bash
+# Create standardized front matter template
+cat > template.json <<EOF
+{
+  "draft": false,
+  "published": true,
+  "author": "Your Name",
+  "date": "2025-12-11",
+  "tags": []
+}
+EOF
+
+# Apply to all posts
+fr replace posts/ -r --from-file template.json --format json
+
+# Replace with YAML (useful for complex structures)
+cat > metadata.yaml <<EOF
+title: New Post
+draft: false
+tags:
+  - tutorial
+  - swift
+metadata:
+  author: Jane Doe
+  category: Technical
+EOF
+
+fr replace post.md --from-file metadata.yaml --format yaml
+
+# One-liner JSON replacement
+fr replace article.md --data '{"title": "Updated", "status": "review"}' --format json
+```
+
+**Validation Errors:**
+
+```bash
+# Array rejected
+$ fr replace post.md --data '["tag1", "tag2"]' --format json
+Error: Front matter must be a dictionary/mapping, not a array/sequence
+
+# Scalar rejected
+$ fr replace post.md --data '"just a string"' --format json
+Error: Front matter must be a dictionary/mapping, not a scalar/primitive value
+
+# Both input options
+$ fr replace post.md --data '{}' --from-file file.json
+Error: Cannot use both --data and --from-file
+```
+
+**Comparison with Other Commands:**
+
+| Command | Purpose | Scope |
+|---------|---------|-------|
+| `set` | Set/update ONE key | Single key-value pair |
+| `replace` | Replace ENTIRE front matter | Destructive, all keys |
+| `remove` | Delete ONE key | Single key removal |
+
+Use `replace` when you need to completely overwrite all front matter. Use `set` for updating individual keys.
+
 ## Bulk Operations with Piping
 
 The `search` command outputs paths, enabling powerful bulk operations:
