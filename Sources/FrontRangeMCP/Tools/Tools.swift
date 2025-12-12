@@ -24,6 +24,7 @@ extension ThisServer {
     case replace
     case sort_keys
     case lines
+    case dump
   }
 
   static let tools: [Tool] = [
@@ -103,6 +104,15 @@ extension ThisServer {
         "path": .object(["type": .string("string"), "description": .string("Path to the file to modify")]),
         "data": .object(["type": .string("string"), "description": .string("New front matter data as a string")]),
         "format": .object(["type": .string("string"), "description": .string("Data format: json (default), yaml, or plist")]),
+      ],
+    ),
+    Tool(
+      name: .dump,
+      description: "Dump entire front matter in specified format (json, yaml, raw, plist). Returns the complete front matter content.",
+      params: [
+        "path": .object(["type": .string("string"), "description": .string("Path to the file to process")]),
+        "format": .object(["type": .string("string"), "description": .string("Output format: json (default), yaml, raw, or plist")]),
+        "includeDelimiters": .object(["type": .string("boolean"), "description": .string("Include --- delimiters for YAML/raw output (default: false)")]),
       ],
     ),
   ]

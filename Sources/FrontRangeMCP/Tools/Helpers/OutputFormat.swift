@@ -11,4 +11,6 @@ enum OutputFormat: String {
   case json
   case yaml
   case plainString
+  case raw
+  case plist
 }

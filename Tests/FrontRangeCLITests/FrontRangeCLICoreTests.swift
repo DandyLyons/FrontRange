@@ -43,6 +43,7 @@ import Testing
       search                  Search for files matching a JMESPath query
       sort-keys, sk           Sort keys in frontmatter
       lines                   Extract a range of lines from a file
+      dump, d                 Dump entire front matter in specified format
 
       See 'fr help <subcommand>' for detailed help.
 

@@ -280,7 +280,78 @@ fr lines posts/ -r
 
 Useful for debugging or integration with other tools.
 
-### 9. **search** - Query files by front matter
+### 9. **dump** - Output entire front matter
+
+Dump the complete front matter from files in various formats:
+
+```bash
+# Dump single file as JSON (default)
+fr dump post.md
+
+# Dump with YAML format
+fr dump post.md --format yaml
+
+# Dump with --- delimiters included
+fr dump post.md --format yaml --include-delimiters
+
+# Dump as PropertyList XML
+fr dump post.md --format plist
+
+# Dump as raw YAML (alias for yaml)
+fr dump post.md --format raw
+
+# Dump multiple files
+fr dump posts/ --format json
+
+# Dump recursively from directory tree
+fr dump posts/ -r --format yaml
+
+# Combine with custom extensions
+fr dump content/ -r --format plist --extensions md,txt
+```
+
+**Options:**
+- Path arguments: File(s) and/or directory(ies) to process (required)
+- `--recursive` / `-r`: Recursively process directories (default: false)
+- `--extensions` / `-e`: File extensions to process (default: md,markdown,yml,yaml)
+- `--format` / `-f`: Output format (json, yaml, raw, plist) - default: json
+- `--include-delimiters`: Add --- delimiters to YAML/raw output (default: false)
+- Alias: `d`
+
+**Debug output:** Set the `FRONTRANGE_DEBUG` environment variable to enable debug output.
+
+**Use Cases:**
+- Export front matter for external processing
+- Convert between formats (YAML to JSON, JSON to plist)
+- Extract all metadata for analysis or migration
+- Generate PropertyList files for macOS/iOS integration
+- Bulk export of front matter data
+
+**Format Details:**
+- **json**: Pretty-printed JSON with sorted keys
+- **yaml**: Clean YAML output
+- **raw**: Alias for yaml format
+- **plist**: Apple PropertyList XML format
+
+**Examples:**
+
+```bash
+# Export all post metadata as JSON for processing
+fr dump posts/ -r --format json > all-metadata.json
+
+# Convert front matter to plist for macOS app
+fr dump config.md --format plist > config.plist
+
+# Get YAML with delimiters (ready to paste into file)
+fr dump template.md --format yaml --include-delimiters
+
+# Bulk dump for migration
+for file in *.md; do
+  fr dump "$file" --format json > "${file%.md}.json"
+done
+```
+
+### 10. **search** - Query files by front matter
 
 **Most powerful command** - Search for files matching JMESPath expressions.
 

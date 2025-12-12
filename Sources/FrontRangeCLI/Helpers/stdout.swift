@@ -20,6 +20,11 @@ func printNodeAsJSON(node: Yams.Node) throws {
   print(jsonString)
 }
 
+func printNodeAsPlist(node: Yams.Node) throws {
+  let plistString = try nodeToPlist(node)
+  print(plistString)
+}
+
 public func printKeys(_ keys: [String]) {
   print("Keys:")
   print("-----")

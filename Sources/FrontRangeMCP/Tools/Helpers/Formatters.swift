@@ -13,8 +13,10 @@ func formatNode(_ node: Yams.Node, format: OutputFormat) throws -> String {
   switch format {
     case .json:
       return try nodeToJSON(node, options: [.prettyPrinted, .sortedKeys])
-    case .yaml, .plainString:
+    case .yaml, .plainString, .raw:
       return try Yams.serialize(node: node)
+    case .plist:
+      return try nodeToPlist(node)
   }
 }
 
@@ -22,7 +24,10 @@ func formatArray(_ array: [String], format: OutputFormat) throws -> String {
   switch format {
     case .json:
       return try anyToJSON(array, options: [.prettyPrinted, .sortedKeys])
-    case .yaml, .plainString:
+    case .yaml, .plainString, .raw:
       return try anyToYAML(array)
+    case .plist:
+      return try anyToPlist(array)
   }
 }
+

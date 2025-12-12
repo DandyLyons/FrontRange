@@ -152,9 +152,12 @@ extension FrontRangeCLIEntry {
           try printAny(matchingFiles, format: .json)
         case .yaml:
           try printAny(matchingFiles, format: .yaml)
-        case .plainString:
+        case .plainString, .raw:
           // Plain text: one file path per line
           print(matchingFiles.joined(separator: "\n"))
+        case .plist:
+          // For search results (file paths), use plist format
+          try printAny(matchingFiles, format: .plist)
         }
       }
     }
