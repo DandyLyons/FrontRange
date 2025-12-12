@@ -316,8 +316,9 @@ fr dump content/ -r --format plist --extensions md,txt
 - `--extensions` / `-e`: File extensions to process (default: md,markdown,yml,yaml)
 - `--format` / `-f`: Output format (json, yaml, raw, plist) - default: json
 - `--include-delimiters`: Add --- delimiters to YAML/raw output (default: false)
-- `--debug` / `-d`: Enable debug output
 - Alias: `d`
+
+**Debug output:** Set the `FRONTRANGE_DEBUG` environment variable to enable debug output.
 
 **Use Cases:**
 - Export front matter for external processing
