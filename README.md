@@ -14,6 +14,7 @@ FrontRange provides three complementary tools for working with front-mattered do
 
 - Parse documents with YAML front matter
 - Get, set, check, list, rename, and remove front matter keys
+- **Replace entire front matter** with structured data (JSON, YAML, plist)
 - **Search files using JMESPath queries** (filter by front matter values)
 - Sort front matter keys alphabetically or in reverse order
 - Extract specific line ranges from files
@@ -174,6 +175,35 @@ fr lines document.md --start 5
 fr lines document.md --end 20
 # Extract from start to line 20
 ```
+
+#### Replace entire front matter
+
+**DESTRUCTIVE** - Replace the complete front matter with new structured data. The command prompts for confirmation before making changes.
+
+```bash
+# Replace with inline JSON
+fr replace document.md --data '{"title": "New Title", "draft": false}' --format json
+
+# Replace from YAML file
+fr replace document.md --from-file metadata.yaml --format yaml
+
+# Replace from plist file
+fr replace document.md --from-file config.plist --format plist
+
+# Process multiple files (prompted once per file)
+fr replace posts/ -r --from-file template.json --format json
+```
+
+**Input methods:**
+- `--data`: Inline data string
+- `--from-file`: Read from file (mutually exclusive with --data)
+
+**Supported formats:**
+- `json`: JavaScript Object Notation (default)
+- `yaml`: YAML Ain't Markup Language
+- `plist`: Apple PropertyList XML
+
+**Note:** Front matter must be a dictionary/mapping. Arrays and scalars will be rejected with validation errors.
 
 #### Search files with JMESPath queries
 
@@ -497,7 +527,7 @@ Add the server to your Claude Desktop configuration (`~/Library/Application Supp
 
 #### Available MCP Tools
 
-The server provides 8 tools that mirror the CLI functionality:
+The server provides 9 tools that mirror the CLI functionality:
 
 - **get** - Get a value from front matter by key
 - **set** - Set a value in front matter
@@ -505,6 +535,7 @@ The server provides 8 tools that mirror the CLI functionality:
 - **list** - List all front matter keys
 - **rename** - Rename a front matter key
 - **remove** - Remove a key from front matter
+- **replace** - Replace entire front matter with structured data
 - **sort_keys** - Sort front matter keys
 - **lines** - Extract line ranges from files
 
