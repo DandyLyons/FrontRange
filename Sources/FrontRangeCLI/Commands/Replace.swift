@@ -30,6 +30,10 @@ extension FrontRangeCLIEntry {
           --from-file: Read from file
             fr replace post.md --from-file new-frontmatter.json --format json
 
+          TIP: When passing inline data that starts with -, use --data= syntax:
+            fr replace post.md --data='- item1' --format yaml
+            This prevents the argument parser from treating - as a flag.
+
         SUPPORTED FORMATS:
           - json: JavaScript Object Notation
           - yaml: YAML Ain't Markup Language
@@ -57,8 +61,6 @@ extension FrontRangeCLIEntry {
       aliases: ["r"]
     )
 
-    @OptionGroup var options: GlobalOptions
-
     @Option(name: .long, help: "Inline data to use as new front matter")
     var data: String?
 
@@ -67,6 +69,9 @@ extension FrontRangeCLIEntry {
 
     @Option(name: [.short, .long], help: "Data format (json, yaml, plist)")
     var format: DataFormat = .json
+
+    @Argument(help: "Path(s) to the file(s) to process")
+    var paths: [Path]
 
     func run() throws {
       // Validate input options
@@ -99,7 +104,7 @@ extension FrontRangeCLIEntry {
       }
 
       // Process each file
-      for path in try options.paths {
+      for path in paths {
         try replaceInFile(path: path, newFrontMatter: newFrontMatter)
       }
     }

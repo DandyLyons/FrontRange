@@ -71,7 +71,7 @@ private func parseJSONToNode(_ jsonString: String) throws -> Yams.Node {
     guard let data = jsonString.data(using: .utf8) else {
       throw NSError(domain: "FrontRange", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to convert string to UTF-8 data"])
     }
-    let obj = try JSONSerialization.jsonObject(with: data)
+    let obj = try JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed)
     return nodeFromAny(obj)
   } catch {
     throw DataParsingError.parseFailed("JSON", underlyingError: error)

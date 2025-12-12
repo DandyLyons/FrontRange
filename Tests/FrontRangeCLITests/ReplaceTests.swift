@@ -179,8 +179,9 @@ import Testing
     - item2
     """
 
-    // This command should fail with validation error
-    let stream = commandRunner.run(arguments: [cliPath, "replace", tempFile, "--data", yamlArray, "--format", "yaml"])
+    // Use --data= syntax (with =) to pass inline YAML that starts with -
+    // This prevents ArgumentParser from treating - as a flag
+    let stream = commandRunner.run(arguments: [cliPath, "replace", tempFile, "--data=\(yamlArray)", "--format", "yaml"])
     var stderr = ""
     var didFail = false
 
