@@ -79,7 +79,7 @@ Note: The MCP server is currently in early development.
 **Entry Point** (Sources/FrontRangeCLI/FrontRangeCLIEntry.swift)
 - Uses swift-argument-parser
 - Main command: `fr`
-- Subcommands: `get`, `set`, `has`, `list`, `rename`, `remove`, `sort-keys`, `lines`, `search`
+- Subcommands: `get`, `set`, `has`, `list`, `rename`, `remove`, `replace`, `sort-keys`, `lines`, `search`
 
 **Subcommand Pattern**
 - Each subcommand is a struct conforming to `ParsableCommand`
@@ -102,6 +102,26 @@ Note: The MCP server is currently in early development.
 - Tools defined in `ThisServer.tools` array
 - Tool execution handled by `runTool()` function
 - Current tools: `hello_world` (working), `get` (placeholder)
+
+### Replace Command (FrontRangeCLI)
+
+**Replace.swift** (Sources/FrontRangeCLI/Commands/Replace.swift)
+- Replace entire front matter with new structured data (JSON, YAML, plist)
+- Accepts data via `--data` (inline) or `--from-file` (from file)
+- Interactive confirmation prompt (per file) for safety
+- Validates input is a mapping/dictionary (rejects arrays/scalars)
+- Uses shared DataParsing utility for format conversion
+
+**DataParsing.swift** (Sources/FrontRange/JSON/DataParsing.swift)
+- Shared parsing utility for JSON/YAML/plist → `Yams.Node.Mapping`
+- Inverse of existing `Node+JSON.swift` (which goes Node → JSON)
+- `parseToMapping()` validates input is a mapping
+- Used by both CLI and MCP implementations
+
+**ReplaceTool.swift** (Sources/FrontRangeMCP/Tools/Implementations/ReplaceTool.swift)
+- MCP tool for programmatic front matter replacement
+- Non-interactive (no confirmation prompt - caller is responsible)
+- Uses same DataParsing utility as CLI
 
 ### Search Command (FrontRangeCLI)
 

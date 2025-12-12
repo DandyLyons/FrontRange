@@ -42,12 +42,14 @@ import Testing
     #expect(allNames.contains("list"))
     #expect(allNames.contains("rename"))
     #expect(allNames.contains("remove"))
+    #expect(allNames.contains("replace"))
     #expect(allNames.contains("sort_keys"))
     #expect(allNames.contains("lines"))
+    #expect(allNames.contains("dump"))
   }
 
   @Test func toolRegistryCount() {
     // Verify all tools are registered
-    #expect(ThisServer.tools.count == 9) // get, set, has, list, rename, remove, sort_keys, lines, dump
+    #expect(ThisServer.tools.count == 10) // get, set, has, list, rename, remove, replace, sort_keys, lines, dump
   }
 }

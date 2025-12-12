@@ -31,6 +31,9 @@ func runTool(
     case .remove:
       return try await runRemoveTool(params: params)
 
+    case .replace:
+      return try await runReplaceTool(params: params)
+
     case .sort_keys:
       return try await runSortKeysTool(params: params)
 

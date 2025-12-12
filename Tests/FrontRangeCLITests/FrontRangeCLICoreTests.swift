@@ -39,6 +39,7 @@ import Testing
       list, ls                List all keys in frontmatter
       rename, rn              Rename a key from frontmatter
       remove, rm              Remove a key from frontmatter
+      replace, r              Replace entire front matter with new data
       search                  Search for files matching a JMESPath query
       sort-keys, sk           Sort keys in frontmatter
       lines                   Extract a range of lines from a file
