@@ -122,8 +122,10 @@ private func nodeFromAny(_ any: Any) -> Yams.Node {
   } else if let string = any as? String {
     return .scalar(.init(string))
   } else if let bool = any as? Bool {
-    // Check for Bool before NSNumber to handle booleans correctly
-    // In Swift 6 unified Foundation, JSONSerialization returns native Bool
+    // Check for Bool before NSNumber to handle booleans correctly.
+    // On Linux, JSONSerialization returns native Bool types.
+    // On Darwin (Apple platforms), Bool values may be bridged as NSNumber (CFBoolean),
+    // so this check must come before NSNumber to ensure correct handling.
     return .scalar(.init(bool ? "true" : "false"))
   } else if let number = any as? NSNumber {
     // Handle numeric values
