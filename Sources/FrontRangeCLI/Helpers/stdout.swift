@@ -33,3 +33,9 @@ public func printKeys(_ keys: [String]) {
   }
   print("-----")
 }
+
+/// Write a message to stderr in a concurrency-safe way
+/// This is needed for Swift 6 strict concurrency checking on Linux
+func printToStderr(_ message: String) {
+  FileHandle.standardError.write(Data(message.utf8))
+}
