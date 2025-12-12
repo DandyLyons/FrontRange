@@ -121,13 +121,21 @@ private func nodeFromAny(_ any: Any) -> Yams.Node {
     return .sequence(.init(array.map(nodeFromAny)))
   } else if let string = any as? String {
     return .scalar(.init(string))
+  } else if let bool = any as? Bool {
+    // Check for Bool before NSNumber to handle booleans correctly
+    // In Swift 6 unified Foundation, JSONSerialization returns native Bool
+    return .scalar(.init(bool ? "true" : "false"))
   } else if let number = any as? NSNumber {
-    // Distinguish bool from number
+    // Handle numeric values
+    // Note: On Darwin, Bool can sometimes be bridged as NSNumber,
+    // but we check Bool first to catch those cases
+#if canImport(Darwin)
+    // On Apple platforms, double-check for CFBoolean in case Bool didn't match
     if CFGetTypeID(number) == CFBooleanGetTypeID() {
       return .scalar(.init(number.boolValue ? "true" : "false"))
-    } else {
-      return .scalar(.init(number.description))
     }
+#endif
+    return .scalar(.init(number.description))
   } else if let date = any as? Date {
     let formatter = ISO8601DateFormatter()
     return .scalar(.init(formatter.string(from: date)))
