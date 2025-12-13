@@ -30,6 +30,7 @@ let package = Package(
     .package(url: "https://github.com/modelcontextprotocol/swift-sdk", from: "0.7.1"), // ModelContextProtocol Swift SDK
     .package(url: "https://github.com/pointfreeco/swift-parsing.git", from: "0.14.1"), // Parsing
     .package(url: "https://github.com/kylef/PathKit", from: "1.0.1"), // PathKit
+    .package(url: "https://github.com/swiftcsv/SwiftCSV.git", from: "0.10.0"), // CSV parsing
     .package(url: "https://github.com/jpsim/Yams.git", from: "6.1.0"), // Yams
   ],
   targets: [
@@ -61,6 +62,7 @@ let package = Package(
         .product(name: "ArgumentParser", package: "swift-argument-parser"), // CLI argument parsing
         .product(name: "JMESPath", package: "jmespath.swift"), // JMESPath query support
         .product(name: "PathKit", package: "PathKit"), // For file path handling
+        .product(name: "SwiftCSV", package: "SwiftCSV"), // CSV parsing
       ],
     ),
     .testTarget(

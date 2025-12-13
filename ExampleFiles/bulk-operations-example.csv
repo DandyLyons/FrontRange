@@ -1,0 +1,8 @@
+file_path,operation,key,value,new_key
+posts/post1.md,set,title,Updated Post Title,
+posts/post1.md,set,draft,false,
+posts/post2.md,set,published,true,
+posts/post2.md,set,date,2025-12-13,
+posts/post3.md,remove,temporary,,
+posts/post4.md,rename,old_title,,title
+posts/post5.md,set,tags,"swift,cli,yaml",

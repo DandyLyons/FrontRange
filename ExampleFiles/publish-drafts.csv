@@ -1,0 +1,7 @@
+file_path,operation,key,value,new_key
+blog/2025/draft1.md,set,draft,false,
+blog/2025/draft1.md,set,published,true,
+blog/2025/draft1.md,set,publishDate,2025-12-13,
+blog/2025/draft2.md,set,draft,false,
+blog/2025/draft2.md,set,published,true,
+blog/2025/draft2.md,set,publishDate,2025-12-13,

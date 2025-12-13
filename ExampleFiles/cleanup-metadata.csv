@@ -1,0 +1,6 @@
+file_path,operation,key,value,new_key
+content/post1.md,remove,temp,,
+content/post1.md,remove,deprecated,,
+content/post2.md,remove,temp,,
+content/post3.md,rename,oldAuthor,,author
+content/post4.md,set,status,archived,

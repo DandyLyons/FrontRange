@@ -79,7 +79,7 @@ Note: The MCP server is currently in early development.
 **Entry Point** (Sources/FrontRangeCLI/FrontRangeCLIEntry.swift)
 - Uses swift-argument-parser
 - Main command: `fr`
-- Subcommands: `get`, `set`, `has`, `list`, `rename`, `remove`, `replace`, `sort-keys`, `lines`, `search`
+- Subcommands: `get`, `set`, `has`, `list`, `rename`, `remove`, `replace`, `sort-keys`, `lines`, `search`, `csv-bulk`
 
 **Subcommand Pattern**
 - Each subcommand is a struct conforming to `ParsableCommand`
@@ -168,6 +168,77 @@ done
 fr search 'deprecated == `true`' . | xargs fr remove --key temporary
 ```
 
+### CSV Bulk Command (FrontRangeCLI)
+
+**CSVBulk.swift** (Sources/FrontRangeCLI/Commands/CSVBulk.swift)
+- Apply multiple front matter operations from a CSV file
+- Supports bulk set, remove, and rename operations across multiple files
+- Interactive confirmation prompt (once for all operations) for safety
+- Error handling: reports individual file failures but continues processing
+- Useful for large-scale metadata updates and migrations
+
+**CSV Format:**
+The CSV file must have the following columns (header row required):
+- `file_path`: Path to the file to modify (relative or absolute)
+- `operation`: Operation to perform (set, remove, rename)
+- `key`: The front matter key to operate on
+- `value`: The value to set (required for 'set' operation)
+- `new_key`: The new key name (required for 'rename' operation)
+
+**Supported Operations:**
+- `set`: Set a key to a value
+  ```csv
+  file_path,operation,key,value,new_key
+  posts/post1.md,set,title,New Title,
+  ```
+
+- `remove`: Remove a key from front matter
+  ```csv
+  file_path,operation,key,value,new_key
+  posts/post2.md,remove,draft,,
+  ```
+
+- `rename`: Rename a key
+  ```csv
+  file_path,operation,key,value,new_key
+  posts/post3.md,rename,old_title,,title
+  ```
+
+**Example usage:**
+```bash
+# Apply operations with confirmation prompt
+fr csv-bulk operations.csv
+
+# Skip confirmation (for automation)
+fr csv-bulk operations.csv --yes
+
+# With debug output
+fr csv-bulk operations.csv --debug
+```
+
+**Sample CSV - Publishing drafts:**
+```csv
+file_path,operation,key,value,new_key
+blog/draft1.md,set,draft,false,
+blog/draft1.md,set,published,true,
+blog/draft1.md,set,publishDate,2025-12-13,
+blog/draft2.md,set,draft,false,
+blog/draft2.md,set,published,true,
+```
+
+**Example CSV files:**
+See ExampleFiles/ directory for sample CSV files:
+- `bulk-operations-example.csv` - Mixed operations example
+- `publish-drafts.csv` - Publishing workflow example
+- `cleanup-metadata.csv` - Metadata cleanup example
+
+**Use cases:**
+- Migrating metadata structure across many files
+- Publishing multiple draft posts at once
+- Cleaning up deprecated or temporary keys
+- Standardizing field names across a content collection
+- Bulk updates based on external data sources
+
 ## Dependencies
 
 - **Yams** - YAML parsing and serialization
@@ -175,6 +246,7 @@ fr search 'deprecated == `true`' . | xargs fr remove --key temporary
 - **swift-argument-parser** - CLI argument parsing
 - **JMESPath** - JMESPath query language for searching/filtering
 - **PathKit** - File path handling in CLI
+- **SwiftCSV** - CSV parsing for bulk operations
 - **swift-custom-dump** - Testing utilities
 - **Command** - Programmatic CLI testing
 - **MCP Swift SDK** - Model Context Protocol server implementation
