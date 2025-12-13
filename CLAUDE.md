@@ -168,6 +168,73 @@ done
 fr search 'deprecated == `true`' . | xargs fr remove --key temporary
 ```
 
+### CSV Dump Format (FrontRangeCLI)
+
+The dump command supports CSV export for multiple files, where each row represents a file and each column represents a front matter property.
+
+**File:** `Sources/FrontRangeCLI/Commands/Dump.swift`
+- Supports `--multi-format csv` for tabular output
+- Three column strategies: union, intersection, custom
+- Uses TinyCSV library for RFC 4180 compliant encoding
+- Leverages existing `--format` flag to control nested data serialization
+
+**Helper Module:** `Sources/FrontRangeCLI/Helpers/CSVHelpers.swift`
+- `CSVGenerator` struct handles CSV generation
+- Column determination logic (union/intersection/custom)
+- Column alignment ensures all rows have same structure
+- Format-aware cell serialization for nested structures
+
+**Column Strategies:**
+
+1. **union (default)**: Include all keys from any file
+   - Missing values appear as empty cells
+   - Most flexible, shows all available data
+
+2. **intersection**: Only include keys present in ALL files
+   - More compact output
+   - May hide data if files have different schemas
+
+3. **custom**: User-specified columns via `--csv-custom-columns`
+   - Maximum control over output
+   - Specify exact columns needed
+
+**Nested Data Handling:**
+
+The `--format` flag controls how complex values (arrays, objects) are serialized in CSV cells:
+- `--format json` (default): Serialize as JSON strings
+- `--format yaml`: Serialize as YAML strings
+- `--format plist`: Serialize as PropertyList XML strings
+
+**CSV Output Structure:**
+- First column: `path` (file path)
+- Remaining columns: Front matter keys (alphabetically sorted for union/intersection)
+- RFC 4180 compliant escaping for commas, quotes, newlines
+- Header row included by default
+
+**Example usage:**
+
+```bash
+# Export all front matter as CSV (union strategy)
+fr dump posts/*.md --multi-format csv
+
+# CSV with only common columns
+fr dump posts/*.md --multi-format csv --csv-columns intersection
+
+# CSV with custom columns
+fr dump posts/*.md --multi-format csv --csv-columns custom --csv-custom-columns "title,author,date"
+
+# CSV with nested data as YAML strings
+fr dump posts/*.md --multi-format csv --format yaml
+
+# Recursive directory export
+fr dump posts/ -r --multi-format csv --csv-columns custom --csv-custom-columns "title,date,tags"
+```
+
+**Limitations:**
+- CSV format requires multiple files (single file raises error)
+- Custom column strategy requires `--csv-custom-columns` to be specified
+- Column alignment is handled automatically (all rows have same number of cells)
+
 ## Dependencies
 
 - **Yams** - YAML parsing and serialization
@@ -175,6 +242,7 @@ fr search 'deprecated == `true`' . | xargs fr remove --key temporary
 - **swift-argument-parser** - CLI argument parsing
 - **JMESPath** - JMESPath query language for searching/filtering
 - **PathKit** - File path handling in CLI
+- **TinyCSV** - RFC 4180 compliant CSV encoding/decoding for dump command
 - **swift-custom-dump** - Testing utilities
 - **Command** - Programmatic CLI testing
 - **MCP Swift SDK** - Model Context Protocol server implementation

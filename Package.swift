@@ -25,6 +25,7 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.1"), // ArgumentParser
     .package(url: "https://github.com/tuist/Command.git", from: "0.13.0"), // Command
+    .package(url: "https://github.com/dagronf/TinyCSV.git", from: "1.0.0"), // TinyCSV
     .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.3.3"), // CustomDump
     .package(url: "https://github.com/adam-fowler/jmespath.swift.git", from: "1.0.3"), // JMESPath
     .package(url: "https://github.com/modelcontextprotocol/swift-sdk", from: "0.7.1"), // ModelContextProtocol Swift SDK
@@ -61,6 +62,7 @@ let package = Package(
         .product(name: "ArgumentParser", package: "swift-argument-parser"), // CLI argument parsing
         .product(name: "JMESPath", package: "jmespath.swift"), // JMESPath query support
         .product(name: "PathKit", package: "PathKit"), // For file path handling
+        .product(name: "TinyCSV", package: "TinyCSV"), // CSV encoding/decoding
       ],
     ),
     .testTarget(

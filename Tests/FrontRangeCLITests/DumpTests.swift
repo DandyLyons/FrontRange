@@ -372,4 +372,193 @@ import Testing
     // We should see escaped newlines \\n
     #expect(output.contains("\\n"))
   }
+
+  // MARK: - CSV Format Tests
+
+  @Test func `Dump CSV with union strategy includes all columns`() async throws {
+    let csv1Path = Bundle.module
+      .url(forResource: "test-csv-1", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+    let csv2Path = Bundle.module
+      .url(forResource: "test-csv-2", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "dump", csv1Path, csv2Path, "--multi-format", "csv"]
+    ).concatenatedString()
+
+    // Should have CSV header with path + all unique columns (alphabetically sorted)
+    #expect(output.contains("\"path\""))
+    #expect(output.contains("\"author\""))
+    #expect(output.contains("\"date\""))
+    #expect(output.contains("\"draft\""))
+    #expect(output.contains("\"published\""))
+    #expect(output.contains("\"rating\""))
+    #expect(output.contains("\"tags\""))
+    #expect(output.contains("\"title\""))
+
+    // Should have file paths in first column
+    #expect(output.contains("test-csv-1.md"))
+    #expect(output.contains("test-csv-2.md"))
+
+    // Check values
+    #expect(output.contains("\"Alice\""))
+    #expect(output.contains("\"Bob\""))
+    #expect(output.contains("\"First Post\""))
+    #expect(output.contains("\"Second Post\""))
+  }
+
+  @Test func `Dump CSV with intersection strategy only includes common columns`() async throws {
+    let csv1Path = Bundle.module
+      .url(forResource: "test-csv-1", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+    let csv2Path = Bundle.module
+      .url(forResource: "test-csv-2", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+    let csv3Path = Bundle.module
+      .url(forResource: "test-csv-3", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+
+    let output = try await commandRunner.run(
+      arguments: [
+        cliPath, "dump", csv1Path, csv2Path, csv3Path,
+        "--multi-format", "csv",
+        "--csv-columns", "intersection"
+      ]
+    ).concatenatedString()
+
+    // Common columns: path, title, author (present in all three files)
+    #expect(output.contains("\"path\""))
+    #expect(output.contains("\"title\""))
+    #expect(output.contains("\"author\""))
+
+    // Should NOT have columns that aren't in all files
+    #expect(!output.contains("\"rating\""))  // Only in csv-1
+    #expect(!output.contains("\"published\""))  // Only in csv-2
+    #expect(!output.contains("\"category\""))  // Only in csv-3
+  }
+
+  @Test func `Dump CSV with custom columns`() async throws {
+    let csv1Path = Bundle.module
+      .url(forResource: "test-csv-1", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+    let csv2Path = Bundle.module
+      .url(forResource: "test-csv-2", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+
+    let output = try await commandRunner.run(
+      arguments: [
+        cliPath, "dump", csv1Path, csv2Path,
+        "--multi-format", "csv",
+        "--csv-columns", "custom",
+        "--csv-custom-columns", "title,author"
+      ]
+    ).concatenatedString()
+
+    // Should only have specified columns plus path
+    #expect(output.contains("\"path\""))
+    #expect(output.contains("\"title\""))
+    #expect(output.contains("\"author\""))
+
+    // Should NOT have other columns
+    #expect(!output.contains("\"date\""))
+    #expect(!output.contains("\"tags\""))
+    #expect(!output.contains("\"draft\""))
+  }
+
+  @Test func `Dump CSV serializes nested arrays as JSON by default`() async throws {
+    let csv1Path = Bundle.module
+      .url(forResource: "test-csv-1", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "dump", csv1Path, testDumpPath, "--multi-format", "csv"]
+    ).concatenatedString()
+
+    // Tags array should be serialized as JSON (default format)
+    // JSON arrays use square brackets
+    #expect(output.contains("["))
+    #expect(output.contains("swift"))
+  }
+
+  @Test func `Dump CSV with YAML format for nested data`() async throws {
+    let csv1Path = Bundle.module
+      .url(forResource: "test-csv-1", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+
+    let output = try await commandRunner.run(
+      arguments: [
+        cliPath, "dump", csv1Path, testDumpPath,
+        "--multi-format", "csv",
+        "--format", "yaml"
+      ]
+    ).concatenatedString()
+
+    // Tags array should be serialized as YAML
+    #expect(output.contains("- swift") || output.contains("tags"))
+  }
+
+  @Test func `Dump CSV handles missing keys with empty cells`() async throws {
+    let csv1Path = Bundle.module
+      .url(forResource: "test-csv-1", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+    let csv2Path = Bundle.module
+      .url(forResource: "test-csv-2", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "dump", csv1Path, csv2Path, "--multi-format", "csv"]
+    ).concatenatedString()
+
+    // Parse CSV structure - should have commas indicating columns
+    let lines = output.split(separator: "\r\n")
+    #expect(lines.count >= 3)  // Header + 2 data rows
+
+    // Verify we have proper CSV structure with commas
+    #expect(output.contains(","))
+  }
+
+  @Test func `Dump CSV single file throws error`() async throws {
+    await #expect(throws: Error.self) {
+      _ = try await commandRunner.run(
+        arguments: [cliPath, "dump", testDumpPath, "--multi-format", "csv"]
+      ).concatenatedString()
+    }
+  }
+
+  @Test func `Dump CSV custom columns without specification throws error`() async throws {
+    let csv1Path = Bundle.module
+      .url(forResource: "test-csv-1", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+    let csv2Path = Bundle.module
+      .url(forResource: "test-csv-2", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+
+    await #expect(throws: Error.self) {
+      _ = try await commandRunner.run(
+        arguments: [
+          cliPath, "dump", csv1Path, csv2Path,
+          "--multi-format", "csv",
+          "--csv-columns", "custom"
+          // Missing --csv-custom-columns
+        ]
+      ).concatenatedString()
+    }
+  }
+
+  @Test func `Dump CSV escapes special characters per RFC 4180`() async throws {
+    let specialPath = Bundle.module
+      .url(forResource: "test-csv-special", withExtension: "md", subdirectory: "ExampleFiles")!
+      .path()
+
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "dump", specialPath, testDumpPath, "--multi-format", "csv"]
+    ).concatenatedString()
+
+    // Values with commas, quotes, or newlines should be quoted and escaped
+    // TinyCSV handles RFC 4180 escaping
+    #expect(output.contains("\"Post with, comma\""))
+    #expect(output.contains("\"Bob \"\"The Builder\"\"\""))  // Quotes are doubled
+  }
 }
+

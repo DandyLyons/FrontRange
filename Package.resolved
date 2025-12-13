@@ -1,5 +1,5 @@
 {
-  "originHash" : "150aa8bbd6c175b5dea36abbe49d71af150df43634384cbc25439e9e547d5267",
+  "originHash" : "1b0fbac1e78566df7a0a32ba6bbeec1d9eacaa309ef03ef577a95084fbae35ed",
   "pins" : [
     {
       "identity" : "command",
@@ -134,6 +134,15 @@
       "state" : {
         "revision" : "395a77f0aa927f0ff73941d7ac35f2b46d47c9db",
         "version" : "1.6.3"
+      }
+    },
+    {
+      "identity" : "tinycsv",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dagronf/TinyCSV.git",
+      "state" : {
+        "revision" : "a27a0baa6766e44eb27a2a8c6b2e15541056b3de",
+        "version" : "1.2.0"
       }
     },
     {
