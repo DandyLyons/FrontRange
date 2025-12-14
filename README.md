@@ -30,14 +30,14 @@ Add FrontRange to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/yourusername/FrontRange.git", from: "0.1.0")
+    .package(url: "https://github.com/DandyLyons/FrontRange.git", from: "0.1.0")
 ]
 ```
 
 ### Building from Source
 
 ```bash
-git clone https://github.com/yourusername/FrontRange.git
+git clone https://github.com/DandyLyons/FrontRange.git
 cd FrontRange
 swift build
 ```
