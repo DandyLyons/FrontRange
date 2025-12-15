@@ -144,8 +144,8 @@ extension FrontRangeCLIEntry {
       // Output results based on format
       if matchingFiles.isEmpty {
         // Print helpful message to stderr (doesn't interfere with piping stdout)
-        fputs("No files matched the query: \"\(query)\"\n", stderr)
-        fputs("Searched \(processedPaths.count) file(s)\n", stderr)
+        printToStderr("No files matched the query: \"\(query)\"\n")
+        printToStderr("Searched \(processedPaths.count) file(s)\n")
       } else {
         switch format {
         case .json:
@@ -208,7 +208,7 @@ extension FrontRangeCLIEntry {
 
         // Show progress to stderr (only for multi-batch operations)
         if paths.count > batchSize {
-          fputs("Processing batch \(batchNumber)/\(totalBatches)...\n", stderr)
+          printToStderr("Processing batch \(batchNumber)/\(totalBatches)...\n")
         }
 
         let batchMatches = processBatch(batch, using: expression)
