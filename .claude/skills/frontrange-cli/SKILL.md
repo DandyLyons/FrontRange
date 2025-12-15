@@ -1,20 +1,11 @@
 ---
 name: frontrange-cli
-description: Expert guidance for using the FrontRange CLI (fr command) to manage YAML front matter in text documents. Use when working with front-mattered files, YAML metadata, blog posts, markdown with front matter, or when the user mentions 'fr' commands.
+description: Expert guidance for using the FrontRange CLI (fr command) to manage YAML front matter in text documents. Use when working with front-mattered files, YAML metadata, blog posts, markdown with front matter, or when the user mentions 'fr' commands. Supports reading/writing front matter keys, JMESPath-based searching, bulk operations via piping, directory recursion, and multiple format output (JSON/YAML/plist/CSV).
 ---
 
 # FrontRange CLI Expert
 
-This Skill provides comprehensive guidance on using the **FrontRange CLI (`fr`)** tool for managing YAML front matter in text documents.
-
-## When to Use This Skill
-
-Invoke this Skill when:
-- User wants to read, modify, or search YAML front matter in files
-- Working with markdown files, blog posts, or documents with metadata headers
-- User mentions the `fr` command or FrontRange CLI
-- Tasks involve bulk operations on front matter across multiple files
-- Need to query or filter files based on front matter properties
+Comprehensive guidance for using the **FrontRange CLI (`fr`)** to manage YAML front matter in text documents.
 
 ## Core Concepts
 
@@ -35,363 +26,105 @@ date: 2025-01-15
 This is the body of the document...
 ```
 
-## How to Invoke the CLI
+### How to Invoke the CLI
 
-The `fr` command can be used in two ways:
+**Recommended (installed globally):**
+```bash
+fr <command>
+```
 
-1. **Installed globally** (recommended for regular use):
-    ```bash
-    fr <command>
-    ```
-This guide assumes fr is installed and available in your PATH.
-
-2. During development (from the FrontRange project directory):
+**During development (from FrontRange project directory):**
 ```bash
 swift run fr <command>
 ```
+
 DO NOT USE `swift run fr` unless developing or testing FrontRange itself.
 
-## Directory and Recursive Processing
+---
 
-**CRITICAL:** The `fr` CLI has powerful directory processing capabilities that work differently for different commands.
+## Quick Start: Essential Commands
 
-### Most Commands: Explicit Recursive Flag
-
-For most commands (`get`, `set`, `has`, `list`, `remove`, `rename`, `sort-keys`, `lines`), you can provide:
-
-1. **Individual files:**
-   ```bash
-   fr get --key title post.md
-   ```
-
-2. **Directories (non-recursive by default):**
-   ```bash
-   # Processes only files directly in the posts/ directory
-   fr get --key draft posts/
-   ```
-
-3. **Directories with `--recursive` / `-r` flag:**
-   ```bash
-   # Recursively processes ALL files in posts/ and subdirectories
-   fr get --key draft --recursive posts/
-
-   # Short form
-   fr get --key draft -r posts/
-   ```
-
-4. **Multiple paths:**
-   ```bash
-   # Mix files and directories
-   fr set --key draft --value false post1.md posts/ drafts/ -r
-   ```
-
-### Search Command: Always Recursive
-
-The `search` command **ALWAYS searches recursively** when given a directory - no flag needed:
-
+### Read a Value
 ```bash
-# Automatically searches recursively through all subdirectories
-fr search 'draft == `true`' ./posts
-
-# Same behavior - always recursive
-fr search 'published == `false`' .
-```
-
-### Extension Filtering
-
-By default, `fr` processes these extensions: `md`, `markdown`, `yml`, `yaml`
-
-**Override with `--extensions` / `-e`:**
-
-```bash
-# Process only markdown files
-fr get --key title posts/ -r --extensions md
-
-# Process multiple custom extensions
-fr list docs/ --extensions txt,md,rst
-
-# Process all files (empty string)
-fr search 'draft' . --extensions ""
-```
-
-**Extension filtering applies to ALL commands**, including search.
-
-### Complete Directory Processing Examples
-
-```bash
-# Get all drafts from posts directory (non-recursive)
-fr get --key draft posts/
-
-# Get all drafts from posts directory and all subdirectories
-fr get --key draft posts/ --recursive
-
-# Search entire project recursively (search is always recursive)
-fr search 'draft == `true`' .
-
-# Set value on all markdown files in content/ recursively
-fr set --key reviewed --value true content/ -r --extensions md
-
-# Process mixed paths: specific files + directories
-fr list post1.md posts/ drafts/ -r
-
-# Recursive operation with custom extensions
-fr sort-keys docs/ -r --extensions md,txt,rst
-```
-
-## Available Commands
-
-### 1. **get** - Retrieve front matter values
-
-Get a specific key's value from files or directories:
-
-```bash
-# Get from a single file
+# Single file
 fr get --key title post.md
 
-# Get from all files in a directory (non-recursive)
-fr get --key draft posts/
-
-# Get from directory tree recursively
-fr get --key author posts/ --recursive
-
-# Multiple paths (files and directories)
-fr get --key tags post.md drafts/ published/ -r
-
-# Format output as JSON
-fr get --key tags posts/ -r --format json
+# All files in directory recursively
+fr get --key title posts/ -r
 ```
 
-**Options:**
-- `--key` / `-k`: The front matter key to retrieve (required)
-- Path arguments: File(s) and/or directory(ies) to process (required)
-- `--recursive` / `-r`: Recursively process directories (default: false)
-- `--extensions` / `-e`: File extensions to process (default: md,markdown,yml,yaml)
-- `--format` / `-f`: Output format (yaml, json, plainString)
-- `--debug` / `-d`: Enable debug output
-
-### 2. **set** - Modify front matter values
-
-Set or update a key's value in files or directories:
-
+### Write a Value
 ```bash
-# Set in a single file
-fr set --key title --value "New Title" post.md
+# Single file
+fr set --key draft --value false post.md
 
-# Set in all files in a directory (non-recursive)
-fr set --key draft --value false posts/
-
-# Set recursively in directory tree
-fr set --key published --value true posts/ --recursive
-
-# Bulk update across multiple locations
-fr set --key reviewed --value true post1.md drafts/ published/ -r
+# All files recursively
+fr set --key published --value true posts/ -r
 ```
 
-**Important:** Values are provided as strings and parsed as YAML scalars.
-
-### 3. **has** - Check if a key exists
-
-Check whether files contain a specific front matter key:
-
+### Search for Files
 ```bash
-# Check single file
-fr has --key author post.md
+# Find all drafts (ALWAYS recursive)
+fr search 'draft == `true`' ./posts
 
-# Check directory (non-recursive)
-fr has --key draft posts/
-
-# Check recursively
-fr has --key category content/ -r
+# Complex query
+fr search 'draft == `false` && contains(tags, `"swift"`)' ./posts
 ```
 
-### 4. **list** - List all front matter keys
-
-Display all keys present in files' front matter:
-
+### Bulk Operations (Piping)
 ```bash
-# List keys in one file
-fr list post.md
-
-# List from directory
-fr list posts/
-
-# List recursively from directory tree
-fr list content/ --recursive --format json
-```
-
-### 5. **remove** - Delete front matter keys
-
-Remove a key from front matter in files or directories:
-
-```bash
-# Remove from single file
-fr remove --key temporary post.md
-
-# Remove from directory (non-recursive)
-fr remove --key draft published/
-
-# Remove recursively
-fr remove --key deprecated content/ -r
-```
-
-**Warning:** This modifies files. The key is permanently removed.
-
-### 6. **rename** - Rename front matter keys
-
-Change a key's name while preserving its value:
-
-```bash
-# Rename in single file
-fr rename --old-key author --new-key authors post.md
-
-# Rename in directory
-fr rename --old-key category --new-key categories posts/
-
-# Rename recursively
-fr rename --old-key tag --new-key tags content/ -r
-```
-
-### 7. **sort-keys** - Alphabetize front matter keys
-
-Sort all keys in front matter alphabetically:
-
-```bash
-# Sort a single file
-fr sort-keys post.md
-
-# Sort all files in directory (non-recursive)
-fr sort-keys posts/
-
-# Sort recursively
-fr sort-keys content/ --recursive
-```
-
-### 8. **lines** - Get line information
-
-Show line numbers and ranges for front matter:
-
-```bash
-# Get front matter line range for file
-fr lines post.md
-
-# Get for all files in directory
-fr lines posts/ -r
-```
-
-Useful for debugging or integration with other tools.
-
-### 9. **dump** - Output entire front matter
-
-Dump the complete front matter from files in various formats:
-
-```bash
-# Dump single file as JSON (default)
-fr dump post.md
-
-# Dump with YAML format
-fr dump post.md --format yaml
-
-# Dump with --- delimiters included
-fr dump post.md --format yaml --include-delimiters
-
-# Dump as PropertyList XML
-fr dump post.md --format plist
-
-# Dump as raw YAML (alias for yaml)
-fr dump post.md --format raw
-
-# Dump multiple files
-fr dump posts/ --format json
-
-# Dump recursively from directory tree
-fr dump posts/ -r --format yaml
-
-# Combine with custom extensions
-fr dump content/ -r --format plist --extensions md,txt
-```
-
-**Options:**
-- Path arguments: File(s) and/or directory(ies) to process (required)
-- `--recursive` / `-r`: Recursively process directories (default: false)
-- `--extensions` / `-e`: File extensions to process (default: md,markdown,yml,yaml)
-- `--format` / `-f`: Output format (json, yaml, raw, plist) - default: json
-- `--include-delimiters`: Add --- delimiters to YAML/raw output (default: false)
-- Alias: `d`
-
-**Debug output:** Set the `FRONTRANGE_DEBUG` environment variable to enable debug output.
-
-**Use Cases:**
-- Export front matter for external processing
-- Convert between formats (YAML to JSON, JSON to plist)
-- Extract all metadata for analysis or migration
-- Generate PropertyList files for macOS/iOS integration
-- Bulk export of front matter data
-
-**Format Details:**
-- **json**: Pretty-printed JSON with sorted keys
-- **yaml**: Clean YAML output
-- **raw**: Alias for yaml format
-- **plist**: Apple PropertyList XML format
-
-**Examples:**
-
-```bash
-# Export all post metadata as JSON for processing
-fr dump posts/ -r --format json > all-metadata.json
-
-# Convert front matter to plist for macOS app
-fr dump config.md --format plist > config.plist
-
-# Get YAML with delimiters (ready to paste into file)
-fr dump template.md --format yaml --include-delimiters
-
-# Bulk dump for migration
-for file in *.md; do
-  fr dump "$file" --format json > "${file%.md}.json"
+# Update all matching files
+fr search 'draft == `true`' ./posts | while read -r file; do
+  fr set "$file" --key draft --value false
+  fr set "$file" --key publishDate --value "$(date +%Y-%m-%d)"
 done
 ```
 
-### 10. **search** - Query files by front matter
+---
 
-**Most powerful command** - Search for files matching JMESPath expressions.
+## Critical Non-Obvious Behaviors
 
-**ALWAYS RECURSIVE** - no flag needed:
+### 1. Search is ALWAYS Recursive
+
+Unlike other commands, `search` **always** searches recursively - no `-r` flag needed:
 
 ```bash
-# Find all draft posts (searches recursively automatically)
-fr search 'draft == `true`' ./posts
+# Other commands: explicit recursive flag required
+fr get --key title posts/         # Only direct children
+fr get --key title posts/ -r      # Includes subdirectories ✓
 
-# Search entire project
-fr search 'contains(tags, `"swift"`)' .
-
-# Complex queries
-fr search 'draft == `false` && contains(tags, `"tutorial"`)' content/
-
-# Control extensions
-fr search 'published == `true`' . --extensions md
-
-# Format results
-fr search 'author == `"Jane"`' . --format json
+# Search: ALWAYS recursive automatically
+fr search 'draft == `true`' posts/ # Searches ALL subdirectories ✓
 ```
 
-**Critical JMESPath Syntax Rules:**
+### 2. JMESPath Literal Syntax - THE ONE TRUE WAY
 
-1. **ALWAYS wrap the entire expression in SINGLE QUOTES** (to prevent shell interpretation)
-2. **ALWAYS use BACKTICKS for ALL literals:**
-   - Booleans: `` `true` ``, `` `false` ``
-   - Strings: `` `"text"` ``
-   - Numbers: `` `42` ``, `` `3.14` ``
-   - Null: `` `null` ``
+**ALWAYS** use this exact syntax for search queries:
 
-**Common JMESPath Patterns:**
+1. **Wrap entire expression in SINGLE QUOTES**
+2. **Use BACKTICKS around ALL literals**
 
+```bash
+# CORRECT ✓
+fr search 'draft == `true`' .
+fr search 'status == `"published"`' .
+fr search 'count > `100`' .
+fr search 'contains(tags, `"swift"`)' .
+
+# WRONG ✗
+fr search draft == `true` .           # Missing quotes
+fr search "draft == `true`" .         # Wrong quotes (shell interprets backticks)
+fr search 'draft == true' .           # Missing backticks around literal
+```
+
+**Common JMESPath patterns:**
 ```bash
 # Equality
 'draft == `true`'
 'status == `"published"`'
 
-# Contains (for arrays)
-'contains(tags, `"swift"`)'
+# Arrays
+'contains(tags, `"tutorial"`)'
 
 # Boolean logic
 'draft == `false` && featured == `true`'
@@ -402,173 +135,71 @@ fr search 'author == `"Jane"`' . --format json
 'rating >= `4.5`'
 ```
 
-**Search Output:**
+### 3. Directory Processing Modes
 
-Outputs file paths (one per line). Progress messages go to stderr and won't interfere with piping:
-```bash
-$ fr search 'draft == `true`' ./posts
-Processing batch 1/4...  # stderr - safe to ignore
-/path/to/file1.md        # stdout - piped
-/path/to/file2.md        # stdout - piped
-```
+**Default:** Most commands only process files in the specified directory (non-recursive).
 
-Suppress progress: `fr search 'draft' . 2>/dev/null`
+**Recursive:** Use `--recursive` / `-r` flag to include subdirectories.
 
-### 10. **replace** - Replace entire front matter
-
-**DESTRUCTIVE** - Replace the complete front matter with new structured data.
-
-**IMPORTANT:** This command prompts for confirmation before making changes.
-
-**Input Methods:**
-
-You must provide data using ONE of these options:
-- `--data`: Inline data string
-- `--from-file`: Read from a file
-
-**Supported Formats:**
-- `json`: JavaScript Object Notation
-- `yaml`: YAML Ain't Markup Language
-- `plist`: Apple PropertyList XML
-
-**Validation:**
-Front matter must be a dictionary/mapping. Arrays and scalars are rejected.
+**Exception:** `search` is ALWAYS recursive.
 
 ```bash
-# Replace with inline JSON
-fr replace post.md --data '{"title": "New Title", "draft": false}' --format json
+# Process only posts/ directory (direct children)
+fr get --key title posts/
 
-# Replace from YAML file
-fr replace post.md --from-file new-metadata.yaml --format yaml
+# Process posts/ and all subdirectories
+fr get --key title posts/ --recursive
 
-# Replace from plist file
-fr replace post.md --from-file config.plist --format plist
-
-# Process multiple files (prompted once per file)
-fr replace post1.md post2.md --data '{"status": "published"}' --format json
-
-# Process directory recursively
-fr replace posts/ -r --from-file standard-metadata.yaml --format yaml
+# Short form
+fr get --key title posts/ -r
 ```
 
-**Options:**
-- Path arguments: File(s) and/or directory(ies) to process (required)
-- `--data`: Inline data string (mutually exclusive with --from-file)
-- `--from-file`: Path to file containing data (mutually exclusive with --data)
-- `--format` / `-f`: Data format - json (default), yaml, or plist
-- `--recursive` / `-r`: Recursively process directories (default: false)
-- `--extensions` / `-e`: File extensions to process (default: md,markdown,yml,yaml)
-- `--debug` / `-d`: Enable debug output
-- Alias: `r`
+### 4. Extension Filtering
 
-**Confirmation:**
-The command prompts for confirmation (y/n) before replacing each file. This prevents accidental data loss.
+Default extensions: `md`, `markdown`, `yml`, `yaml`
 
-**Use Cases:**
-- Standardize front matter across multiple files
-- Migrate from one schema to another
-- Bulk reset metadata
-- Apply template front matter
-- Convert between data formats
-
-**Safety:**
-- Always use version control (git)
-- Test on a copy first
-- The command shows the file path and waits for confirmation
-- Type 'y' or 'yes' to proceed, anything else cancels
-
-**Examples:**
+**Override with `--extensions` / `-e`:**
 
 ```bash
-# Create standardized front matter template
-cat > template.json <<EOF
-{
-  "draft": false,
-  "published": true,
-  "author": "Your Name",
-  "date": "2025-12-11",
-  "tags": []
-}
-EOF
+# Only markdown files
+fr get --key title docs/ -r --extensions md
 
-# Apply to all posts
-fr replace posts/ -r --from-file template.json --format json
+# Multiple extensions
+fr list content/ --extensions txt,md,rst
 
-# Replace with YAML (useful for complex structures)
-cat > metadata.yaml <<EOF
-title: New Post
-draft: false
-tags:
-  - tutorial
-  - swift
-metadata:
-  author: Jane Doe
-  category: Technical
-EOF
-
-fr replace post.md --from-file metadata.yaml --format yaml
-
-# One-liner JSON replacement
-fr replace article.md --data '{"title": "Updated", "status": "review"}' --format json
+# All files (empty string)
+fr search 'title' . --extensions ""
 ```
 
-**Validation Errors:**
+---
 
-```bash
-# Array rejected
-$ fr replace post.md --data '["tag1", "tag2"]' --format json
-Error: Front matter must be a dictionary/mapping, not a array/sequence
+## Common Commands Overview
 
-# Scalar rejected
-$ fr replace post.md --data '"just a string"' --format json
-Error: Front matter must be a dictionary/mapping, not a scalar/primitive value
+For complete command reference, see [references/commands.md](references/commands.md).
 
-# Both input options
-$ fr replace post.md --data '{}' --from-file file.json
-Error: Cannot use both --data and --from-file
-```
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `get` | Retrieve value | `fr get --key title post.md` |
+| `set` | Set/update value | `fr set --key draft --value false post.md` |
+| `has` | Check key exists | `fr has --key author post.md` |
+| `list` | List all keys | `fr list post.md` |
+| `remove` | Delete key | `fr remove --key temp post.md` |
+| `rename` | Rename key | `fr rename --old-key tag --new-key tags post.md` |
+| `sort-keys` | Alphabetize keys | `fr sort-keys post.md` |
+| `lines` | Show line numbers | `fr lines post.md` |
+| `dump` | Export front matter | `fr dump post.md --format json` |
+| `search` | Query files (JMESPath) | `fr search 'draft == \`true\`' ./posts` |
+| `replace` | Replace entire front matter | `fr replace post.md --data '{}' --format json` |
 
-**Comparison with Other Commands:**
+---
 
-| Command | Purpose | Scope |
-|---------|---------|-------|
-| `set` | Set/update ONE key | Single key-value pair |
-| `replace` | Replace ENTIRE front matter | Destructive, all keys |
-| `remove` | Delete ONE key | Single key removal |
+## Bulk Operations
 
-Use `replace` when you need to completely overwrite all front matter. Use `set` for updating individual keys.
-
-## Bulk Operations with Piping
-
-The `search` command outputs paths, enabling powerful bulk operations:
-
-### Choosing the Right Approach
-
-| Scenario | Use | Why |
-|----------|-----|-----|
-| <100 files, no spaces | `xargs` | Fast, simple |
-| Paths with spaces | `while read` | Handles quoting |
-| 100+ files | `while read` | Avoids arg limits |
-| Multi-step operations | `while read` | Easier to debug |
-
-### Using xargs
-
-**CAUTION:** xargs has system argument limits (~4096) and fails with spaces in paths.
-
-```bash
-# Simple cases (few files, no spaces)
-fr search 'draft == `true`' ./posts | xargs fr set --key draft --value false
-
-# With spaces: use -I flag
-fr search 'tags' . | xargs -I {} fr get --key tags "{}"
-
-# Large operations: batch with -n
-fr search 'tags' . | xargs -n 50 fr get --key tags
-```
+The `search` command outputs file paths (one per line), enabling powerful piping:
 
 ### Using while loops (Recommended)
 
-**Handles spaces, special characters, and large file sets reliably:**
+Handles spaces, special characters, and large file sets:
 
 ```bash
 # Publish and date-stamp matching posts
@@ -576,19 +207,52 @@ fr search 'draft == `true`' ./posts | while read -r file; do
   fr set "$file" --key published --value true
   fr set "$file" --key date --value "$(date +%Y-%m-%d)"
 done
-
-# With error handling
-fr search 'tags' . | while read -r file; do
-  tags=$(fr get --key tags "$file" 2>&1)
-  if [[ ! "$tags" =~ "not found" ]]; then
-    echo "$file: $tags"
-  fi
-done
 ```
 
-## Handling Missing Keys & Errors
+### Using xargs (Simple cases only)
 
-Not all files have all keys. Commands output errors when keys are missing:
+Works for small file sets without spaces in paths:
+
+```bash
+# Simple bulk update
+fr search 'draft == `true`' ./posts | xargs fr set --key draft --value false
+
+# With spaces: use -I flag
+fr search 'tags' . | xargs -I {} fr get --key tags "{}"
+```
+
+**When to use each:**
+- `while read`: Paths with spaces, 100+ files, multi-step operations
+- `xargs`: <100 files, no spaces, simple one-liners
+
+For detailed piping patterns, see [references/examples.md](references/examples.md).
+
+---
+
+## Output Formats
+
+Most commands support `--format` / `-f` for output formatting:
+
+```bash
+# YAML (default for most commands)
+fr get --key tags post.md --format yaml
+
+# JSON
+fr get --key tags post.md --format json
+
+# Plain string (no formatting)
+fr get --key title post.md --format plainString
+
+# Dump supports additional formats
+fr dump post.md --format plist      # Apple PropertyList XML
+fr dump post.md --format yaml --include-delimiters
+```
+
+---
+
+## Handling Missing Keys
+
+Not all files have all keys. Commands error when keys are missing:
 
 ```bash
 $ fr get --key tags post.md
@@ -597,7 +261,7 @@ Error: Key 'tags' not found in frontmatter.
 
 **Strategies:**
 
-1. **Filter with search first** (only processes files with the key):
+1. **Filter with search first:**
    ```bash
    fr search 'tags' . | while read -r file; do
      fr get --key tags "$file"
@@ -611,28 +275,19 @@ Error: Key 'tags' not found in frontmatter.
 
 3. **Check for errors in scripts:**
    ```bash
-   tags=$(fr get --key tags "$file" 2>&1)
-   if [[ ! "$tags" =~ "Error" ]]; then
-     echo "$tags"
+   if fr has --key tags "$file" 2>/dev/null; then
+     fr get --key tags "$file"
    fi
    ```
 
-## Global Options Summary
+---
 
-Options available across commands:
-
-- **Path arguments:** File(s) and/or directory(ies) to process (required for most commands)
-- `--recursive` / `-r`: Recursively process directories (default: false, **except search which is always recursive**)
-- `--extensions` / `-e`: File extensions to process (default: `md,markdown,yml,yaml`)
-- `--format` / `-f`: Output format - `yaml`, `json`, or `plainString`
-- `--debug` / `-d`: Enable debug output for troubleshooting
-
-## Common Patterns & Recipes
+## Common Workflows
 
 ### Publishing Workflow
 
 ```bash
-# Find drafts ready to publish (recursive search)
+# Find drafts ready to publish
 fr search 'draft == `true` && ready == `true`' ./posts
 
 # Publish them
@@ -646,322 +301,93 @@ done
 ### Content Auditing
 
 ```bash
-# Get all authors from entire content tree
+# Get all authors
 fr get --key author content/ -r --format json
 
-# Count posts by status (search is always recursive)
+# Count by status
 fr search 'status == `"draft"`' posts | wc -l
 fr search 'status == `"published"`' posts | wc -l
 
-# List all unique tags across all posts
+# List unique tags
 fr get --key tags posts/ -r --format json | jq -r '.[]' | sort -u
 ```
 
 ### Batch Updates
 
 ```bash
-# Add a new key to all files recursively
-fr set --key lastChecked --value "2025-12-10" posts/ -r
+# Add key to all files
+fr set --key version --value "2.0" content/ -r
 
-# Update all markdown files in content tree
-fr set --key version --value "2.0" content/ -r --extensions md
-
-# Rename keys across entire project
+# Rename keys across project
 fr rename --old-key category --new-key categories . -r
-```
 
-### Cleanup Operations
-
-```bash
-# Remove deprecated keys (search is recursive)
+# Remove deprecated keys
 fr search 'oldField' . | xargs fr remove --key oldField
-
-# Sort keys in all files recursively
-fr sort-keys content/ -r
-
-# Remove temporary fields from drafts directory
-fr remove --key temp drafts/ -r
 ```
 
-### Working with Subdirectories
+For more patterns and recipes, see [references/examples.md](references/examples.md).
 
-```bash
-# Process specific subdirectory structure
-fr set --key section --value "tutorials" content/tutorials/ -r
-fr set --key section --value "guides" content/guides/ -r
-
-# Search specific subtree
-fr search 'featured == `true`' content/blog/
-
-# Combine search with directory-specific updates
-fr search 'draft == `false`' content/tutorials/ | \
-  xargs fr set --key category --value "tutorial"
-```
-
-## Important Considerations
-
-### 1. Directory Processing Modes
-
-**Key Rule:** Most commands require `--recursive` for subdirectories, but **search is always recursive**.
-
-```bash
-# These are DIFFERENT:
-fr get --key draft posts/          # Only direct children
-fr get --key draft posts/ -r       # All subdirectories too
-
-# Search is ALWAYS recursive (no flag needed or accepted)
-fr search 'draft == `true`' posts/ # Searches all subdirectories
-```
-
-### 2. Extension Filtering
-
-Default extensions are `md,markdown,yml,yaml`. To process other file types:
-
-```bash
-# Custom extensions
-fr list docs/ -r --extensions txt,md,rst
-
-# All files (use empty string)
-fr search 'title' . --extensions ""
-```
-
-### 3. YAML Node Types
-
-Internally, FrontRange works with `Yams.Node` types, not plain Swift dictionaries. The CLI handles this conversion, but be aware:
-
-- Complex YAML structures (nested maps, arrays) are preserved
-- Type information is maintained (strings vs numbers vs booleans)
-- YAML comments and formatting may not be preserved after modification
-
-### 4. File Modification
-
-Commands like `set`, `remove`, `rename`, and `sort-keys` **modify files in place**. Always:
-- Use version control (git)
-- Test on sample files first
-- Use `--debug` flag when unsure
-
-### 5. JMESPath Shell Escaping
-
-The single most common error is improper quoting. Remember:
-
-**CORRECT:**
-```bash
-fr search 'draft == `true`' .
-fr search 'contains(tags, `"swift"`)' posts/
-```
-
-**INCORRECT:**
-```bash
-fr search draft == `true` .           # Shell interprets backticks
-fr search "draft == `true`" .         # Shell interprets backticks
-fr search 'draft == true' .           # Missing backticks around literal
-```
-
-### 6. Development vs Production
-
-During development, use `fr`. For production/CI:
-
-```bash
-# Build release binary
-swift build -c release
-
-# Use binary directly (faster)
-.build/release/fr get --key title posts/ -r
-```
-
-## Troubleshooting
-
-### Command not found
-
-Make sure you're in the FrontRange project directory and use:
-```bash
-fr <command>
-```
-
-### Not processing subdirectories
-
-Remember:
-- Most commands need `--recursive` / `-r` flag for subdirectories
-- Search command is ALWAYS recursive
-
-### Wrong file types processed
-
-Check your `--extensions` option:
-```bash
-# See what extensions are being used
-fr get --key title posts/ -r --debug
-
-# Override extensions
-fr get --key title posts/ -r --extensions md
-```
-
-### JMESPath syntax errors
-
-- Always use single quotes around the expression
-- Always use backticks around literals
-- Check for matching quotes and backticks
-- Use `--debug` flag to see parsing errors
-
-### File not modified
-
-- Check that files have front matter delimiters (`---`)
-- Verify file paths are correct
-- Ensure you have write permissions
-- Use `--debug` to see what's happening
-
-## Advanced: Complex Scripts for Structured Data
-
-**For operations requiring precise control over many files with special characters in paths:**
-
-Create standalone bash scripts for maintainability:
-
-```bash
-#!/bin/bash
-# Save as extract_tags.sh
-echo "{"
-
-books=(
-  "/path/with spaces/Book 1.md"
-  "/path/with (parens)/Book 2.md"
-)
-
-total=${#books[@]}
-count=0
-
-for book_path in "${books[@]}"; do
-  count=$((count + 1))
-  if [ -f "$book_path" ]; then
-    book_name=$(basename "$book_path" .md)
-    tags=$(fr get --key tags "$book_path" 2>&1)
-
-    if [[ ! "$tags" =~ "not found" ]] && [[ ! "$tags" =~ "Error" ]]; then
-      echo -n "  \"$book_name\": $tags"
-      [ $count -lt $total ] && echo "," || echo ""
-    fi
-  fi
-done
-
-echo "}"
-```
-
-Run: `chmod +x extract_tags.sh && ./extract_tags.sh > output.json`
-
-**When to use scripts vs one-liners:**
-- Repeatable operations → Script file
-- Paths with spaces/special chars → Script file
-- JSON/structured output → Script file
-- One-time quick task → Command-line
-
-## Testing Your Commands
-
-Before bulk operations, test on a sample directory:
-
-```bash
-# 1. Create test directory structure
-mkdir -p test-dir/subdir
-cat > test-dir/post1.md << 'EOF'
 ---
-title: Post 1
-draft: true
+
+## Global Options
+
+Available across most commands:
+
+- Path arguments: File(s) and/or directory(ies) to process
+- `--recursive` / `-r`: Process subdirectories (default: false, except `search` which is always recursive)
+- `--extensions` / `-e`: File extensions to process (default: `md,markdown,yml,yaml`)
+- `--format` / `-f`: Output format (`yaml`, `json`, `plainString`)
+- `--debug` / `-d`: Enable debug output
+
 ---
-Content 1
-EOF
 
-cat > test-dir/subdir/post2.md << 'EOF'
----
-title: Post 2
-draft: true
----
-Content 2
-EOF
+## Quick Reference: When to Use Each Approach
 
-# 2. Test non-recursive (only post1.md)
-fr get --key draft test-dir/
-
-# 3. Test recursive (both files)
-fr get --key draft test-dir/ --recursive
-
-# 4. Test search (always recursive)
-fr search 'draft == `true`' test-dir/
-
-# 5. Test modification
-fr set --key draft --value false test-dir/ -r
-
-# 6. Verify
-fr get --key draft test-dir/ -r
-
-# 7. Clean up
-rm -rf test-dir/
+### Single File Operations
+```bash
+fr get --key title post.md
+fr set --key draft --value false post.md
 ```
 
-## Examples
-
-### Complete Directory-Aware Workflow
-
+### Directory Operations (Non-Recursive)
 ```bash
-# Step 1: Understand directory structure
-find posts -type f -name "*.md" | head -10
+fr get --key title posts/              # Only direct children
+fr set --key reviewed --value true posts/
+```
 
-# Step 2: Search recursively for drafts (search is always recursive)
-fr search 'draft == `true`' ./posts
+### Directory Operations (Recursive)
+```bash
+fr get --key title posts/ -r           # All subdirectories
+fr set --key category --value "blog" content/ -r
+```
 
-# Step 3: Check which drafts are in subdirectories
-fr search 'draft == `true` && ready == `true`' ./posts --format json
+### Query-Based Operations
+```bash
+# Search (always recursive) + pipe to other commands
+fr search 'draft == `true`' . | xargs fr set --key draft --value false
 
-# Step 4: Review front matter in subdirectories
-fr list posts/tutorials/ -r
-
-# Step 5: Publish ready posts across all subdirectories
-fr search 'draft == `true` && ready == `true`' ./posts | while read -r file; do
-  echo "Publishing: $file"
-  fr set "$file" --key draft --value false
+# With while loop for safety
+fr search 'ready == `true`' . | while read -r file; do
   fr set "$file" --key published --value true
-  fr set "$file" --key date --value "$(date +%Y-%m-%d)"
-  fr remove "$file" --key ready
-done
-
-# Step 6: Verify changes across entire tree
-fr search 'published == `true`' ./posts | tail -5
-fr get --key published posts/ -r | grep -c true
-```
-
-### Organizing Content by Directory
-
-```bash
-# Set category based on directory location
-fr set --key category --value "tutorial" content/tutorials/ -r
-fr set --key category --value "guide" content/guides/ -r
-fr set --key category --value "blog" content/blog/ -r
-
-# Find mismatched categories
-fr search 'category != `"tutorial"`' content/tutorials/
-fr search 'category != `"guide"`' content/guides/
-
-# Add section metadata to all files in each section
-for section in intro advanced reference; do
-  fr set --key section --value "$section" "content/$section/" -r
 done
 ```
+
+---
+
+## Additional Documentation
+
+- **[references/commands.md](references/commands.md)** - Complete command reference with all options and flags
+- **[references/examples.md](references/examples.md)** - Detailed patterns, recipes, and workflows
+- **[references/troubleshooting.md](references/troubleshooting.md)** - Troubleshooting guide and advanced usage
+
+---
 
 ## Summary
 
-The FrontRange CLI provides a complete toolkit for managing YAML front matter with powerful directory processing:
+**Key Principles:**
+1. **Search is always recursive** - no `-r` flag needed
+2. **JMESPath requires backticks** - `'draft == \`true\`'` not `'draft == true'`
+3. **Most commands need `-r` for subdirectories** - except search
+4. **Pipe search results for bulk operations** - `fr search ... | xargs fr set ...`
 
-**Directory Processing:**
-- Most commands: Use `--recursive` / `-r` for subdirectories
-- Search command: **Always recursive** automatically
-- Extension filtering: `--extensions` controls which files to process
-
-**Command Categories:**
-- **Read operations**: `get`, `has`, `list`, `lines`
-- **Write operations**: `set`, `remove`, `rename`, `sort-keys`
-- **Query operations**: `search` with JMESPath (always recursive)
-- **Bulk operations**: Pipe search results to other commands
-
-**Key principle:** The `search` command finds files recursively, and you pipe those paths to other `fr` commands for bulk operations.
-
-For more details, see:
-- [README.md](../../README.md) - Project overview
-- [CLAUDE.md](../../CLAUDE.md) - Developer guide
-- [GlobalOptions.swift](../../Sources/FrontRangeCLI/GlobalOptions.swift) - Directory processing implementation
-- [Search.swift](../../Sources/FrontRangeCLI/Commands/Search.swift) - Search command implementation
+The FrontRange CLI provides a complete toolkit for managing YAML front matter with powerful directory processing, flexible querying, and seamless bulk operations.
