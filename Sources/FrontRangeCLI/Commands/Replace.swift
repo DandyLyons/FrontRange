@@ -70,6 +70,12 @@ extension FrontRangeCLIEntry {
     @Option(name: [.short, .long], help: "Data format (json, yaml, plist)")
     var format: DataFormat = .json
 
+    @Flag(name: .long, help: "Validate against schema after replacement (OPT-IN)")
+    var validate: Bool = false
+
+    @Option(name: .long, help: "Schema to validate against")
+    var validateSchema: String?
+
     @Argument(help: "Path(s) to the file(s) to process")
     var paths: [Path]
 
@@ -103,16 +109,65 @@ extension FrontRangeCLIEntry {
         throw ValidationError(error.description)
       }
 
+      // Initialize resolver if validation is enabled
+      let resolver = validate ? SchemaResolver() : nil
+
       // Process each file
       for path in paths {
-        try replaceInFile(path: path, newFrontMatter: newFrontMatter)
+        try replaceInFile(path: path, newFrontMatter: newFrontMatter, resolver: resolver)
       }
     }
 
-    private func replaceInFile(path: Path, newFrontMatter: Yams.Node.Mapping) throws {
+    private func replaceInFile(
+      path: Path,
+      newFrontMatter: Yams.Node.Mapping,
+      resolver: SchemaResolver?
+    ) throws {
       printIfDebug("ℹ️ Processing '\(path)'")
 
-      // Prompt for confirmation (interactive)
+      // Read and parse document
+      let content = try path.read(.utf8)
+      var doc = try FrontMatteredDoc(parsing: content)
+
+      // Replace front matter (direct assignment)
+      doc.frontMatter = newFrontMatter
+
+      // Validate if requested (OPT-IN) - BEFORE confirmation
+      if validate, let schemaResolver = resolver {
+        printIfDebug("🔍 Validating after replacement...")
+
+        // Resolve schema
+        let embeddedSchema = doc.getValue(forKey: "$schema")
+        guard let schema = try schemaResolver.resolveSchema(
+          explicit: validateSchema,
+          embedded: embeddedSchema,
+          filePath: path.absolute().string
+        ) else {
+          throw ValidationError.schemaNotFound(
+            "No schema found. Provide --validate-schema or add $schema key to frontmatter."
+          )
+        }
+
+        // Validate
+        let validator = SchemaValidator()
+        let result = validator.validate(doc, against: schema)
+
+        if !result.isValid {
+          // Print violations to stderr
+          printToStderr("✗ Validation failed for \(path.string):\n")
+          for (index, violation) in result.violations.enumerated() {
+            printToStderr(formatViolation(violation, index: index))
+            printToStderr("\n")
+          }
+
+          // Block the save - throw error (skip confirmation)
+          throw ValidationError.validationFailed(violations: result.violations)
+        }
+
+        printIfDebug("✅ Validation passed")
+      }
+
+      // Prompt for confirmation (interactive) - AFTER validation passes
       print("⚠️  This will REPLACE the entire front matter in '\(path)'. Continue? (y/n): ", terminator: "")
       // Flush stdout to ensure prompt appears before readLine()
       FileHandle.standardOutput.synchronizeFile()
@@ -126,13 +181,6 @@ extension FrontRangeCLIEntry {
         print("Cancelled.")
         return
       }
-
-      // Read and parse document
-      let content = try path.read(.utf8)
-      var doc = try FrontMatteredDoc(parsing: content)
-
-      // Replace front matter (direct assignment)
-      doc.frontMatter = newFrontMatter
 
       // Render and write back
       let updatedContent = try doc.render()
