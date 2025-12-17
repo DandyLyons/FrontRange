@@ -1,5 +1,5 @@
 {
-  "originHash" : "150aa8bbd6c175b5dea36abbe49d71af150df43634384cbc25439e9e547d5267",
+  "originHash" : "e0158501426cdf8f623333460178dd71527bbb5df54a1d0d1fec5cc7a2ec4825",
   "pins" : [
     {
       "identity" : "command",
@@ -26,6 +26,15 @@
       "state" : {
         "revision" : "3877a5060e85ae33e3b9fe51ab581784f65ec80e",
         "version" : "1.0.3"
+      }
+    },
+    {
+      "identity" : "jsonschema.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kylef/JSONSchema.swift.git",
+      "state" : {
+        "revision" : "d14de4b2d9205068c9db89c00d097ca43c897000",
+        "version" : "0.6.0"
       }
     },
     {
