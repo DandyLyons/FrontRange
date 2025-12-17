@@ -124,16 +124,7 @@ public class SchemaResolver {
   private func loadSchemaData(from path: String) throws -> Data {
     // Check if it's a URL
     if path.hasPrefix("http://") || path.hasPrefix("https://") {
-      // URL loading (Phase 6: Advanced Features)
-      // For now, throw an error
-      throw ValidationError.schemaLoadFailed(
-        path,
-        underlyingError: NSError(
-          domain: "FrontRange",
-          code: 1,
-          userInfo: [NSLocalizedDescriptionKey: "URL schema loading not yet implemented. Use file paths for now."]
-        )
-      )
+      return try loadSchemaFromURL(path)
     }
 
     // Load from file path
@@ -145,6 +136,27 @@ public class SchemaResolver {
       let expandedPath = (path as NSString).expandingTildeInPath
       let expandedURL = URL(fileURLWithPath: expandedPath)
       return try Data(contentsOf: expandedURL)
+    }
+  }
+
+  /// Load schema from HTTP/HTTPS URL
+  private func loadSchemaFromURL(_ urlString: String) throws -> Data {
+    guard let url = URL(string: urlString) else {
+      throw ValidationError.schemaLoadFailed(
+        urlString,
+        underlyingError: NSError(
+          domain: "FrontRange",
+          code: 1,
+          userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]
+        )
+      )
+    }
+
+    // Use Foundation's synchronous Data(contentsOf:) which works with URLs
+    do {
+      return try Data(contentsOf: url)
+    } catch {
+      throw ValidationError.schemaLoadFailed(urlString, underlyingError: error)
     }
   }
 
