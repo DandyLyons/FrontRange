@@ -1,0 +1,44 @@
+# .frontrange.yml - FrontRange Project Configuration Example
+#
+# This file defines project-wide settings for FrontRange CLI.
+# Rename to .frontrange.yml and place in your project root.
+#
+# IMPORTANT: Having this config file does NOT enable validation automatically!
+# Validation is 100% opt-in - you must explicitly run `fr validate` or use --validate flag.
+
+# Schema Mappings
+# Map file patterns (glob) to JSONSchema files
+# Patterns are matched in order - first match wins
+schemas:
+  # Blog posts use blog-post schema
+  "content/posts/**/*.md": "schemas/blog-post.json"
+
+  # Pages use page schema
+  "content/pages/**/*.md": "schemas/page.json"
+
+  # Documentation uses doc schema
+  "docs/**/*.md": "schemas/documentation.json"
+
+  # Default fallback for all other markdown files
+  "**/*.md": "schemas/default.json"
+
+# Validation Settings
+# These apply when validation IS enabled (via fr validate or --validate flag)
+validation:
+  # Patterns to exclude during validation
+  exclude:
+    - "drafts/**"
+    - "temp/**"
+    - "**/README.md"
+
+  # Cache schemas for performance (default: true)
+  cacheSchemas: true
+
+# Extension Preferences
+# Default file extensions to process
+extensions:
+  default:
+    - md
+    - markdown
+    - yml
+    - yaml

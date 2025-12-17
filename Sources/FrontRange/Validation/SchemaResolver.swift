@@ -13,12 +13,22 @@ import Yams
 public class SchemaResolver {
   private var schemaCache: [String: Schema] = [:]
   private let cacheSchemas: Bool
+  private var config: ProjectConfig?
+  private let projectRoot: String?
 
   /// Initialize a schema resolver
   ///
-  /// - Parameter cacheSchemas: Whether to cache loaded schemas for performance (default: true)
-  public init(cacheSchemas: Bool = true) {
+  /// - Parameters:
+  ///   - cacheSchemas: Whether to cache loaded schemas for performance (default: true)
+  ///   - projectRoot: Project root directory for loading .frontrange.yml (default: auto-detect)
+  public init(cacheSchemas: Bool = true, projectRoot: String? = nil) {
     self.cacheSchemas = cacheSchemas
+    self.projectRoot = projectRoot ?? Self.findProjectRoot()
+
+    // Try to load project config
+    if let root = self.projectRoot {
+      self.config = try? ProjectConfig.load(from: root)
+    }
   }
 
   /// Resolve a schema based on priority: explicit path, embedded $schema, or config
@@ -51,11 +61,11 @@ public class SchemaResolver {
       return try loadSchema(from: schemaPath)
     }
 
-    // Priority 3: Project config (TODO: Phase 3)
-    // if let config = self.config,
-    //    let configSchemaPath = config.schemaPath(for: filePath) {
-    //   return try loadSchema(from: configSchemaPath)
-    // }
+    // Priority 3: Project config (.frontrange.yml)
+    if let config = self.config,
+       let configSchemaPath = config.schemaPath(for: filePath ?? "") {
+      return try loadSchema(from: configSchemaPath)
+    }
 
     // Priority 4: No schema found (graceful)
     return nil
@@ -144,5 +154,34 @@ public class SchemaResolver {
       return nil
     }
     return String.construct(from: node)
+  }
+
+  /// Find project root directory by looking for .git directory
+  ///
+  /// Searches upward from current directory until .git is found or root is reached
+  ///
+  /// - Returns: Project root path if found, nil otherwise
+  private static func findProjectRoot(startingFrom path: String? = nil) -> String? {
+    let fileManager = FileManager.default
+    var currentPath = path ?? fileManager.currentDirectoryPath
+
+    // Search upward for .git directory
+    while true {
+      let gitPath = (currentPath as NSString).appendingPathComponent(".git")
+
+      if fileManager.fileExists(atPath: gitPath) {
+        return currentPath
+      }
+
+      // Move up one directory
+      let parentPath = (currentPath as NSString).deletingLastPathComponent
+
+      // Reached root without finding .git
+      if parentPath == currentPath {
+        return nil
+      }
+
+      currentPath = parentPath
+    }
   }
 }
