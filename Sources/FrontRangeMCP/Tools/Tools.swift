@@ -25,6 +25,7 @@ extension ThisServer {
     case sort_keys
     case lines
     case dump
+    case validate
   }
 
   static let tools: [Tool] = [
@@ -113,6 +114,15 @@ extension ThisServer {
         "path": .object(["type": .string("string"), "description": .string("Path to the file to process")]),
         "format": .object(["type": .string("string"), "description": .string("Output format: json (default), yaml, raw, or plist")]),
         "includeDelimiters": .object(["type": .string("boolean"), "description": .string("Include --- delimiters for YAML/raw output (default: false)")]),
+      ],
+    ),
+    Tool(
+      name: .validate,
+      description: "Validate front matter against a JSONSchema. Returns validation results including any violations found. OPT-IN: Validation never runs automatically - must be explicitly called.",
+      params: [
+        "path": .object(["type": .string("string"), "description": .string("Path to the file to validate")]),
+        "schema": .object(["type": .string("string"), "description": .string("Path to JSONSchema file or URL (optional, can use embedded $schema key)")]),
+        "format": .object(["type": .string("string"), "description": .string("Output format: detailed (default), summary, or json")]),
       ],
     ),
   ]
