@@ -1,6 +1,6 @@
 ---
 title: Getting Started with FrontRange
-date: 2025-12-17
+date: "2025-12-17"
 draft: false
 author: FrontRange Team
 tags:

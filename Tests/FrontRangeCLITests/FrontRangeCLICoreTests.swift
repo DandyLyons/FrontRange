@@ -44,6 +44,7 @@ import Testing
       sort-keys, sk           Sort keys in frontmatter
       lines                   Extract a range of lines from a file
       dump, d                 Dump entire front matter in specified format
+      validate, val           Validate front matter against JSONSchema
 
       See 'fr help <subcommand>' for detailed help.
 
