@@ -14,6 +14,12 @@ public struct YAMLSubstringToNodeMappingConversion: Conversion {
   public typealias Output = Yams.Node.Mapping
   
   public func apply(_ input: Substring) throws -> Yams.Node.Mapping {
+    // Handle empty or whitespace-only input as valid empty frontmatter
+    let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
+    if trimmed.isEmpty {
+      return Yams.Node.Mapping()
+    }
+
     guard let node = try? Yams.compose(yaml: String(input)) else {
       throw FrontMatteredDoc.Parser.ParsingError.notANode
     }
