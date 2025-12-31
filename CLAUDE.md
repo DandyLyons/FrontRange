@@ -10,6 +10,11 @@ FrontRange is a Swift package for parsing, mutating, serializing, and deserializ
 2. **fr CLI** - Command-line tool for managing front matter in text files
 3. **FrontRangeMCP** - Model Context Protocol (MCP) server for front matter operations
 
+## Distribution
+
+- **Main Repository:** https://github.com/DandyLyons/FrontRange (library and source code)
+- **Homebrew Tap:** https://github.com/DandyLyons/homebrew-frontrange (macOS installation via Homebrew)
+
 ## Requirements
 
 - **Swift 6.2** or later (as defined in Package.swift)
