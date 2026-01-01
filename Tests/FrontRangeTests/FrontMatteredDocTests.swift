@@ -96,8 +96,9 @@ It can also include **Markdown** formatting.
                            ---
                            []
                            ---
-                           
+
                            """
+    // Invalid frontmatter (array instead of mapping) should throw an error
     #expect(throws: (any Error).self) {
       try FrontMatteredDoc(parsing: invalidDocString)
     }
@@ -168,5 +169,210 @@ It can also include **Markdown** formatting.
       "title": "Sample Document",
     ]
     #expect(doc.frontMatter == expected)
+  }
+
+  // MARK: - Valid Edge Cases
+
+  @Test func `frontmatter without body`() throws {
+    let docString = """
+---
+title: Test
+author: John
+---
+"""
+    let doc = try FrontMatteredDoc(parsing: docString)
+    #expect(doc.getValue(forKey: "title") == "Test")
+    #expect(doc.getValue(forKey: "author") == "John")
+    #expect(doc.body == "")
+  }
+
+  @Test func `empty frontmatter with body`() throws {
+    let docString = """
+---
+---
+Body content here
+"""
+    let doc = try FrontMatteredDoc(parsing: docString)
+    #expect(doc.frontMatter.isEmpty)
+    #expect(doc.body == "Body content here")
+  }
+
+  @Test func `empty frontmatter with whitespace`() throws {
+    let docString = """
+---
+
+---
+Body content
+"""
+    let doc = try FrontMatteredDoc(parsing: docString)
+    #expect(doc.frontMatter.isEmpty)
+    #expect(doc.body == "Body content")
+  }
+
+  @Test func `body contains delimiter`() throws {
+    let docString = """
+---
+title: Test
+---
+Some text
+---
+More text
+"""
+    let doc = try FrontMatteredDoc(parsing: docString)
+    #expect(doc.getValue(forKey: "title") == "Test")
+    #expect(doc.body == "Some text\n---\nMore text")
+  }
+
+  @Test func `complex nested YAML`() throws {
+    let docString = """
+---
+nested:
+  deep:
+    value: 42
+list: [1, 2, 3]
+metadata:
+  author: Jane
+  tags:
+    - swift
+    - yaml
+---
+Body
+"""
+    let doc = try FrontMatteredDoc(parsing: docString)
+    let nested = doc.getValue(forKey: "nested")
+    #expect(nested != nil)
+    let list = doc.getValue(forKey: "list")
+    #expect(list == [1, 2, 3])
+    #expect(doc.body == "Body")
+  }
+
+  // MARK: - Invalid Cases (should throw)
+
+  @Test func `frontmatter is array`() throws {
+    let docString = """
+---
+[]
+---
+Body
+"""
+    #expect(throws: (any Error).self) {
+      try FrontMatteredDoc(parsing: docString)
+    }
+  }
+
+  @Test func `frontmatter is scalar string`() throws {
+    let docString = """
+---
+"just a string"
+---
+Body
+"""
+    #expect(throws: (any Error).self) {
+      try FrontMatteredDoc(parsing: docString)
+    }
+  }
+
+  @Test func `frontmatter is boolean`() throws {
+    let docString = """
+---
+true
+---
+Body
+"""
+    #expect(throws: (any Error).self) {
+      try FrontMatteredDoc(parsing: docString)
+    }
+  }
+
+  @Test func `frontmatter is number`() throws {
+    let docString = """
+---
+42
+---
+Body
+"""
+    #expect(throws: (any Error).self) {
+      try FrontMatteredDoc(parsing: docString)
+    }
+  }
+
+  @Test func `frontmatter has invalid YAML syntax`() throws {
+    let docString = """
+---
+invalid: yaml: syntax:
+---
+Body
+"""
+    #expect(throws: (any Error).self) {
+      try FrontMatteredDoc(parsing: docString)
+    }
+  }
+
+  @Test func `frontmatter is YAML list`() throws {
+    let docString = """
+---
+- item1
+- item2
+---
+Body
+"""
+    #expect(throws: (any Error).self) {
+      try FrontMatteredDoc(parsing: docString)
+    }
+  }
+
+  // MARK: - Edge Cases
+  @Test func `no frontmatter`() throws {
+    let docString = """
+    This is the body without any front matter.
+    """
+    let doc = try FrontMatteredDoc(parsing: docString)
+    #expect(doc.frontMatter.isEmpty)
+    #expect(doc.body == "This is the body without any front matter.")
+  }
+
+  @Test func `single delimiter only`() throws {
+    let docString = """
+---
+This should be treated as body text
+"""
+    let doc = try FrontMatteredDoc(parsing: docString)
+    #expect(doc.frontMatter.isEmpty)
+    #expect(doc.body == "---\nThis should be treated as body text")
+  }
+
+  @Test func `delimiter not on first line`() throws {
+    let docString = """
+Some text
+---
+title: Test
+---
+More text
+"""
+    let doc = try FrontMatteredDoc(parsing: docString)
+    #expect(doc.frontMatter.isEmpty)
+    #expect(doc.body == "Some text\n---\ntitle: Test\n---\nMore text")
+  }
+
+  @Test func `empty document`() throws {
+    let docString = ""
+    let doc = try FrontMatteredDoc(parsing: docString)
+    #expect(doc.frontMatter.isEmpty)
+    #expect(doc.body == "")
+  }
+
+  @Test func `only whitespace`() throws {
+    let docString = "   \n  "
+    let doc = try FrontMatteredDoc(parsing: docString)
+    #expect(doc.frontMatter.isEmpty)
+    #expect(doc.body == "   \n  ")
+  }
+
+  @Test func `windows line endings unsupported`() throws {
+    let docString = "---\r\ntitle: Test\r\n---\r\nBody"
+    let doc = try FrontMatteredDoc(parsing: docString)
+    // Windows line endings not supported, so no frontmatter detected
+    #expect(doc.frontMatter.isEmpty)
+    #expect(doc.body == "---\r\ntitle: Test\r\n---\r\nBody")
   }
 }

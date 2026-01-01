@@ -14,6 +14,7 @@ enum MultiFormat: String, CaseIterable, ExpressibleByArgument {
   case yaml
   case raw
   case plist
+  case csv
 
   var defaultValueDescription: String {
     switch self {
@@ -22,6 +23,7 @@ enum MultiFormat: String, CaseIterable, ExpressibleByArgument {
       case .yaml: return "yaml"
       case .raw: return "raw"
       case .plist: return "plist"
+      case .csv: return "csv"
     }
   }
 }

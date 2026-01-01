@@ -8,20 +8,36 @@
 import ArgumentParser
 import Foundation
 import FrontRange
+import PathKit
 import Yams
+
+enum CSVColumnStrategy: String, CaseIterable, ExpressibleByArgument {
+  case union
+  case intersection
+  case custom
+
+  var defaultValueDescription: String {
+    switch self {
+    case .union: return "union (default)"
+    case .intersection: return "intersection"
+    case .custom: return "custom"
+    }
+  }
+}
 
 extension FrontRangeCLIEntry {
   struct Dump: ParsableCommand {
     static let configuration = CommandConfiguration(
       abstract: "Dump entire front matter in specified format",
       discussion: """
-        Outputs the complete front matter from files in various formats: JSON, YAML, raw, or plist.
+        Outputs the complete front matter from files in various formats: JSON, YAML, raw, plist, or CSV.
 
         Supports multiple files and directory processing with recursive mode.
 
         SINGLE FILE:
           Single-file dumps output the front matter directly with no wrapper.
           The --multi-format flag is ignored for single files.
+          CSV format requires multiple files.
 
         MULTIPLE FILES:
           By default, multiple files use cat-style headers (==> path <==) with empty line separation.
@@ -31,6 +47,19 @@ extension FrontRangeCLIEntry {
           --multi-format json: JSON array of {path, frontMatter} objects
           --multi-format yaml: YAML array of {path, frontMatter} objects
           --multi-format plist: PropertyList array of {path, frontMatter} objects
+          --multi-format csv: CSV table with path column + front matter keys
+
+        CSV FORMAT OPTIONS:
+          When using --multi-format csv, you can control which columns appear:
+
+          --csv-columns union (default): Include all keys from any file
+          --csv-columns intersection: Only include keys present in ALL files
+          --csv-columns custom: Use custom column list via --csv-custom-columns
+
+          The --format flag controls how nested objects/arrays are serialized in CSV cells:
+          --format json (default): Serialize as JSON strings
+          --format yaml: Serialize as YAML strings
+          --format plist: Serialize as plist strings
 
         FORMAT MIXING:
           --format controls individual file content format
@@ -55,6 +84,18 @@ extension FrontRangeCLIEntry {
 
           # Mixed format: JSON array with YAML strings
           fr dump posts/ -r --format yaml --multi-format json
+
+          # CSV with all columns (union)
+          fr dump posts/*.md --multi-format csv
+
+          # CSV with only common columns
+          fr dump posts/*.md --multi-format csv --csv-columns intersection
+
+          # CSV with custom columns
+          fr dump posts/*.md --multi-format csv --csv-columns custom --csv-custom-columns "title,author,date"
+
+          # CSV with nested data as YAML strings
+          fr dump posts/*.md --multi-format csv --format yaml
         """,
       aliases: ["d"]
     )
@@ -64,12 +105,29 @@ extension FrontRangeCLIEntry {
     @Flag(name: .long, help: "Include --- delimiters in YAML/raw output")
     var includeDelimiters: Bool = false
 
+    @Option(
+      name: .long,
+      help: "Column strategy for CSV output: union (all keys), intersection (common keys), or custom"
+    )
+    var csvColumns: CSVColumnStrategy = .union
+
+    @Option(
+      name: .long,
+      help: "Comma-separated list of custom column names (only used with --csv-columns custom)"
+    )
+    var csvCustomColumns: String?
+
     func run() throws {
       let allPaths = try options.paths
       let isMultipleFiles = allPaths.count > 1
 
       // Single file: ignore multi-format, output directly
       if !isMultipleFiles {
+        // CSV requires multiple files
+        if options.multiFormat == .csv {
+          throw CSVError.singleFileNotSupported
+        }
+
         let path = allPaths[0]
         printIfDebug("ℹ️ Dumping front matter from '\(path)' in \(options.format.rawValue) format")
 
@@ -113,6 +171,9 @@ extension FrontRangeCLIEntry {
             print()
           }
         }
+      } else if options.multiFormat == .csv {
+        // CSV output
+        try generateCSVOutput(allPaths: allPaths)
       } else {
         // Structured output (json, yaml, plist, raw)
         var items: [[String: Any]] = []
@@ -185,6 +246,9 @@ extension FrontRangeCLIEntry {
           try printAny(items, format: .yaml)
         case .plist:
           try printAny(items, format: .plist)
+        case .csv:
+          // Should not reach here - CSV has its own path
+          break
       }
     }
 
@@ -207,6 +271,37 @@ extension FrontRangeCLIEntry {
       let node = Yams.Node.mapping(frontMatter)
       let constructor = Yams.Constructor.default
       return constructor.any(from: node)
+    }
+
+    /// Generates CSV output for multiple files
+    private func generateCSVOutput(allPaths: [Path]) throws {
+      // Parse custom columns if provided
+      let customCols: [String]? = csvCustomColumns?.split(separator: ",")
+        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        .filter { !$0.isEmpty }
+
+      // Collect documents
+      var documents: [(path: String, frontMatter: Yams.Node.Mapping)] = []
+
+      for path in allPaths {
+        printIfDebug("ℹ️ Loading front matter from '\(path)' for CSV export")
+
+        let content = try path.read(.utf8)
+        let doc = try FrontMatteredDoc(parsing: content)
+
+        documents.append((path: path.string, frontMatter: doc.frontMatter))
+      }
+
+      // Generate CSV
+      let generator = CSVGenerator(
+        documents: documents,
+        strategy: csvColumns,
+        customColumns: customCols,
+        cellFormat: options.format
+      )
+
+      let csvOutput = try generator.generate()
+      print(csvOutput, terminator: "")  // TinyCSV adds final newline
     }
   }
 }
