@@ -15,6 +15,53 @@ FrontRange is a Swift package for parsing, mutating, serializing, and deserializ
 - **Main Repository:** https://github.com/DandyLyons/FrontRange (library and source code)
 - **Homebrew Tap:** https://github.com/DandyLyons/homebrew-frontrange (macOS installation via Homebrew)
 
+## Release Process
+
+FrontRange uses an automated release workflow powered by GitHub Actions. The workflow is triggered when a version tag is pushed.
+
+### Creating a New Release
+
+1. **Update version numbers** in:
+   - `Sources/FrontRangeCLI/FrontRangeCLIEntry.swift` (CLI version)
+   - `Sources/FrontRangeMCP/main.swift` (MCP server version)
+
+2. **Commit and push** version changes to main branch
+
+3. **Create and push a tag**:
+   ```bash
+   git tag v0.3.0-beta
+   git push origin v0.3.0-beta
+   ```
+
+4. **Automated workflow** (.github/workflows/release.yml) will:
+   - Build universal binaries (arm64 + x86_64) for `fr` and `frontrange-mcp`
+   - Create a tarball archive with both executables
+   - Create a GitHub release (marked as pre-release if tag contains beta/alpha/rc)
+   - Automatically update the Homebrew formula with new URL and SHA256
+
+### First-Time Setup
+
+The automated release workflow requires a GitHub personal access token:
+
+1. Create a personal access token with `public_repo` scope
+2. Add it to repository secrets as `FRONTRANGE_COMMITTER_TOKEN`
+3. The workflow uses this token to commit formula updates to the homebrew-frontrange repository
+
+### Release Artifacts
+
+Each release provides:
+- **Source code** (automatic GitHub archive)
+- **Pre-built binaries** (universal macOS binaries in tarball)
+- **Homebrew formula** (automatically updated in DandyLyons/homebrew-frontrange)
+
+Users can install via:
+```bash
+brew tap DandyLyons/frontrange
+brew install frontrange
+```
+
+No compilation required - users get instant installation with pre-built binaries.
+
 ## Requirements
 
 - **Swift 6.2** or later (as defined in Package.swift)
