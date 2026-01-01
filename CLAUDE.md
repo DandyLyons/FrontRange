@@ -240,6 +240,151 @@ fr dump posts/ -r --multi-format csv --csv-columns custom --csv-custom-columns "
 - Custom column strategy requires `--csv-custom-columns` to be specified
 - Column alignment is handled automatically (all rows have same number of cells)
 
+## Date Handling
+
+FrontRange provides comprehensive date support for working with dates in front matter and file system metadata.
+
+### Date Modules
+
+**Date Parsing** (`Sources/FrontRange/Date/`)
+- **DateParser.swift**: Multi-format date parsing with automatic format detection
+- **WikiLinkDateParser.swift**: Parse wiki-link style dates like `[[2026-01-01]]`
+- **DateRange.swift**: Date range comparison utilities
+
+**File Metadata** (`Sources/FrontRange/FileMetadata/`)
+- **FileMetadata.swift**: Access file system dates (created, modified, added)
+- **Path+Metadata.swift**: PathKit extension for convenient metadata access
+
+### Supported Date Formats
+
+FrontRange automatically detects and parses the following date formats:
+
+1. **ISO 8601** (recommended for interchange)
+   - `2023-10-01T00:00:00Z`
+   - `2023-10-01T14:30:00+00:00`
+   - `2023-10-01`
+
+2. **Year-Month-Day** (unambiguous)
+   - `YYYY-MM-DD`: `2023-10-01`
+   - `YYYY/MM/DD`: `2023/10/01`
+
+3. **Month-Day-Year** (US format)
+   - `MM/DD/YYYY`: `10/01/2023`
+   - `MM-DD-YYYY`: `10-01-2023`
+
+4. **Day-Month-Year** (European format)
+   - `DD/MM/YYYY`: `01/10/2023`
+   - `DD-MM-YYYY`: `01-10-2023`
+
+5. **Wiki Links** (for zettelkasten workflows)
+   - `[[2026-01-01]]`
+
+6. **Custom Format Strings**
+   - Support for custom DateFormatter format strings
+
+### File System Date Filtering
+
+GlobalOptions provides date filtering flags to keep only files matching date constraints:
+
+**Modified Date Filters:**
+```bash
+--modified-after YYYY-MM-DD    # Keep files modified after this date
+--modified-before YYYY-MM-DD   # Keep files modified before this date
+--modified-month YYYY-MM       # Keep files modified in this month
+```
+
+**Created Date Filters:**
+```bash
+--created-after YYYY-MM-DD     # Keep files created after this date
+--created-before YYYY-MM-DD    # Keep files created before this date
+--created-month YYYY-MM        # Keep files created in this month
+```
+
+**Added Date Filters** (macOS only via Spotlight):
+```bash
+--added-after YYYY-MM-DD       # Keep files added after this date
+--added-before YYYY-MM-DD      # Keep files added before this date
+--added-month YYYY-MM          # Keep files added in this month
+```
+
+### Date Filtering Examples
+
+```bash
+# Keep files modified after January 1, 2024
+fr dump posts/ --modified-after 2024-01-01
+
+# Keep files created before December 31, 2024
+fr dump posts/ --created-before 2024-12-31
+
+# Keep files modified in January 2024
+fr dump posts/ --modified-month 2024-01
+
+# Combine date filters with front matter search
+fr search 'draft == `false`' posts/ --modified-after 2024-01-01
+
+# Multiple date constraints (created in 2024, modified recently)
+fr dump posts/ --created-after 2024-01-01 --modified-after 2024-12-01
+
+# CSV export with file metadata columns
+fr dump posts/*.md --multi-format csv --include-file-metadata
+```
+
+### CSV with File Metadata
+
+The dump command supports including file system metadata in CSV exports:
+
+**Flag:** `--include-file-metadata`
+
+When enabled, adds three columns after the path column:
+- `created`: File creation date (ISO8601)
+- `modified`: File modification date (ISO8601)
+- `added`: File added date (ISO8601, macOS only)
+
+**Example output:**
+```csv
+path,created,modified,added,title,author,date
+posts/a.md,2024-01-01T10:00:00Z,2024-01-15T14:30:00Z,2024-01-01T11:00:00Z,"Post A","Alice","2024-01-01"
+posts/b.md,2024-02-01T09:00:00Z,2024-02-10T16:00:00Z,2024-02-01T09:30:00Z,"Post B","Bob","2024-02-01"
+```
+
+**Usage:**
+```bash
+# CSV with file metadata
+fr dump posts/*.md --multi-format csv --include-file-metadata
+
+# Combine with custom columns
+fr dump posts/*.md --multi-format csv --csv-columns custom --csv-custom-columns "title,author" --include-file-metadata
+
+# Filter by date AND export metadata
+fr dump posts/ -r --modified-after 2024-01-01 --multi-format csv --include-file-metadata
+```
+
+### Date Handling in Front Matter
+
+**Storage:** Dates in front matter remain as YAML scalar strings (ISO8601 format recommended)
+
+**Comparison:** For JMESPath queries in search command, ISO 8601 dates can be compared as strings:
+```bash
+# Find posts from 2024 onwards (string comparison works for ISO 8601)
+fr search 'date >= `"2024-01-01"`' posts/
+
+# Find posts in specific month
+fr search 'starts_with(date, `"2024-01"`)' posts/
+
+# Combine front matter and file system dates
+fr search 'draft == `false`' posts/ --modified-after 2024-01-01
+```
+
+**Best Practice:** Always use ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ) for dates in front matter to ensure reliable string-based comparisons and cross-platform compatibility.
+
+### Architecture Notes
+
+- **Library stays format-agnostic**: Core FrontRange library stores dates as YAML scalar strings
+- **Parsing at CLI layer**: Date parsing happens in CLI commands when consuming data
+- **Zero dependencies**: Uses Foundation (DateFormatter, ISO8601DateFormatter, FileManager)
+- **Platform-specific**: "Added date" only available on macOS via Spotlight metadata
+- **Graceful degradation**: Missing metadata returns nil instead of throwing errors
+
 ## Dependencies
 
 - **Yams** - YAML parsing and serialization
