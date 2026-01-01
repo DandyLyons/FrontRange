@@ -1,0 +1,55 @@
+name: Release
+
+# Automatically create releases when version tags are pushed
+# Example: git tag v0.3.0-beta && git push origin v0.3.0-beta
+#
+# This workflow will:
+# 1. Build universal binaries (arm64 + x86_64) for fr and frontrange-mcp
+# 2. Package them in a tarball and upload to GitHub release
+# 3. Automatically update the Homebrew formula in DandyLyons/homebrew-frontrange
+#
+# Prerequisites:
+# - FRONTRANGE_COMMITTER_TOKEN secret must be set (GitHub PAT with public_repo scope)
+
+on:
+  push:
+    tags:
+      - v*.*.*
+
+jobs:
+  release:
+    name: Build and Release
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build executables for release
+        run: |
+          swift build -c release --arch arm64 --arch x86_64
+
+      - name: Prepare release archive
+        run: |
+          mkdir -p release
+          cp .build/apple/Products/Release/fr release/
+          cp .build/apple/Products/Release/frontrange-mcp release/
+          tar -czf ${{ github.ref_name }}.tar.gz -C release fr frontrange-mcp
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ github.ref_name }}.tar.gz
+          token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') || contains(github.ref_name, 'rc') }}
+          generate_release_notes: true
+
+      - name: Update Homebrew formula
+        uses: mislav/bump-homebrew-formula-action@v3
+        with:
+          formula-name: frontrange
+          homebrew-tap: DandyLyons/homebrew-frontrange
+          base-branch: main
+          download-url: https://github.com/DandyLyons/FrontRange/releases/download/${{ github.ref_name }}/${{ github.ref_name }}.tar.gz
+        env:
+          COMMITTER_TOKEN: ${{ secrets.FRONTRANGE_COMMITTER_TOKEN }}
