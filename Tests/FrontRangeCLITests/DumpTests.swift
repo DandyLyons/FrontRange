@@ -560,5 +560,53 @@ import Testing
     #expect(output.contains("\"Post with, comma\""))
     #expect(output.contains("\"Bob \"\"The Builder\"\"\""))  // Quotes are doubled
   }
+
+  @Test func `Dump with date filter that matches no files shows error message` () async throws {
+    // Regression test for index out of range bug when date filtering removes all files
+    let (stdout, stderr) = try await runAndSeparateOutput(
+      arguments: [cliPath, "dump", testDumpPath, "--modified-after", "2030-01-01"]
+    )
+
+    // Should show helpful error message on stderr
+    #expect(stderr.contains("No files found matching the criteria"))
+
+    // stdout should be empty (no output when no files)
+    #expect(stdout.isEmpty)
+
+    // Should not crash (if it crashes, test fails)
+  }
+
+  @Test func `Dump with date filter that matches files works correctly` () async throws {
+    // Verify date filtering works when files DO match
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "dump", testDumpPath, "--modified-after", "2020-01-01", "--format", "json"]
+    ).concatenatedString()
+
+    // Should output front matter normally
+    #expect(output.contains("\"title\""))
+    #expect(output.contains("Test Post"))
+  }
+
+  /// Helper to run command and separate stdout from stderr
+  private func runAndSeparateOutput(arguments: [String]) async throws -> (stdout: String, stderr: String) {
+    let stream = commandRunner.run(arguments: arguments)
+    var stdout = ""
+    var stderr = ""
+
+    for try await event in stream {
+      switch event.pipeline {
+      case .standardOutput:
+        if let str = event.string(encoding: .utf8) {
+          stdout.append(str)
+        }
+      case .standardError:
+        if let str = event.string(encoding: .utf8) {
+          stderr.append(str)
+        }
+      }
+    }
+
+    return (stdout, stderr)
+  }
 }
 
