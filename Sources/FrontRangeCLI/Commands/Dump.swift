@@ -122,6 +122,13 @@ extension FrontRangeCLIEntry {
 
     func run() throws {
       let allPaths = try options.paths
+
+      // Check if any files were found
+      guard !allPaths.isEmpty else {
+        fputs("No files found matching the criteria.\n", stderr)
+        return
+      }
+
       let isMultipleFiles = allPaths.count > 1
 
       // Single file: ignore multi-format, output directly
