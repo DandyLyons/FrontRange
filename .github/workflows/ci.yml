@@ -8,20 +8,21 @@ on:
 
 jobs:
   test:
-    name: Build and Test
-    runs-on: macos-15
-
+    runs-on: ubuntu-latest
+    container: swift:6.2-noble
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Swift
-      uses: swift-actions/setup-swift@v2
-      with:
-        swift-version: "6.2"
-
-    - name: Build
-      run: swift build --verbose
-
-    - name: Run tests
-      run: swift test --verbose
+      - uses: actions/checkout@v4
+      
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .build
+            .swiftpm/cache
+          key: spm-${{ hashFiles('Package.resolved') }}
+          restore-keys: spm-
+      
+      - uses: brightdigit/swift-build@v1.4.0 # https://github.com/brightdigit/swift-build/tree/main
+        with:
+          scheme: YourPackageName-Package

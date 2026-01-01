@@ -6,6 +6,7 @@
 //
 
 import Foundation
+#if canImport(OSLog)
 import OSLog
 
 extension FrontRangeCLIEntry {
@@ -16,3 +17,4 @@ extension FrontRangeCLIEntry {
     return Logger(subsystem: "com.daniellyons.FrontRangeCLICore", category: category.rawValue)
   }
 }
+#endif

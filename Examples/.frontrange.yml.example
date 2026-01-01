@@ -1,0 +1,38 @@
+# FrontRange Project Configuration Example
+# Copy this file to your project root as .frontrange.yml
+
+# Schema mappings: glob pattern → schema path
+# Patterns are matched against file paths in order
+# First matching pattern wins
+schemas:
+  # Blog posts use blog-post schema
+  "content/posts/**/*.md": "schemas/blog-post.json"
+
+  # Pages use page schema
+  "content/pages/**/*.md": "schemas/page.json"
+
+  # Documentation uses doc schema
+  "docs/**/*.md": "schemas/documentation.json"
+
+  # Default schema for all other markdown files
+  "**/*.md": "schemas/default.json"
+
+# Validation settings (when validation IS enabled via --validate flag)
+validation:
+  # File patterns to exclude from validation
+  exclude:
+    - "drafts/**"
+    - "temp/**"
+    - "**/.DS_Store"
+
+  # Cache schemas for better performance (default: true)
+  cache_schemas: true
+
+# Extension preferences
+extensions:
+  # Default file extensions to process
+  default:
+    - "md"
+    - "markdown"
+    - "yml"
+    - "yaml"

@@ -42,5 +42,8 @@ func runTool(
 
     case .dump:
       return try await runDumpTool(params: params)
+
+    case .validate:
+      return try await runValidateTool(params: params)
   }
 }
