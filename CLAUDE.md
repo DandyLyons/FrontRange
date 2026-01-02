@@ -135,6 +135,10 @@ Note: The MCP server is currently in early development.
 - Recursively searches directories for matching files
 - Converts `Yams.Node.Mapping` to Swift dictionaries for JMESPath evaluation
 - Returns file paths of matches (supports JSON, YAML, plain text output)
+- Supports all date filtering options (see Date Handling section)
+
+**Architectural Note:**
+The Search command duplicates date filtering options and logic from GlobalOptions due to ArgumentParser constraints. Search has a unique signature `fr search <query> <paths>...` with two positional @Arguments (query and paths), which conflicts with GlobalOptions' @Argument for paths. ArgumentParser doesn't support multiple @Argument declarations when using @OptionGroup. Rather than refactor the entire GlobalOptions architecture, the date filtering code is intentionally duplicated in Search.swift with inline comments documenting this decision.
 
 **JMESPath Literal Syntax - THE ONE TRUE WAY:**
 - **ALWAYS** use backticks for ALL literal values:
