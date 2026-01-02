@@ -177,7 +177,7 @@ struct GlobalOptions: ParsableArguments {
   }
 
   private func parseDateFlag(_ string: String, flagName: String) throws -> Date {
-    guard let date = DateParser.parse(string) else {
+    guard let date = Date.parse(string) else {
       throw ValidationError("Invalid date format for \(flagName): '\(string)'. Use ISO8601 or YYYY-MM-DD.")
     }
     return date

@@ -247,7 +247,7 @@ FrontRange provides comprehensive date support for working with dates in front m
 ### Date Modules
 
 **Date Parsing** (`Sources/FrontRange/Date/`)
-- **DateParser.swift**: Multi-format date parsing with automatic format detection
+- **DateParsing.swift**: Multi-format date parsing using Swift Foundation's Date.ParseStrategy API
 - **WikiLinkDateParser.swift**: Parse wiki-link style dates like `[[2026-01-01]]`
 - **DateRange.swift**: Date range comparison utilities
 
@@ -381,7 +381,8 @@ fr search 'draft == `false`' posts/ --modified-after 2024-01-01
 
 - **Library stays format-agnostic**: Core FrontRange library stores dates as YAML scalar strings
 - **Parsing at CLI layer**: Date parsing happens in CLI commands when consuming data
-- **Zero dependencies**: Uses Foundation (DateFormatter, ISO8601DateFormatter, FileManager)
+- **Modern Swift APIs**: Uses Foundation's Date.ParseStrategy API for date parsing (DateFormatter for fallback cases)
+- **Zero external dependencies**: Date parsing relies only on Swift Foundation APIs
 - **Platform-specific**: "Added date" only available on macOS via Spotlight metadata
 - **Graceful degradation**: Missing metadata returns nil instead of throwing errors
 

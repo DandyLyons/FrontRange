@@ -21,7 +21,7 @@ public struct WikiLinkDateParser {
       return nil
     }
 
-    return DateParser.parse(extracted, format: .yearMonthDay(separator: "-"))
+    return Date.parse(extracted)
   }
 
   /// Find all wiki link dates in a string
