@@ -17,6 +17,7 @@ struct CSVGenerator {
   let strategy: CSVColumnStrategy
   let customColumns: [String]?
   let cellFormat: OutputFormat
+  let includeFileMetadata: Bool
 
   func generate() throws -> String {
     // 1. Determine columns based on strategy
@@ -25,13 +26,27 @@ struct CSVGenerator {
     // 2. Build CSV rows
     var rows: [[String]] = []
 
-    // Header row
-    rows.append(["path"] + columns)
+    // Header row - include metadata columns if requested
+    var header = ["path"]
+    if includeFileMetadata {
+      header += ["created", "modified", "added"]
+    }
+    header += columns
+    rows.append(header)
 
     // Data rows - CRITICAL: iterate through columns, not file's keys
     for (path, frontMatter) in documents {
       var row: [String] = [path]
 
+      // Add file metadata if requested
+      if includeFileMetadata {
+        let metadata = try? FileMetadata(path: Path(path))
+        row.append(formatDate(metadata?.creationDate))
+        row.append(formatDate(metadata?.modificationDate))
+        row.append(formatDate(metadata?.addedDate))
+      }
+
+      // Add front matter columns
       for column in columns {
         let cellValue = try extractCellValue(
           frontMatter: frontMatter,
@@ -146,6 +161,14 @@ struct CSVGenerator {
     case .plist:
       return try node.toPlist()
     }
+  }
+
+  private func formatDate(_ date: Date?) -> String {
+    guard let date = date else {
+      return ""
+    }
+    let formatter = ISO8601DateFormatter()
+    return formatter.string(from: date)
   }
 }
 

@@ -41,6 +41,7 @@ let package = Package(
       dependencies: [
         .product(name: "CustomDump", package: "swift-custom-dump"),
         .product(name: "Parsing", package: "swift-parsing"),
+        .product(name: "PathKit", package: "PathKit"),
         "Yams",
       ],
     ),

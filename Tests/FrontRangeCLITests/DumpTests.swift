@@ -560,5 +560,291 @@ import Testing
     #expect(output.contains("\"Post with, comma\""))
     #expect(output.contains("\"Bob \"\"The Builder\"\"\""))  // Quotes are doubled
   }
+
+  @Test func `Dump with date filter that matches no files shows error message` () async throws {
+    // Regression test for index out of range bug when date filtering removes all files
+    let (stdout, stderr) = try await runAndSeparateOutput(
+      arguments: [cliPath, "dump", testDumpPath, "--modified-after", "2030-01-01"]
+    )
+
+    // Should show helpful error message on stderr
+    #expect(stderr.contains("No files found matching the criteria"))
+
+    // stdout should be empty (no output when no files)
+    #expect(stdout.isEmpty)
+
+    // Should not crash (if it crashes, test fails)
+  }
+
+  @Test func `Dump with date filter that matches files works correctly` () async throws {
+    // Verify date filtering works when files DO match
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "dump", testDumpPath, "--modified-after", "2020-01-01", "--format", "json"]
+    ).concatenatedString()
+
+    // Should output front matter normally
+    #expect(output.contains("\"title\""))
+    #expect(output.contains("Test Post"))
+  }
+
+  @Test func `Dump with created-after filters files correctly`() async throws {
+    // Files created after 2020-01-01 should include test files
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "dump", testDumpPath, "--created-after", "2020-01-01", "--format", "json"]
+    ).concatenatedString()
+
+    // Should output front matter normally
+    #expect(output.contains("\"title\""))
+    #expect(output.contains("Test Post"))
+  }
+
+  @Test func `Dump with created-after future date shows error`() async throws {
+    // Files created after 2030-01-01 should be empty (future date)
+    let (stdout, stderr) = try await runAndSeparateOutput(
+      arguments: [cliPath, "dump", testDumpPath, "--created-after", "2030-01-01"]
+    )
+
+    // Should show helpful error message on stderr
+    #expect(stderr.contains("No files found matching the criteria"))
+
+    // stdout should be empty (no output when no files)
+    #expect(stdout.isEmpty)
+  }
+
+  @Test func `Dump with modified-before past date shows error`() async throws {
+    // Files modified before 2020-01-01 should be empty
+    let (stdout, stderr) = try await runAndSeparateOutput(
+      arguments: [cliPath, "dump", testDumpPath, "--modified-before", "2020-01-01"]
+    )
+
+    // Should show helpful error message on stderr
+    #expect(stderr.contains("No files found matching the criteria"))
+
+    // stdout should be empty (no output when no files)
+    #expect(stdout.isEmpty)
+  }
+
+  @Test func `Dump with modified-before future date includes files`() async throws {
+    // Files modified before 2030-01-01 should include files
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "dump", testDumpPath, "--modified-before", "2030-01-01", "--format", "json"]
+    ).concatenatedString()
+
+    // Should output front matter normally
+    #expect(output.contains("\"title\""))
+    #expect(output.contains("Test Post"))
+  }
+
+  @Test func `Dump with invalid date format shows error`() async throws {
+    // Invalid date format should fail with helpful error
+    let stream = commandRunner.run(
+      arguments: [cliPath, "dump", testDumpPath, "--modified-after", "invalid-date"]
+    )
+    var stderr = ""
+    var didFail = false
+
+    do {
+      for try await event in stream {
+        switch event.pipeline {
+        case .standardError:
+          if let str = event.string(encoding: .utf8) {
+            stderr.append(str)
+          }
+        case .standardOutput:
+          break
+        }
+      }
+    } catch {
+      didFail = true
+    }
+
+    // The command should fail
+    #expect(didFail, "Expected command to fail with invalid date format")
+
+    // Verify the error message contains helpful information
+    #expect(stderr.contains("Invalid date format"))
+    #expect(stderr.contains("--modified-after"))
+    #expect(stderr.contains("invalid-date"))
+  }
+
+  @Test func `Dump with invalid month format shows error`() async throws {
+    // Invalid month format should fail with helpful error
+    let stream = commandRunner.run(
+      arguments: [cliPath, "dump", testDumpPath, "--created-month", "2024-13"]
+    )
+    var stderr = ""
+    var didFail = false
+
+    do {
+      for try await event in stream {
+        switch event.pipeline {
+        case .standardError:
+          if let str = event.string(encoding: .utf8) {
+            stderr.append(str)
+          }
+        case .standardOutput:
+          break
+        }
+      }
+    } catch {
+      didFail = true
+    }
+
+    // The command should fail
+    #expect(didFail, "Expected command to fail with invalid month")
+
+    // Verify the error message contains helpful information
+    #expect(stderr.contains("Invalid month format"))
+    #expect(stderr.contains("--created-month"))
+  }
+
+  @Test func `Dump with multiple date constraints works correctly`() async throws {
+    // Test combining multiple date filters
+    let output = try await commandRunner.run(
+      arguments: [
+        cliPath, "dump", testDumpPath,
+        "--created-after", "2020-01-01",
+        "--modified-before", "2030-01-01",
+        "--format", "json"
+      ]
+    ).concatenatedString()
+
+    // Should output front matter normally
+    #expect(output.contains("\"title\""))
+    #expect(output.contains("Test Post"))
+  }
+
+  @Test func `Dump CSV with file metadata includes date columns`() async throws {
+    // Create multiple temp files for CSV test
+    let tempDir = FileManager.default.temporaryDirectory
+    let file1 = tempDir.appendingPathComponent(UUID().uuidString).appendingPathExtension("md")
+    let file2 = tempDir.appendingPathComponent(UUID().uuidString).appendingPathExtension("md")
+
+    let content1 = """
+      ---
+      title: Post 1
+      author: Alice
+      ---
+      Body 1
+      """
+
+    let content2 = """
+      ---
+      title: Post 2
+      author: Bob
+      ---
+      Body 2
+      """
+
+    try content1.write(to: file1, atomically: true, encoding: .utf8)
+    try content2.write(to: file2, atomically: true, encoding: .utf8)
+
+    defer {
+      try? FileManager.default.removeItem(at: file1)
+      try? FileManager.default.removeItem(at: file2)
+    }
+
+    // Dump with file metadata
+    let output = try await commandRunner.run(
+      arguments: [
+        cliPath, "dump",
+        file1.path,
+        file2.path,
+        "--multi-format", "csv",
+        "--include-file-metadata"
+      ]
+    ).concatenatedString()
+
+    // Check if we got any output at all
+    #expect(!output.isEmpty, "Should have CSV output")
+
+    // Should include metadata column headers (may be quoted)
+    #expect(output.contains("created"), "Should contain 'created' column")
+    #expect(output.contains("modified"), "Should contain 'modified' column")
+    #expect(output.contains("added"), "Should contain 'added' column")
+
+    // Should include file paths
+    #expect(output.contains(file1.lastPathComponent), "Should contain first file")
+    #expect(output.contains(file2.lastPathComponent), "Should contain second file")
+
+    // Should include front matter columns
+    #expect(output.contains("title"), "Should contain 'title' column")
+    #expect(output.contains("author"), "Should contain 'author' column")
+
+    // Should have metadata values (ISO8601 formatted dates)
+    // The dates will be in ISO8601 format, check for timestamp format
+    #expect(output.contains("2026-01"), "Should contain ISO8601 formatted dates")
+  }
+
+  @Test func `Dump CSV with file metadata and date filter combines correctly`() async throws {
+    // Create multiple temp files (CSV requires multiple files)
+    let tempDir = FileManager.default.temporaryDirectory
+    let file1 = tempDir.appendingPathComponent(UUID().uuidString).appendingPathExtension("md")
+    let file2 = tempDir.appendingPathComponent(UUID().uuidString).appendingPathExtension("md")
+
+    let content1 = """
+      ---
+      title: Test Post 1
+      ---
+      Body 1
+      """
+
+    let content2 = """
+      ---
+      title: Test Post 2
+      ---
+      Body 2
+      """
+
+    try content1.write(to: file1, atomically: true, encoding: .utf8)
+    try content2.write(to: file2, atomically: true, encoding: .utf8)
+
+    defer {
+      try? FileManager.default.removeItem(at: file1)
+      try? FileManager.default.removeItem(at: file2)
+    }
+
+    // Dump with both file metadata AND date filtering
+    let output = try await commandRunner.run(
+      arguments: [
+        cliPath, "dump",
+        file1.path,
+        file2.path,
+        "--multi-format", "csv",
+        "--include-file-metadata",
+        "--modified-after", "2020-01-01"
+      ]
+    ).concatenatedString()
+
+    // Should include metadata columns
+    #expect(output.contains("created"))
+    #expect(output.contains("modified"))
+
+    // Should include both files (they were just created, so modified after 2020)
+    #expect(output.contains(file1.lastPathComponent))
+    #expect(output.contains(file2.lastPathComponent))
+  }
+
+  /// Helper to run command and separate stdout from stderr
+  private func runAndSeparateOutput(arguments: [String]) async throws -> (stdout: String, stderr: String) {
+    let stream = commandRunner.run(arguments: arguments)
+    var stdout = ""
+    var stderr = ""
+
+    for try await event in stream {
+      switch event.pipeline {
+      case .standardOutput:
+        if let str = event.string(encoding: .utf8) {
+          stdout.append(str)
+        }
+      case .standardError:
+        if let str = event.string(encoding: .utf8) {
+          stderr.append(str)
+        }
+      }
+    }
+
+    return (stdout, stderr)
+  }
 }
 
