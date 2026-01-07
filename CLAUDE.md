@@ -433,6 +433,171 @@ doc.setValue(42, forKey: "key")             // Int
 doc.frontMatter[.scalar(.init("key"))] = .scalar(.init("value"))
 ```
 
+## JSONSchema Validation (NEW)
+
+FrontRange now supports JSONSchema validation of front matter. **Validation is 100% opt-in** - it never runs automatically.
+
+### Overview
+
+Validate front matter against JSONSchema definitions to ensure data quality and consistency. Validation must be explicitly requested via:
+- `fr validate` command
+- `--validate` flag on `fr set` and `fr replace` commands
+- `validate_frontmatter` MCP tool
+
+### Core Components
+
+**SchemaValidator** (`Sources/FrontRange/Validation/SchemaValidator.swift`)
+- Validates `FrontMatteredDoc` against JSONSchema
+- Converts `Yams.Node.Mapping` to Swift dictionaries for validation
+- Returns `ValidationResult` with detailed violations
+
+**SchemaResolver** (`Sources/FrontRange/Validation/SchemaResolver.swift`)
+- Loads schemas from files, URLs, or project config
+- Priority: CLI flag > embedded `$schema` > project config
+- Caches schemas for performance
+- Auto-detects project root (searches for `.git`)
+
+**ValidationResult** (`Sources/FrontRange/Validation/ValidationResult.swift`)
+- Contains validation status and violations
+- `ValidationViolation`: JSONPath, message, expected, actual
+- `ValidationSummary`: Statistics for batch operations
+
+**ProjectConfig** (`Sources/FrontRange/Config/ProjectConfig.swift`)
+- Parses `.frontrange.yml` from project root
+- Maps file patterns (globs) to schema paths
+- Defines validation settings (exclude patterns, cache)
+
+### Schema Resolution Priority
+
+1. **Explicit CLI flag**: `--schema` or `--validate-schema`
+2. **Embedded `$schema` key**: In frontmatter itself
+3. **Project config**: `.frontrange.yml` glob pattern match
+4. **None**: Gracefully returns nil (no validation)
+
+### CLI Commands
+
+**fr validate**
+```bash
+# Validate with explicit schema
+fr validate posts/*.md --schema schemas/blog-post.json
+
+# Use embedded $schema key
+fr validate post.md
+
+# Recursive with project config
+fr validate . --recursive
+
+# JSON output for CI/CD
+fr validate posts/ --format json --schema schemas/post.json
+
+# Continue on errors
+fr validate . -r --continue-on-error
+```
+
+Output formats: `detailed` (default), `summary`, `json`, `yaml`
+
+Exit codes: `0` (valid), `1` (invalid), `2` (errors)
+
+**fr set --validate**
+```bash
+# Set value with validation
+fr set --key draft --value false post.md --validate --validate-schema schemas/post.json
+
+# If validation fails, file is NOT modified
+```
+
+**fr replace --validate**
+```bash
+# Replace with validation
+fr replace post.md --data '{"title": "New"}' --format json --validate
+
+# Validation runs BEFORE confirmation prompt
+# If invalid, skips prompt and exits
+```
+
+### MCP Tool
+
+**validate_frontmatter**
+```json
+{
+  "path": "post.md",
+  "schema": "schemas/blog-post.json",
+  "format": "json"
+}
+```
+
+Returns: Structured validation results with `isError` flag
+
+### Project Config (.frontrange.yml)
+
+Place in project root to define schema mappings:
+
+```yaml
+# Schema mappings (glob pattern → schema path)
+schemas:
+  "content/posts/**/*.md": "schemas/blog-post.json"
+  "content/pages/**/*.md": "schemas/page.json"
+  "**/*.md": "schemas/default.json"
+
+# Validation settings (when validation IS enabled)
+validation:
+  exclude:
+    - "drafts/**"
+    - "temp/**"
+  cache_schemas: true
+```
+
+**IMPORTANT**: Having this config file does NOT enable validation automatically. Validation is always opt-in.
+
+### Example Schema
+
+```json
+{
+  "type": "object",
+  "required": ["title", "date", "draft"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "draft": {
+      "type": "boolean"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
+### Testing
+
+**Unit Tests** (`Tests/FrontRangeTests/Validation/`)
+- SchemaValidator: Validation logic
+- SchemaResolver: Schema loading and resolution
+- ProjectConfig: Config parsing and glob matching
+
+**CLI Integration Tests** (`Tests/FrontRangeCLITests/`)
+- Validate command with various options
+- Set/Replace with --validate flag
+- Error handling and exit codes
+
+### Design Principles
+
+1. **100% Opt-In**: Validation NEVER runs automatically
+2. **Fail-Fast**: Invalid documents block mutations
+3. **Detailed Errors**: JSONPath to violations, expected vs actual
+4. **Flexible**: Multiple schema sources (CLI, embedded, config)
+5. **Performant**: Schema caching, batch processing
+6. **User-Friendly**: Clear messages, multiple output formats
+
 ## Key Patterns and Conventions
 
 1. **Parser-Printer Pattern**: FrontMatteredDoc.Parser implements both parsing (string → struct) and printing (struct → string)

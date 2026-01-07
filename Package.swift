@@ -28,6 +28,7 @@ let package = Package(
     .package(url: "https://github.com/dagronf/TinyCSV.git", from: "1.0.0"), // TinyCSV
     .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.3.3"), // CustomDump
     .package(url: "https://github.com/adam-fowler/jmespath.swift.git", from: "1.0.3"), // JMESPath
+    .package(url: "https://github.com/kylef/JSONSchema.swift.git", from: "0.6.0"), // JSONSchema
     .package(url: "https://github.com/modelcontextprotocol/swift-sdk", from: "0.7.1"), // ModelContextProtocol Swift SDK
     .package(url: "https://github.com/pointfreeco/swift-parsing.git", from: "0.14.1"), // Parsing
     .package(url: "https://github.com/kylef/PathKit", from: "1.0.1"), // PathKit
@@ -40,6 +41,7 @@ let package = Package(
       name: "FrontRange",
       dependencies: [
         .product(name: "CustomDump", package: "swift-custom-dump"),
+        .product(name: "JSONSchema", package: "JSONSchema.swift"),
         .product(name: "Parsing", package: "swift-parsing"),
         .product(name: "PathKit", package: "PathKit"),
         "Yams",
