@@ -247,4 +247,170 @@ import Testing
     // Should find Example.md which has bool: true
     #expect(output.contains("Example.md"))
   }
+
+  // MARK: - Date Filtering Tests
+
+  @Test func `Search with modified-after filters files correctly`() async throws {
+    // Files modified after 2020-01-01 should include most test files
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "search", "draft == `true`", exampleFilesDir, "--modified-after", "2020-01-01"]
+    ).concatenatedString()
+
+    // Should find test-draft-true.md (it exists and was modified after 2020)
+    #expect(output.contains("test-draft-true.md"))
+  }
+
+  @Test func `Search with modified-after future date returns no files`() async throws {
+    // Files modified after 2030-01-01 should be empty (future date)
+    let (stdout, stderr) = try await runAndSeparateOutput(
+      arguments: [cliPath, "search", "draft == `true`", exampleFilesDir, "--modified-after", "2030-01-01"]
+    )
+
+    // No results in stdout
+    #expect(stdout.isEmpty)
+
+    // Helpful message in stderr
+    #expect(stderr.contains("No files matched the query"))
+    #expect(stderr.contains("Searched 0 file(s)"))
+  }
+
+  @Test func `Search with modified-before past date returns no files`() async throws {
+    // Files modified before 2020-01-01 should be empty
+    let (stdout, stderr) = try await runAndSeparateOutput(
+      arguments: [cliPath, "search", "draft == `true`", exampleFilesDir, "--modified-before", "2020-01-01"]
+    )
+
+    // No results in stdout
+    #expect(stdout.isEmpty)
+
+    // Helpful message in stderr
+    #expect(stderr.contains("No files matched the query"))
+    #expect(stderr.contains("Searched 0 file(s)"))
+  }
+
+  @Test func `Search with modified-before future date includes files`() async throws {
+    // Files modified before 2030-01-01 should include files
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "search", "draft == `true`", exampleFilesDir, "--modified-before", "2030-01-01"]
+    ).concatenatedString()
+
+    // Should find test-draft-true.md
+    #expect(output.contains("test-draft-true.md"))
+  }
+
+  @Test func `Search with created-after filters files correctly`() async throws {
+    // Files created after 2020-01-01 should include most test files
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "search", "draft == `true`", exampleFilesDir, "--created-after", "2020-01-01"]
+    ).concatenatedString()
+
+    // Should find test-draft-true.md
+    #expect(output.contains("test-draft-true.md"))
+  }
+
+  @Test func `Search with created-after future date returns no files`() async throws {
+    // Files created after 2030-01-01 should be empty (future date)
+    let (stdout, stderr) = try await runAndSeparateOutput(
+      arguments: [cliPath, "search", "draft == `true`", exampleFilesDir, "--created-after", "2030-01-01"]
+    )
+
+    // No results in stdout
+    #expect(stdout.isEmpty)
+
+    // Helpful message in stderr
+    #expect(stderr.contains("No files matched the query"))
+    #expect(stderr.contains("Searched 0 file(s)"))
+  }
+
+  @Test func `Search with invalid date format shows error`() async throws {
+    // Invalid date format should fail with helpful error
+    let stream = commandRunner.run(
+      arguments: [cliPath, "search", "draft == `true`", exampleFilesDir, "--modified-after", "not-a-date"]
+    )
+    var stderr = ""
+    var didFail = false
+
+    do {
+      for try await event in stream {
+        switch event.pipeline {
+        case .standardError:
+          if let str = event.string(encoding: .utf8) {
+            stderr.append(str)
+          }
+        case .standardOutput:
+          break
+        }
+      }
+    } catch {
+      didFail = true
+    }
+
+    // The command should fail
+    #expect(didFail, "Expected command to fail with invalid date format")
+
+    // Verify the error message contains helpful information
+    #expect(stderr.contains("Invalid date format"))
+    #expect(stderr.contains("--modified-after"))
+    #expect(stderr.contains("not-a-date"))
+  }
+
+  @Test func `Search with invalid month format shows error`() async throws {
+    // Invalid month format should fail with helpful error
+    let stream = commandRunner.run(
+      arguments: [cliPath, "search", "draft == `true`", exampleFilesDir, "--modified-month", "2024-13"]
+    )
+    var stderr = ""
+    var didFail = false
+
+    do {
+      for try await event in stream {
+        switch event.pipeline {
+        case .standardError:
+          if let str = event.string(encoding: .utf8) {
+            stderr.append(str)
+          }
+        case .standardOutput:
+          break
+        }
+      }
+    } catch {
+      didFail = true
+    }
+
+    // The command should fail
+    #expect(didFail, "Expected command to fail with invalid month")
+
+    // Verify the error message contains helpful information
+    #expect(stderr.contains("Invalid month format"))
+    #expect(stderr.contains("--modified-month"))
+  }
+
+  @Test func `Search combines date filter with JMESPath query`() async throws {
+    // Test that date filtering happens BEFORE JMESPath evaluation
+    // This ensures we're filtering the file list, not the query results
+    let output = try await commandRunner.run(
+      arguments: [
+        cliPath, "search", "draft == `true`", exampleFilesDir,
+        "--modified-after", "2020-01-01",
+        "--modified-before", "2030-01-01"
+      ]
+    ).concatenatedString()
+
+    // Should find files that match both the query AND the date range
+    #expect(output.contains("test-draft-true.md"))
+  }
+
+  @Test func `Search with multiple date constraints`() async throws {
+    // Test combining multiple date filters
+    let output = try await commandRunner.run(
+      arguments: [
+        cliPath, "search", "draft == `true`", exampleFilesDir,
+        "--created-after", "2020-01-01",
+        "--modified-before", "2030-01-01"
+      ]
+    ).concatenatedString()
+
+    // Should find files that match all constraints
+    #expect(output.contains("test-draft-true.md"))
+  }
 }

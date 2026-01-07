@@ -117,8 +117,18 @@ extension FrontRangeCLIEntry {
     )
     var csvCustomColumns: String?
 
+    @Flag(name: .long, help: "Include file system metadata columns in CSV output (created, modified, added)")
+    var includeFileMetadata: Bool = false
+
     func run() throws {
       let allPaths = try options.paths
+
+      // Check if any files were found
+      guard !allPaths.isEmpty else {
+        fputs("No files found matching the criteria.\n", stderr)
+        return
+      }
+
       let isMultipleFiles = allPaths.count > 1
 
       // Single file: ignore multi-format, output directly
@@ -297,7 +307,8 @@ extension FrontRangeCLIEntry {
         documents: documents,
         strategy: csvColumns,
         customColumns: customCols,
-        cellFormat: options.format
+        cellFormat: options.format,
+        includeFileMetadata: includeFileMetadata
       )
 
       let csvOutput = try generator.generate()
