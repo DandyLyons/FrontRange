@@ -1,0 +1,99 @@
+time=2026-01-02T19:31:14.383-07:00 level=INFO msg="Daemon started (interval: %v, auto-commit: %v, auto-push: %v)" !BADKEY=5s !BADKEY=false !BADKEY=false
+time=2026-01-02T19:31:14.383-07:00 level=INFO msg="using database" path=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/beads.db
+time=2026-01-02T19:31:14.388-07:00 level=INFO msg="database opened" path=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/beads.db freshness_checking=true
+time=2026-01-02T19:31:14.388-07:00 level=INFO msg="upgrading .beads/.gitignore"
+time=2026-01-02T19:31:14.388-07:00 level=WARN msg="failed to upgrade .gitignore" error="open .beads/.gitignore: no such file or directory"
+time=2026-01-02T19:31:14.395-07:00 level=INFO msg="Repository fingerprint validated: %s" !BADKEY=d9c23281
+time=2026-01-02T19:31:14.395-07:00 level=INFO msg="starting RPC server" socket=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/bd.sock
+time=2026-01-02T19:31:14.397-07:00 level=INFO msg="RPC server ready (socket listening)"
+time=2026-01-02T19:31:14.403-07:00 level=INFO msg="registered in global registry"
+time=2026-01-02T19:31:14.403-07:00 level=INFO msg="Starting %s..." !BADKEY="sync cycle"
+time=2026-01-02T19:31:14.403-07:00 level=INFO msg="Exported to JSONL"
+time=2026-01-02T19:31:15.035-07:00 level=INFO msg="Pulled from remote"
+time=2026-01-02T19:31:15.054-07:00 level=INFO msg="Imported from JSONL"
+time=2026-01-02T19:31:15.069-07:00 level=INFO msg="Sync cycle complete"
+time=2026-01-02T19:31:15.069-07:00 level=INFO msg="monitoring parent process" pid=0
+time=2026-01-02T19:31:15.070-07:00 level=INFO msg="using event-driven mode"
+time=2026-01-02T19:31:15.070-07:00 level=INFO msg="Auto-pull disabled: use 'git pull' manually to sync remote changes"
+time=2026-01-02T20:05:08.013-07:00 level=INFO msg="JSONL removed/renamed, re-establishing watch"
+time=2026-01-02T20:05:08.065-07:00 level=INFO msg="Successfully re-established JSONL watch after %v" !BADKEY=50ms
+time=2026-01-02T20:05:08.065-07:00 level=INFO msg="JSONL file created: %s" !BADKEY=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/issues.jsonl
+time=2026-01-02T20:05:09.068-07:00 level=INFO msg="Import triggered by file change"
+time=2026-01-02T20:05:09.069-07:00 level=INFO msg="Starting %s..." !BADKEY=auto-import
+time=2026-01-02T20:05:09.070-07:00 level=INFO msg="Skipping %s: JSONL content unchanged" !BADKEY=auto-import
+time=2026-01-02T20:05:18.931-07:00 level=INFO msg="JSONL removed/renamed, re-establishing watch"
+time=2026-01-02T20:05:18.983-07:00 level=INFO msg="Successfully re-established JSONL watch after %v" !BADKEY=50ms
+time=2026-01-02T20:05:18.983-07:00 level=INFO msg="JSONL file created: %s" !BADKEY=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/issues.jsonl
+time=2026-01-02T20:05:19.985-07:00 level=INFO msg="Import triggered by file change"
+time=2026-01-02T20:05:19.985-07:00 level=INFO msg="Starting %s..." !BADKEY=auto-import
+time=2026-01-02T20:05:19.986-07:00 level=INFO msg="Skipping %s: JSONL content unchanged" !BADKEY=auto-import
+time=2026-01-02T20:05:29.335-07:00 level=INFO msg="JSONL removed/renamed, re-establishing watch"
+time=2026-01-02T20:05:29.386-07:00 level=INFO msg="Successfully re-established JSONL watch after %v" !BADKEY=50ms
+time=2026-01-02T20:05:29.386-07:00 level=INFO msg="JSONL file created: %s" !BADKEY=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/issues.jsonl
+time=2026-01-02T20:05:30.387-07:00 level=INFO msg="Import triggered by file change"
+time=2026-01-02T20:05:30.388-07:00 level=INFO msg="Starting %s..." !BADKEY=auto-import
+time=2026-01-02T20:05:30.408-07:00 level=INFO msg="Skipping %s: JSONL content unchanged" !BADKEY=auto-import
+time=2026-01-02T20:05:50.319-07:00 level=INFO msg="JSONL removed/renamed, re-establishing watch"
+time=2026-01-02T20:05:50.370-07:00 level=INFO msg="Successfully re-established JSONL watch after %v" !BADKEY=50ms
+time=2026-01-02T20:05:50.370-07:00 level=INFO msg="JSONL file created: %s" !BADKEY=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/issues.jsonl
+time=2026-01-02T20:05:51.372-07:00 level=INFO msg="Import triggered by file change"
+time=2026-01-02T20:05:51.372-07:00 level=INFO msg="Starting %s..." !BADKEY=auto-import
+time=2026-01-02T20:05:51.373-07:00 level=INFO msg="Skipping %s: JSONL content unchanged" !BADKEY=auto-import
+time=2026-01-02T20:06:00.865-07:00 level=INFO msg="JSONL removed/renamed, re-establishing watch"
+time=2026-01-02T20:06:00.917-07:00 level=INFO msg="Successfully re-established JSONL watch after %v" !BADKEY=50ms
+time=2026-01-02T20:06:00.917-07:00 level=INFO msg="JSONL file created: %s" !BADKEY=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/issues.jsonl
+time=2026-01-02T20:06:01.918-07:00 level=INFO msg="Import triggered by file change"
+time=2026-01-02T20:06:01.918-07:00 level=INFO msg="Starting %s..." !BADKEY=auto-import
+time=2026-01-02T20:06:01.919-07:00 level=INFO msg="Skipping %s: JSONL content unchanged" !BADKEY=auto-import
+time=2026-01-02T20:06:11.365-07:00 level=INFO msg="JSONL removed/renamed, re-establishing watch"
+time=2026-01-02T20:06:11.416-07:00 level=INFO msg="Successfully re-established JSONL watch after %v" !BADKEY=50ms
+time=2026-01-02T20:06:11.416-07:00 level=INFO msg="JSONL file created: %s" !BADKEY=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/issues.jsonl
+time=2026-01-02T20:06:12.419-07:00 level=INFO msg="Import triggered by file change"
+time=2026-01-02T20:06:12.419-07:00 level=INFO msg="Starting %s..." !BADKEY=auto-import
+time=2026-01-02T20:06:12.420-07:00 level=INFO msg="Skipping %s: JSONL content unchanged" !BADKEY=auto-import
+time=2026-01-03T09:59:20.298-07:00 level=INFO msg="JSONL removed/renamed, re-establishing watch"
+time=2026-01-03T09:59:20.350-07:00 level=INFO msg="Successfully re-established JSONL watch after %v" !BADKEY=50ms
+time=2026-01-03T09:59:20.350-07:00 level=INFO msg="JSONL file created: %s" !BADKEY=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/issues.jsonl
+time=2026-01-03T09:59:21.352-07:00 level=INFO msg="Import triggered by file change"
+time=2026-01-03T09:59:21.353-07:00 level=INFO msg="Starting %s..." !BADKEY=auto-import
+time=2026-01-03T09:59:21.354-07:00 level=INFO msg="Skipping %s: JSONL content unchanged" !BADKEY=auto-import
+time=2026-01-03T09:59:30.672-07:00 level=INFO msg="JSONL removed/renamed, re-establishing watch"
+time=2026-01-03T09:59:30.723-07:00 level=INFO msg="Successfully re-established JSONL watch after %v" !BADKEY=50ms
+time=2026-01-03T09:59:30.723-07:00 level=INFO msg="JSONL file created: %s" !BADKEY=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/issues.jsonl
+time=2026-01-03T09:59:31.725-07:00 level=INFO msg="Import triggered by file change"
+time=2026-01-03T09:59:31.725-07:00 level=INFO msg="Starting %s..." !BADKEY=auto-import
+time=2026-01-03T09:59:31.726-07:00 level=INFO msg="Skipping %s: JSONL content unchanged" !BADKEY=auto-import
+time=2026-01-03T09:59:41.023-07:00 level=INFO msg="JSONL removed/renamed, re-establishing watch"
+time=2026-01-03T09:59:41.074-07:00 level=INFO msg="Successfully re-established JSONL watch after %v" !BADKEY=50ms
+time=2026-01-03T09:59:41.074-07:00 level=INFO msg="JSONL file created: %s" !BADKEY=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/issues.jsonl
+time=2026-01-03T09:59:42.076-07:00 level=INFO msg="Import triggered by file change"
+time=2026-01-03T09:59:42.076-07:00 level=INFO msg="Starting %s..." !BADKEY=auto-import
+time=2026-01-03T09:59:42.077-07:00 level=INFO msg="Skipping %s: JSONL content unchanged" !BADKEY=auto-import
+time=2026-01-03T12:45:12.589-07:00 level=INFO msg="Received signal %v, shutting down..." !BADKEY=terminated
+time=2026-01-06T19:38:40.352-07:00 level=INFO msg="Daemon started (interval: %v, auto-commit: %v, auto-push: %v)" !BADKEY=5s !BADKEY=false !BADKEY=false
+time=2026-01-06T19:38:40.353-07:00 level=INFO msg="using database" path=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/beads.db
+time=2026-01-06T19:38:40.359-07:00 level=INFO msg="database opened" path=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/beads.db freshness_checking=true
+time=2026-01-06T19:38:40.359-07:00 level=INFO msg="upgrading .beads/.gitignore"
+time=2026-01-06T19:38:40.359-07:00 level=WARN msg="failed to upgrade .gitignore" error="open .beads/.gitignore: no such file or directory"
+time=2026-01-06T19:38:40.363-07:00 level=INFO msg="Repository fingerprint validated: %s" !BADKEY=d9c23281
+time=2026-01-06T19:38:40.363-07:00 level=INFO msg="starting RPC server" socket=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/bd.sock
+time=2026-01-06T19:38:40.365-07:00 level=INFO msg="RPC server ready (socket listening)"
+time=2026-01-06T19:38:40.371-07:00 level=INFO msg="registered in global registry"
+time=2026-01-06T19:38:40.371-07:00 level=INFO msg="Starting %s..." !BADKEY="sync cycle"
+time=2026-01-06T19:38:40.372-07:00 level=INFO msg="Exported to JSONL"
+time=2026-01-06T19:38:40.914-07:00 level=INFO msg="Pull failed: %v" !BADKEY="git pull failed: exit status 1\nfatal: couldn't find remote ref chore_beads\n"
+time=2026-01-06T19:38:40.914-07:00 level=INFO msg="monitoring parent process" pid=0
+time=2026-01-06T19:38:40.914-07:00 level=INFO msg="using event-driven mode"
+time=2026-01-06T19:38:40.916-07:00 level=INFO msg="Auto-pull disabled: use 'git pull' manually to sync remote changes"
+time=2026-01-06T19:40:25.395-07:00 level=INFO msg="JSONL removed/renamed, re-establishing watch"
+time=2026-01-06T19:40:25.446-07:00 level=INFO msg="Successfully re-established JSONL watch after %v" !BADKEY=50ms
+time=2026-01-06T19:40:25.446-07:00 level=INFO msg="JSONL file created: %s" !BADKEY=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/issues.jsonl
+time=2026-01-06T19:40:26.449-07:00 level=INFO msg="Import triggered by file change"
+time=2026-01-06T19:40:26.449-07:00 level=INFO msg="Starting %s..." !BADKEY=auto-import
+time=2026-01-06T19:40:26.453-07:00 level=INFO msg="Skipping %s: JSONL content unchanged" !BADKEY=auto-import
+time=2026-01-06T19:40:36.349-07:00 level=INFO msg="JSONL removed/renamed, re-establishing watch"
+time=2026-01-06T19:40:36.400-07:00 level=INFO msg="Successfully re-established JSONL watch after %v" !BADKEY=50ms
+time=2026-01-06T19:40:36.401-07:00 level=INFO msg="JSONL file created: %s" !BADKEY=/Users/daniellyons/Developer/MySwiftPackages/FrontRange/.beads/issues.jsonl
+time=2026-01-06T19:40:37.402-07:00 level=INFO msg="Import triggered by file change"
+time=2026-01-06T19:40:37.402-07:00 level=INFO msg="Starting %s..." !BADKEY=auto-import
+time=2026-01-06T19:40:37.404-07:00 level=INFO msg="Skipping %s: JSONL content unchanged" !BADKEY=auto-import
