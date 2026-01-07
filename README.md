@@ -38,6 +38,8 @@ brew install frontrange
 
 The Homebrew formula is maintained in a separate repository: [DandyLyons/homebrew-frontrange](https://github.com/DandyLyons/homebrew-frontrange)
 
+**Note:** The Homebrew formula builds FrontRange from source during installation, requiring Swift Command Line Tools on your system.
+
 ### Swift Package Manager
 
 Add FrontRange to your `Package.swift`:
@@ -625,6 +627,42 @@ Front matter is stored as `Yams.Node.Mapping`, preserving YAML semantics rather 
 - [swift-argument-parser](https://github.com/apple/swift-argument-parser) - CLI argument parsing
 - [PathKit](https://github.com/kylef/PathKit) - File path handling
 - [MCP Swift SDK](https://github.com/modelcontextprotocol/swift-sdk) - Model Context Protocol implementation
+
+## Releasing a New Version
+
+For maintainers releasing a new version:
+
+**1. Tag and push the release:**
+```bash
+git tag v0.3.0-beta
+git push origin v0.3.0-beta
+```
+
+**2. Create GitHub release:**
+- Visit [Releases](https://github.com/DandyLyons/FrontRange/releases)
+- Draft a new release using the tag
+- Write release notes
+- Publish (GitHub auto-generates source tarballs)
+
+**3. Update Homebrew formula:**
+```bash
+cd ../homebrew-frontrange
+
+# Get SHA256 for the new tarball
+curl -LO https://github.com/DandyLyons/FrontRange/archive/refs/tags/v0.3.0-beta.tar.gz
+shasum -a 256 v0.3.0-beta.tar.gz
+
+# Edit Formula/frontrange.rb:
+# - Update URL to new version
+# - Update SHA256 checksum
+# - Update version in test assertion
+
+git add Formula/frontrange.rb
+git commit -m "Update FrontRange to v0.3.0-beta"
+git push
+```
+
+See [homebrew-frontrange/CLAUDE.md](https://github.com/DandyLyons/homebrew-frontrange/blob/main/CLAUDE.md) for detailed formula maintenance guide.
 
 ## Contributing
 
