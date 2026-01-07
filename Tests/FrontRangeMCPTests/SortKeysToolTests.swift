@@ -63,9 +63,9 @@ import Testing
       .filter { !$0.starts(with: "  ") && $0.contains(":") }
       .compactMap { $0.components(separatedBy: ":").first?.trimmingCharacters(in: .whitespaces) }
 
-    // Check if sorted (at least first few keys should be in order)
-    if topLevelKeys.count >= 2 {
-      #expect(topLevelKeys[0] < topLevelKeys[1])
+    // Verify all consecutive pairs are sorted
+    for i in 0..<(topLevelKeys.count - 1) {
+      #expect(topLevelKeys[i] < topLevelKeys[i + 1], "Keys should be sorted: \(topLevelKeys[i]) should come before \(topLevelKeys[i + 1])")
     }
   }
 

@@ -204,35 +204,15 @@ import Testing
     #expect(stderr.contains("must be a dictionary/mapping"))
   }
 
-  @Test func `Replace from YAML file option exists` () async throws {
-    let tempFile = try createTempFileWithFrontMatter()
-    defer { try? FileManager.default.removeItem(atPath: tempFile) }
+  @Test func `Replace command has from-file option` () async throws {
+    // Verify that the --from-file option is documented in help
+    let output = try await commandRunner.run(
+      arguments: [cliPath, "replace", "--help"]
+    ).concatenatedString()
 
-    let yamlFile = NSTemporaryDirectory() + "test-yaml-\(UUID()).yaml"
-    let yamlContent = """
-    title: YAML Title
-    draft: false
-    tags:
-      - swift
-      - cli
-    """
-    try yamlContent.write(toFile: yamlFile, atomically: true, encoding: .utf8)
-    defer { try? FileManager.default.removeItem(atPath: yamlFile) }
-
-    // Note: This test validates the command syntax but requires manual testing
-    // for the interactive confirmation flow. The command should accept the file
-    // path without errors during validation phase (before the prompt).
-
-    // We can't easily test the full flow without stdin mocking, but we can verify
-    // the arguments are accepted and the file is readable
-    #expect(FileManager.default.fileExists(atPath: yamlFile))
-    #expect(FileManager.default.fileExists(atPath: tempFile))
+    // Should document the --from-file option
+    #expect(output.contains("--from-file"))
+    // Should explain that it reads from a file
+    #expect(output.contains("Path to file containing new front matter"))
   }
-
-  // Manual testing procedure documented:
-  // 1. Create a test file: echo "---\ntitle: Test\n---\nBody" > test.md
-  // 2. Run: swift run fr replace test.md --data '{"title": "New", "draft": false}' --format json
-  // 3. Respond: y
-  // 4. Verify: swift run fr dump test.md
-  // 5. Expected: Front matter shows {"title": "New", "draft": false}
 }

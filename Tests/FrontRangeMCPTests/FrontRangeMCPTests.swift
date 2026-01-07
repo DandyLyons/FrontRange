@@ -48,8 +48,20 @@ import Testing
     #expect(allNames.contains("dump"))
   }
 
-  @Test func toolRegistryCount() {
-    // Verify all tools are registered
-    #expect(ThisServer.tools.count == 10) // get, set, has, list, rename, remove, replace, sort_keys, lines, dump
+  @Test func toolRegistryVerification() {
+    // Verify all expected tools are registered
+    let toolNames = ThisServer.tools.map { $0.name }
+
+    // Check that all required tools are present
+    #expect(toolNames.contains("get"))
+    #expect(toolNames.contains("set"))
+    #expect(toolNames.contains("has"))
+    #expect(toolNames.contains("list"))
+    #expect(toolNames.contains("rename"))
+    #expect(toolNames.contains("remove"))
+    #expect(toolNames.contains("replace"))
+    #expect(toolNames.contains("sort_keys"))
+    #expect(toolNames.contains("lines"))
+    #expect(toolNames.contains("dump"))
   }
 }
