@@ -16,6 +16,7 @@ FrontRange provides three complementary tools for working with front-mattered do
 - Get, set, check, list, rename, and remove front matter keys
 - **Replace entire front matter** with structured data (JSON, YAML, plist)
 - **Search files using JMESPath queries** (filter by front matter values)
+- **Filter files by array membership** (check if arrays contain specific values)
 - Sort front matter keys alphabetically or in reverse order
 - Extract specific line ranges from files
 - Support for multiple output formats (JSON, YAML, plain text)
@@ -287,6 +288,51 @@ fr search 'contains(tags, "swift")' .
 fr search 'draft == `true`' .
 fr search 'contains(tags, `"swift"`)' .
 ```
+
+#### Filter files by array membership
+
+For simple array containment checks, use `array-contains` instead of the more complex `search` command. This is ideal for filtering files by tags, categories, or aliases.
+
+```bash
+# Find files where tags array contains "swift"
+fr array-contains --key tags --value swift posts/
+
+# Find files with specific alias (case-insensitive)
+fr array-contains --key aliases --value blue -i ./
+
+# Invert: find files that DON'T contain the value
+fr array-contains --key tags --value deprecated --invert posts/
+
+# Output in plain text (one path per line)
+fr array-contains --key tags --value swift posts/ --format plainString
+```
+
+**Features:**
+- String comparison only (bool/null/int/float not currently supported)
+- Case-sensitive by default, `-i` flag for case-insensitive
+- `--invert` flag to find files NOT containing the value
+- Pipe-friendly output for bulk operations
+- Exit code 0 for matches, 1 for no matches (enables scripting)
+- Files without the key or non-array values are silently skipped
+
+**Piping to other commands:**
+
+```bash
+# Bulk update: mark all posts tagged "swift" as published
+fr array-contains --key tags --value swift posts/ | xargs fr set --key published --value true
+
+# Chain operations
+fr array-contains --key tags --value tutorial . | while read -r file; do
+  fr set "$file" --key featured --value true
+done
+
+# Find and list front matter
+fr array-contains --key categories --value tech . | xargs fr list
+```
+
+**When to use array-contains vs search:**
+- Use `array-contains` for simple "does array contain X?" checks
+- Use `search` for complex queries, multiple conditions, or non-array fields
 
 ### Workflow Examples
 
