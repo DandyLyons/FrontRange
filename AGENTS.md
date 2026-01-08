@@ -19,13 +19,25 @@ FrontRange is a Swift package for parsing, mutating, serializing, and deserializ
 
 When releasing a new version of FrontRange:
 
-**1. Create and push a git tag in this repository:**
+**1. Update the version number in the CLI:**
+
+Edit `Sources/FrontRangeCLI/FrontRangeCLIEntry.swift` and update the `version` field in `CommandConfiguration`:
+
+```swift
+public static let configuration = CommandConfiguration(
+  // ...
+  version: "0.3.0-beta",  // Update this to match your new version, (usually the same as the git tag)
+  // ...
+)
+```
+
+**2. Create and push a git tag in this repository:**
 ```bash
 git tag v0.3.0-beta
 git push origin v0.3.0-beta
 ```
 
-**2. Create a GitHub release:**
+**3. Create a GitHub release:**
 - Go to https://github.com/DandyLyons/FrontRange/releases
 - Click "Draft a new release"
 - Select the tag you just created
@@ -34,7 +46,7 @@ git push origin v0.3.0-beta
 
 GitHub automatically generates source tarballs (`.tar.gz` and `.zip`) for each release. The Homebrew formula downloads and builds from the source tarball.
 
-**3. Update the Homebrew formula:**
+**4. Update the Homebrew formula:**
 
 Navigate to the homebrew-frontrange repository and update [Formula/frontrange.rb](https://github.com/DandyLyons/homebrew-frontrange/blob/main/Formula/frontrange.rb):
 
@@ -56,7 +68,7 @@ git commit -m "Update FrontRange to v0.3.0-beta"
 git push
 ```
 
-**4. Users can now install the new version:**
+**5. Users can now install the new version:**
 ```bash
 brew update
 brew upgrade frontrange
