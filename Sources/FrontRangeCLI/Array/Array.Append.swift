@@ -16,14 +16,15 @@ extension FrontRangeCLIEntry.Array {
       commandName: "append",
       abstract: "Append a value to the end of an array in front matter",
       discussion: """
-        Add a value to the end of an array in front matter. If the array doesn't
-        exist, this command will throw an error.
+        Add a value to the end of an array in front matter. If the key doesn't
+        exist, it will be created as a new array with the value. If the key exists
+        but is not an array, an error will be thrown.
 
         EXAMPLES:
           # Add "tutorial" tag to all posts
           fr array append --key tags --value tutorial posts/*.md
 
-          # Add alias to specific file
+          # Add alias to specific file (creates 'aliases' key if it doesn't exist)
           fr array append --key aliases --value "New Alias" post.md
 
         SKIP DUPLICATES:
@@ -68,8 +69,8 @@ extension FrontRangeCLIEntry.Array {
         let content = try path.read(.utf8)
         var doc = try FrontMatteredDoc(parsing: content)
 
-        // Validate array exists
-        let sequence = try ArrayHelpers.validateArrayKey(key, in: doc, path: path)
+        // Get array (creates empty if doesn't exist, errors if not an array)
+        let sequence = try ArrayHelpers.getOrCreateArrayKey(key, in: doc, path: path)
 
         // Check for duplicates if requested
         if skipDuplicates {

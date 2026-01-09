@@ -17,13 +17,15 @@ extension FrontRangeCLIEntry.Array {
       abstract: "Prepend a value to the beginning of an array in front matter",
       discussion: """
         Add a value to the beginning of an array in front matter. Useful for
-        priority ordering (e.g., most important tag first).
+        priority ordering (e.g., most important tag first). If the key doesn't
+        exist, it will be created as a new array with the value. If the key exists
+        but is not an array, an error will be thrown.
 
         EXAMPLES:
           # Add "featured" as first tag
           fr array prepend --key tags --value featured posts/*.md
 
-          # Add primary alias
+          # Add primary alias (creates 'aliases' key if it doesn't exist)
           fr array prepend --key aliases --value "Primary Name" post.md
 
         SKIP DUPLICATES:
@@ -68,8 +70,8 @@ extension FrontRangeCLIEntry.Array {
         let content = try path.read(.utf8)
         var doc = try FrontMatteredDoc(parsing: content)
 
-        // Validate array exists
-        let sequence = try ArrayHelpers.validateArrayKey(key, in: doc, path: path)
+        // Get array (creates empty if doesn't exist, errors if not an array)
+        let sequence = try ArrayHelpers.getOrCreateArrayKey(key, in: doc, path: path)
 
         // Check for duplicates if requested
         if skipDuplicates {

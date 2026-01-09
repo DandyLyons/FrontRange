@@ -79,4 +79,47 @@ import Testing
 
     #expect(values == ["Swift"])
   }
+
+  @Test func `Append creates array if key does not exist`() async throws {
+    // Create a temp file with NO tags key
+    let tempFileURL = try createTempFile(withContent: """
+      ---
+      title: "Test Post"
+      ---
+      Body content here.
+      """)
+    let tempFile = tempFileURL.path
+
+    // fr array append --key tags --value swift tempfile
+    _ = try await commandRunner.run(
+      arguments: [cliPath, "array", "append", "--key", "tags", "--value", "swift", tempFile]
+    ).concatenatedString()
+
+    // Verify the array was created with the value
+    let content = try Path(tempFile).read(.utf8)
+    let doc = try FrontMatteredDoc(parsing: content)
+    let values = try extractArrayValues(from: doc, key: "tags")
+
+    #expect(values == ["swift"])
+  }
+
+  @Test func `Append errors if key exists but is not an array`() async throws {
+    // Create a temp file where tags is a string, not an array
+    let tempFileURL = try createTempFile(withContent: """
+      ---
+      title: "Test Post"
+      tags: "not-an-array"
+      ---
+      Body content here.
+      """)
+    let tempFile = tempFileURL.path
+
+    // fr array append --key tags --value swift tempfile
+    // This should fail
+    await #expect(throws: (any Error).self) {
+      _ = try await commandRunner.run(
+        arguments: [cliPath, "array", "append", "--key", "tags", "--value", "swift", tempFile]
+      ).concatenatedString()
+    }
+  }
 }

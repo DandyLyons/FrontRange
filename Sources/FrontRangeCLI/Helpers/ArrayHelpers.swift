@@ -40,6 +40,35 @@ enum ArrayHelpers {
     return sequence
   }
 
+  /// Gets the array for a key, creating it if it doesn't exist
+  /// - Parameters:
+  ///   - key: The front matter key
+  ///   - doc: The FrontMatteredDoc to check
+  ///   - path: The file path (for error messages)
+  /// - Returns: The Yams.Node.Sequence (empty if key doesn't exist)
+  /// - Throws: ArrayError if key exists but is not an array
+  static func getOrCreateArrayKey(
+    _ key: String,
+    in doc: FrontMatteredDoc,
+    path: Path
+  ) throws -> Yams.Node.Sequence {
+    // If key doesn't exist, return empty sequence
+    guard doc.hasKey(key) else {
+      return Yams.Node.Sequence()
+    }
+
+    guard let node = doc.getValue(forKey: key) else {
+      throw ArrayError.cannotRetrieveValue(key: key, path: path.string)
+    }
+
+    // If key exists but is not an array, throw error
+    guard case .sequence(let sequence) = node else {
+      throw ArrayError.notAnArray(key: key, path: path.string)
+    }
+
+    return sequence
+  }
+
   /// Checks if a value exists in a sequence
   /// - Parameters:
   ///   - searchValue: The value to search for
