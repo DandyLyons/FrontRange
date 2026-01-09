@@ -31,7 +31,7 @@ extension FrontRangeCLIEntry {
       
       let content = try paths[0].read(.utf8)
       let doc = try FrontMatteredDoc(parsing: content)
-      let keys = Array(doc.frontMatter.keys)
+      let keys = Swift.Array(doc.frontMatter.keys)
         .compactMap { $0.string }
       try printAny(
         keys,

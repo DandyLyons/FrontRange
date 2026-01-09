@@ -16,7 +16,7 @@ FrontRange provides three complementary tools for working with front-mattered do
 - Get, set, check, list, rename, and remove front matter keys
 - **Replace entire front matter** with structured data (JSON, YAML, plist)
 - **Search files using JMESPath queries** (filter by front matter values)
-- **Filter files by array membership** (check if arrays contain specific values)
+- **Array manipulation commands** (check, append, prepend, remove values from arrays)
 - Sort front matter keys alphabetically or in reverse order
 - Extract specific line ranges from files
 - Support for multiple output formats (JSON, YAML, plain text)
@@ -289,49 +289,77 @@ fr search 'draft == `true`' .
 fr search 'contains(tags, `"swift"`)' .
 ```
 
-#### Filter files by array membership
+#### Array manipulation commands
 
-For simple array containment checks, use `array-contains` instead of the more complex `search` command. This is ideal for filtering files by tags, categories, or aliases.
+The `array` command group provides operations for working with arrays in front matter. All commands support case-insensitive operations via the `-i` flag.
+
+**Check if array contains a value:**
 
 ```bash
 # Find files where tags array contains "swift"
-fr array-contains --key tags --value swift posts/
+fr array contains --key tags --value swift posts/
 
 # Find files with specific alias (case-insensitive)
-fr array-contains --key aliases --value blue -i ./
+fr array contains --key aliases --value blue -i ./
 
 # Invert: find files that DON'T contain the value
-fr array-contains --key tags --value deprecated --invert posts/
+fr array contains --key tags --value deprecated --invert posts/
 
 # Output in plain text (one path per line)
-fr array-contains --key tags --value swift posts/ --format plainString
+fr array contains --key tags --value swift posts/ --format plainString
 ```
 
-**Features:**
-- String comparison only (bool/null/int/float not currently supported)
-- Case-sensitive by default, `-i` flag for case-insensitive
-- `--invert` flag to find files NOT containing the value
-- Pipe-friendly output for bulk operations
-- Exit code 0 for matches, 1 for no matches (enables scripting)
-- Files without the key or non-array values are silently skipped
-
-**Piping to other commands:**
+**Add values to arrays:**
 
 ```bash
-# Bulk update: mark all posts tagged "swift" as published
-fr array-contains --key tags --value swift posts/ | xargs fr set --key published --value true
+# Append value to end of array
+fr array append --key tags --value tutorial posts/*.md
 
-# Chain operations
-fr array-contains --key tags --value tutorial . | while read -r file; do
-  fr set "$file" --key featured --value true
-done
+# Append only if value doesn't exist (prevent duplicates)
+fr array append --key tags --value swift --skip-duplicates posts/*.md
 
-# Find and list front matter
-fr array-contains --key categories --value tech . | xargs fr list
+# Prepend value to beginning of array (useful for priority ordering)
+fr array prepend --key tags --value featured posts/*.md
+
+# Case-insensitive duplicate check
+fr array append --key tags --value SWIFT -i --skip-duplicates posts/*.md
 ```
 
-**When to use array-contains vs search:**
-- Use `array-contains` for simple "does array contain X?" checks
+**Remove values from arrays:**
+
+```bash
+# Remove first occurrence of value from array
+fr array remove --key tags --value draft posts/*.md
+
+# Case-insensitive removal
+fr array remove --key tags --value SWIFT -i posts/*.md
+```
+
+**Common features:**
+- String comparison only (bool/null/int/float not currently supported)
+- Case-sensitive by default, `-i` flag for case-insensitive operations
+- Pipe-friendly output for bulk operations
+- Files without the key or non-array values are silently skipped (for contains) or throw errors (for mutating operations)
+
+**Piping array commands together:**
+
+```bash
+# Find files with "draft" tag and remove it
+fr array contains --key tags --value draft posts/ | xargs fr array remove --key tags --value draft
+
+# Add "published" tag to all non-draft posts
+fr array contains --key tags --value draft --invert posts/ | xargs fr array append --key tags --value published
+
+# Chain multiple operations
+fr array contains --key tags --value swift . | while read -r file; do
+  fr array append "$file" --key tags --value programming --skip-duplicates
+  fr array prepend "$file" --key tags --value featured
+done
+```
+
+**When to use array commands vs search:**
+- Use `array contains` for simple "does array contain X?" checks
+- Use `array append/prepend/remove` for bulk array modifications
 - Use `search` for complex queries, multiple conditions, or non-array fields
 
 ### Workflow Examples

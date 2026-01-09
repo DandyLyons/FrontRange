@@ -44,7 +44,7 @@ import Testing
       sort-keys, sk           Sort keys in frontmatter
       lines                   Extract a range of lines from a file
       dump, d                 Dump entire front matter in specified format
-      array-contains          Find files where an array contains a specific value
+      array                   Array manipulation commands for front matter
 
       See 'fr help <subcommand>' for detailed help.
 
