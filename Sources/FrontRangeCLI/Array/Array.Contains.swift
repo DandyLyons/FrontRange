@@ -1,8 +1,8 @@
 //
-//  ArrayContains.swift
+//  Array.Contains.swift
 //  FrontRange
 //
-//  Created by Daniel Lyons on 2026-01-07.
+//  Check if arrays in front matter contain specific values
 //
 
 import ArgumentParser
@@ -10,10 +10,10 @@ import Foundation
 import FrontRange
 import Yams
 
-extension FrontRangeCLIEntry {
-  struct ArrayContains: ParsableCommand {
+extension FrontRangeCLIEntry.Array {
+  struct Contains: ParsableCommand {
     static let configuration = CommandConfiguration(
-      commandName: "array-contains",
+      commandName: "contains",
       abstract: "Find files where an array contains a specific value",
       discussion: """
         Search for files whose front matter contains an array with a specific value.
@@ -26,24 +26,24 @@ extension FrontRangeCLIEntry {
 
         EXAMPLES:
           # Find files where tags array contains "swift"
-          fr array-contains --key tags --value swift posts/
+          fr array contains --key tags --value swift posts/
 
           # Find files with specific alias
-          fr array-contains --key aliases --value Blue ./
+          fr array contains --key aliases --value Blue ./
 
         PIPING TO OTHER COMMANDS:
           The command outputs file paths (one per line), making it ideal for piping:
 
           # Bulk update: mark all posts tagged "swift" as published
-          fr array-contains --key tags --value swift posts/ | xargs fr set --key published --value true
+          fr array contains --key tags --value swift posts/ | xargs fr set --key published --value true
 
           # Chain operations
-          fr array-contains --key tags --value tutorial . | while read -r file; do
+          fr array contains --key tags --value tutorial . | while read -r file; do
             fr set "$file" --key featured --value true
           done
 
           # Find and list front matter
-          fr array-contains --key categories --value tech . | xargs fr list
+          fr array contains --key categories --value tech . | xargs fr list
 
         OUTPUT FORMATS:
           --format plainString (default): One file path per line
@@ -52,7 +52,7 @@ extension FrontRangeCLIEntry {
 
         INVERT RESULTS:
           Use --invert to find files that DON'T contain the value:
-          fr array-contains --key tags --value deprecated --invert posts/
+          fr array contains --key tags --value deprecated --invert posts/
         """
     )
 
@@ -96,28 +96,19 @@ extension FrontRangeCLIEntry {
           continue
         }
 
-        // 2. Check if key exists
-        guard doc.hasKey(key) else {
-          printIfDebug("⚠️ Key '\(key)' not found in \(path.string) - skipping")
+        // 2. Check if key exists and is an array (skip if not)
+        let sequence: Yams.Node.Sequence
+        do {
+          sequence = try ArrayHelpers.validateArrayKey(key, in: doc, path: path)
+        } catch {
+          printIfDebug("⚠️ \(error.localizedDescription) - skipping")
           continue
         }
 
-        // 3. Get the value for the key
-        guard let node = doc.getValue(forKey: key) else {
-          printIfDebug("⚠️ Could not retrieve value for key '\(key)' in \(path.string) - skipping")
-          continue
-        }
+        // 3. Search for the value in the sequence
+        let found = ArrayHelpers.containsValue(value, in: sequence, caseInsensitive: caseInsensitive)
 
-        // 4. Check if value is a sequence (array)
-        guard case .sequence(let sequence) = node else {
-          printIfDebug("⚠️ Value for key '\(key)' is not an array in \(path.string) - skipping")
-          continue
-        }
-
-        // 5. Search for the value in the sequence
-        let found = containsValue(value, in: sequence, caseInsensitive: caseInsensitive)
-
-        // 6. Apply invert logic
+        // 4. Apply invert logic
         let matches = invert ? !found : found
 
         if matches {
@@ -128,30 +119,8 @@ extension FrontRangeCLIEntry {
         }
       }
 
-      // 7. Output results
+      // 5. Output results
       try outputResults(matchingFiles)
-    }
-
-    private func containsValue(_ searchValue: String, in sequence: Yams.Node.Sequence, caseInsensitive: Bool) -> Bool {
-      let compareValue = caseInsensitive ? searchValue.lowercased() : searchValue
-
-      for i in 0..<sequence.count {
-        let element = sequence[i]
-
-        // Only compare scalar (string) values
-        guard case .scalar(let scalar) = element else {
-          continue
-        }
-
-        let elementString = scalar.string
-        let compareElement = caseInsensitive ? elementString.lowercased() : elementString
-
-        if compareElement == compareValue {
-          return true
-        }
-      }
-
-      return false
     }
 
     private func outputResults(_ matchingFiles: [String]) throws {

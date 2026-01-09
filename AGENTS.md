@@ -149,7 +149,7 @@ Note: The MCP server is currently in early development.
 **Entry Point** (Sources/FrontRangeCLI/FrontRangeCLIEntry.swift)
 - Uses swift-argument-parser
 - Main command: `fr`
-- Subcommands: `get`, `set`, `has`, `list`, `rename`, `remove`, `replace`, `sort-keys`, `lines`, `search`
+- Subcommands: `get`, `set`, `has`, `list`, `rename`, `remove`, `replace`, `sort-keys`, `lines`, `search`, `array`, `dump`
 
 **Subcommand Pattern**
 - Each subcommand is a struct conforming to `ParsableCommand`
@@ -240,6 +240,107 @@ done
 
 # Remove a key from matching files
 fr search 'deprecated == `true`' . | xargs fr remove --key temporary
+```
+
+### Array Commands (FrontRangeCLI)
+
+**BREAKING CHANGE:** The `array-contains` command has been removed and replaced with `fr array contains`.
+
+**File Organization:**
+- Parent command: `Sources/FrontRangeCLI/Array/Array.swift`
+- Subcommands: `Array/Array.Contains.swift`, `Array/Array.Append.swift`, `Array/Array.Prepend.swift`, `Array/Array.Remove.swift`
+- Shared utilities: `Sources/FrontRangeCLI/Helpers/ArrayHelpers.swift`
+- Tests: `Tests/FrontRangeCLITests/Array/`
+
+The array command group provides operations for manipulating arrays in front matter:
+
+**Array Contains** (`fr array contains`)
+- Find files where an array contains a specific value
+- Replaces the old `array-contains` command (breaking change)
+- Supports `--invert` flag to find files NOT containing the value
+- Supports `--case-insensitive` / `-i` for case-insensitive matching
+- Outputs file paths (one per line) for piping to other commands
+
+```bash
+# Find files where tags array contains "swift"
+fr array contains --key tags --value swift posts/
+
+# Find files that DON'T contain "deprecated" tag
+fr array contains --key tags --value deprecated --invert posts/
+
+# Case-insensitive search
+fr array contains --key aliases --value BLUE -i ./
+```
+
+**Array Append** (`fr array append`)
+- Append a value to the end of an array
+- Supports `--skip-duplicates` to prevent adding duplicate values
+- Supports `--case-insensitive` / `-i` for duplicate detection
+- Writes changes back to files
+
+```bash
+# Add "tutorial" tag to all posts
+fr array append --key tags --value tutorial posts/*.md
+
+# Add tag only if it doesn't exist
+fr array append --key tags --value swift --skip-duplicates posts/*.md
+
+# Case-insensitive duplicate check
+fr array append --key tags --value SWIFT -i --skip-duplicates posts/*.md
+```
+
+**Array Prepend** (`fr array prepend`)
+- Prepend a value to the beginning of an array
+- Useful for priority ordering (e.g., most important tag first)
+- Supports same flags as `append`: `--skip-duplicates`, `--case-insensitive`
+
+```bash
+# Add "featured" as first tag
+fr array prepend --key tags --value featured posts/*.md
+
+# Add primary alias to the front
+fr array prepend --key aliases --value "Primary Name" post.md
+```
+
+**Array Remove** (`fr array remove`)
+- Remove first occurrence of a value from an array
+- Only removes the first match (if multiple exist)
+- Supports `--case-insensitive` / `-i` for matching
+- Skips files where value is not found
+
+```bash
+# Remove "draft" tag from posts
+fr array remove --key tags --value draft posts/*.md
+
+# Case-insensitive removal
+fr array remove --key tags --value SWIFT -i posts/*.md
+```
+
+**Array Helpers** (`Sources/FrontRangeCLI/Helpers/ArrayHelpers.swift`)
+- Shared utility functions for array operations:
+  - `validateArrayKey()` - Validates key exists and contains an array
+  - `containsValue()` - Searches array with case sensitivity option
+  - `append()`, `prepend()`, `removeFirst()` - Array manipulation functions
+- Custom `ArrayError` enum for consistent error messages
+
+**Testing:**
+- All array commands have comprehensive test coverage
+- Tests located in `Tests/FrontRangeCLITests/Array/`
+- Test helpers in `CLI Test Helpers.swift`: `createTempFileWithArray()`, `extractArrayValues()`
+
+**Examples with piping:**
+```bash
+# Find files with "draft" tag and remove it
+fr array contains --key tags --value draft posts/ | xargs fr array remove --key tags --value draft
+
+# Add "published" tag to all non-draft posts
+fr array contains --key tags --value draft --invert posts/ | xargs fr array append --key tags --value published
+
+# Chain operations
+fr array contains --key tags --value swift . | while read -r file; do
+  fr array append "$file" --key tags --value programming --skip-duplicates
+  fr array prepend "$file" --key tags --value featured
+done
 ```
 
 ### CSV Dump Format (FrontRangeCLI)
