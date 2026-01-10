@@ -218,8 +218,8 @@ The Search command duplicates date filtering options and logic from GlobalOption
 # Find draft files
 fr search 'draft == `true`' ./posts
 
-# Find files with specific tags
-fr search 'contains(tags, `"swift"`)' .
+# Find files with specific tags (simpler than JMESPath)
+fr array contains --key tags --value swift .
 
 # Complex queries with mixed types
 fr search 'draft == `false` && contains(tags, `"tutorial"`)' ./content
