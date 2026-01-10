@@ -42,4 +42,41 @@ import Testing
 
     #expect(values == ["swift"])
   }
+
+  @Test func `Prepend creates array if key does not exist`() async throws {
+    let tempFileURL = try createTempFile(withContent: """
+      ---
+      title: "Test Post"
+      ---
+      Body content here.
+      """)
+    let tempFile = tempFileURL.path
+
+    _ = try await commandRunner.run(
+      arguments: [cliPath, "array", "prepend", "--key", "tags", "--value", "swift", tempFile]
+    ).concatenatedString()
+
+    let content = try Path(tempFile).read(.utf8)
+    let doc = try FrontMatteredDoc(parsing: content)
+    let values = try extractArrayValues(from: doc, key: "tags")
+
+    #expect(values == ["swift"])
+  }
+
+  @Test func `Prepend errors if key exists but is not an array`() async throws {
+    let tempFileURL = try createTempFile(withContent: """
+      ---
+      title: "Test Post"
+      tags: "not-an-array"
+      ---
+      Body content here.
+      """)
+    let tempFile = tempFileURL.path
+
+    await #expect(throws: (any Error).self) {
+      _ = try await commandRunner.run(
+        arguments: [cliPath, "array", "prepend", "--key", "tags", "--value", "swift", tempFile]
+      ).concatenatedString()
+    }
+  }
 }

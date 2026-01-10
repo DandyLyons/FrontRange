@@ -274,6 +274,8 @@ fr array contains --key aliases --value BLUE -i ./
 
 **Array Append** (`fr array append`)
 - Append a value to the end of an array
+- **Auto-creates array**: If the key doesn't exist, it will be created as a new array with the value
+- **Type safety**: If the key exists but is not an array, an error is thrown
 - Supports `--skip-duplicates` to prevent adding duplicate values
 - Supports `--case-insensitive` / `-i` for duplicate detection
 - Writes changes back to files
@@ -287,11 +289,16 @@ fr array append --key tags --value swift --skip-duplicates posts/*.md
 
 # Case-insensitive duplicate check
 fr array append --key tags --value SWIFT -i --skip-duplicates posts/*.md
+
+# Creates 'tags' key if it doesn't exist
+fr array append --key tags --value swift post-without-tags.md
 ```
 
 **Array Prepend** (`fr array prepend`)
 - Prepend a value to the beginning of an array
 - Useful for priority ordering (e.g., most important tag first)
+- **Auto-creates array**: If the key doesn't exist, it will be created as a new array with the value
+- **Type safety**: If the key exists but is not an array, an error is thrown
 - Supports same flags as `append`: `--skip-duplicates`, `--case-insensitive`
 
 ```bash
@@ -300,6 +307,9 @@ fr array prepend --key tags --value featured posts/*.md
 
 # Add primary alias to the front
 fr array prepend --key aliases --value "Primary Name" post.md
+
+# Creates 'categories' key if it doesn't exist
+fr array prepend --key categories --value "Featured" post.md
 ```
 
 **Array Remove** (`fr array remove`)
@@ -318,7 +328,8 @@ fr array remove --key tags --value SWIFT -i posts/*.md
 
 **Array Helpers** (`Sources/FrontRangeCLI/Helpers/ArrayHelpers.swift`)
 - Shared utility functions for array operations:
-  - `validateArrayKey()` - Validates key exists and contains an array
+  - `validateArrayKey()` - Validates key exists and contains an array (throws if key doesn't exist)
+  - `getOrCreateArrayKey()` - Gets array or returns empty if key doesn't exist (throws if key exists but is not an array)
   - `containsValue()` - Searches array with case sensitivity option
   - `append()`, `prepend()`, `removeFirst()` - Array manipulation functions
 - Custom `ArrayError` enum for consistent error messages
