@@ -230,11 +230,11 @@ Search for files whose front matter matches a JMESPath expression. The `search` 
 # Find all draft files (automatically recursive)
 fr search 'draft == `true`' ./posts
 
-# Find files with specific tag
-fr search 'contains(tags, `"swift"`)' .
+# Find files with specific tag (simpler than JMESPath)
+fr array contains --key tags --value swift .
 
 # Complex queries with mixed types
-fr search 'draft == `false` && contains(tags, `"tutorial"`)' ./content
+fr search 'draft == `false` && tags' ./content
 
 # Output formats
 fr search 'draft == `true`' . --format json
@@ -281,12 +281,11 @@ fr search "draft == `true`" .
 # ✗ Wrong - JMESPath treats "true" as field name
 fr search 'draft == true' .
 
-# ✗ Wrong - JMESPath treats "swift" as field reference
-fr search 'contains(tags, "swift")' .
-
 # ✓ Correct - single quotes + backtick literals
 fr search 'draft == `true`' .
-fr search 'contains(tags, `"swift"`)' .
+
+# ✓ Better - use array contains for simpler, more readable syntax
+fr array contains --key tags --value swift .
 ```
 
 #### Array manipulation commands
@@ -390,7 +389,7 @@ For straightforward operations on small file sets without spaces in paths:
 fr search 'draft == `true`' ./posts | xargs fr set --key draft --value false
 
 # Add a "reviewed" tag to all tutorial posts
-fr search 'contains(tags, `"tutorial"`)' ./content | xargs fr set --key reviewed --value true
+fr array contains --key tags --value tutorial ./content | xargs fr set --key reviewed --value true
 ```
 
 **Important limitations of xargs:**
