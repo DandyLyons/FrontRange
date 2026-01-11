@@ -561,6 +561,133 @@ else
 fi
 ```
 
+#### YAML Formatting Configuration
+
+FrontRange provides comprehensive control over YAML output formatting through a flexible configuration system that supports CLI flags, project-level config files, and global user preferences.
+
+##### Configuration Precedence
+
+Configuration is resolved in order of priority (highest to lowest):
+
+1. **CLI Flags** - Command-line arguments (e.g., `--indent 4`)
+2. **Project Config** - `.frontrange.yaml` in the current directory
+3. **Global Config** - `~/.config/frontrange/config.yaml`
+4. **Defaults** - Built-in defaults
+
+##### Configuration Files
+
+**Global Config (`~/.config/frontrange/config.yaml`):**
+User-specific preferences that apply to all `fr` commands on your system.
+
+```yaml
+# Personal preferences
+indent: 2
+width: 100
+allowUnicode: true
+sortKeys: true
+```
+
+**Project Config (`.frontrange.yaml`):**
+Team-shareable settings for a specific project (commit to version control).
+
+```yaml
+# Team-wide formatting standards
+indent: 4
+width: 80
+sortKeys: true
+sequenceStyle: block
+mappingStyle: block
+scalarStyle: doubleQuoted
+```
+
+##### Available Options
+
+All YAML serialization options:
+
+- `canonical` (bool): Canonical YAML format
+- `indent` (int): Indentation spaces (default: 2)
+- `width` (int): Line width for wrapping (default: 80, -1 = unlimited)
+- `allowUnicode` (bool): Allow Unicode characters (default: false)
+- `lineBreak` (string): `cr`, `ln`, or `crln` (default: `ln`)
+- `explicitStart` (bool): Include `---` document start (default: false)
+- `explicitEnd` (bool): Include `...` document end (default: false)
+- `sortKeys` (bool): Sort keys alphabetically (default: false)
+- `sequenceStyle` (string): Array format - `any`, `block`, or `flow` (default: `any`)
+- `mappingStyle` (string): Object format - `any`, `block`, or `flow` (default: `any`)
+- `scalarStyle` (string): String format - `any`, `plain`, `singleQuoted`, `doubleQuoted`, `literal`, or `folded` (default: `any`)
+
+##### CLI Flag Overrides
+
+All write commands support formatting flags that override configuration files:
+
+```bash
+# Override config to use 2-space indentation
+fr set --key title --value "Hello" post.md --indent 2
+
+# Force canonical YAML output
+fr set --key author --value "Alice" post.md --canonical
+
+# Use flow style for arrays (inline: [1, 2, 3])
+fr array append --key tags --value swift post.md --sequence-style flow
+
+# Sort keys alphabetically
+fr set --key date --value "2024-01-01" post.md --sort-keys
+
+# Combine multiple formatting options
+fr set --key title --value "Post" post.md --indent 4 --width 120 --sort-keys
+```
+
+##### Use Cases
+
+**Team Consistency:**
+Ensure all team members use the same YAML formatting:
+
+```bash
+# Create project config
+cat > .frontrange.yaml << EOF
+indent: 2
+sortKeys: true
+sequenceStyle: block
+EOF
+
+# Commit to version control
+git add .frontrange.yaml
+git commit -m "Add FrontRange config for consistent YAML formatting"
+```
+
+**Personal Preferences:**
+Set your preferred formatting globally:
+
+```bash
+# Create global config directory
+mkdir -p ~/.config/frontrange
+
+# Set preferences
+cat > ~/.config/frontrange/config.yaml << EOF
+allowUnicode: true
+width: 120
+indent: 2
+EOF
+```
+
+**One-off Overrides:**
+Override defaults for specific operations:
+
+```bash
+# Usually use 2-space indent, but need 4 for this file
+fr set --key title --value "Special" post.md --indent 4
+```
+
+**Standardize Formatting:**
+Reformat all files with consistent settings:
+
+```bash
+# Bulk reformat all posts
+for file in posts/*.md; do
+  fr sort-keys "$file" --indent 2 --sort-keys --sequence-style block
+done
+```
+
 #### Global Options
 
 - `--format, -f`: Output format (json, yaml, plainString)
