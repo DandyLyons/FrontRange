@@ -9,6 +9,7 @@ import ArgumentParser
 import Foundation
 import FrontRange
 import IssueReporting
+import PathKit
 
 extension FrontRangeCLIEntry {
   struct SortKeys: ParsableCommand {
@@ -32,12 +33,19 @@ extension FrontRangeCLIEntry {
       
     
     func run() throws {
+      // Resolve configuration from all sources
+      let resolvedConfig = try ConfigResolver.resolve(
+        globalOptions: options,
+        workingDirectory: Path.current
+      )
+      let serializationOptions = ConfigResolver.toSerializationOptions(resolvedConfig)
+
       for path in try options.paths {
         printIfDebug("ℹ️ Sorting keys in file '\(path)' using method '\(sortMethod.rawValue)'")
-        
+
         let content = try path.read(.utf8)
         var doc = try FrontMatteredDoc(parsing: content)
-        
+
         switch sortMethod {
           case .alphabetical:
             doc.frontMatter.sort { $0.key < $1.key }
@@ -45,12 +53,12 @@ extension FrontRangeCLIEntry {
             //          doc.frontMatter.sort { $0.key.count < $1.key.count }
             reportIssue("Not yet implemented: sorting by length")
         }
-        
+
         if reverse {
           doc.frontMatter.reverse()
         }
-        
-        let updatedContent = try doc.render()
+
+        let updatedContent = try doc.render(options: serializationOptions)
         try path.write(updatedContent)
       }
     }

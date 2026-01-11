@@ -44,10 +44,33 @@ extension FrontMatteredDoc {
 
 // MARK: Methods
 extension FrontMatteredDoc {
+  /// Render the document with default serialization options
   public func render() throws -> String {
-    let frontMatterString = try Yams.serialize(node: .mapping(self.frontMatter))
-      .trimmingCharacters(in: .newlines) // remove leading/trailing newlines
-    
+    try render(options: nil)
+  }
+
+  /// Render the document with custom serialization options
+  /// - Parameter options: Serialization options for YAML formatting. If nil, uses defaults.
+  /// - Returns: Rendered document with YAML front matter and body
+  public func render(options: SerializationOptions?) throws -> String {
+    let opts = options ?? .defaults
+
+    let frontMatterString = try Yams.serialize(
+      node: .mapping(self.frontMatter),
+      canonical: opts.canonical,
+      indent: opts.indent,
+      width: opts.width,
+      allowUnicode: opts.allowUnicode,
+      lineBreak: opts.lineBreak,
+      explicitStart: opts.explicitStart,
+      explicitEnd: opts.explicitEnd,
+      version: nil,  // Not configurable for now
+      sortKeys: opts.sortKeys,
+      sequenceStyle: opts.sequenceStyle,
+      mappingStyle: opts.mappingStyle,
+      newLineScalarStyle: opts.scalarStyle
+    ).trimmingCharacters(in: .newlines)
+
     return """
     ---
     \(frontMatterString)
