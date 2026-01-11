@@ -79,15 +79,20 @@ struct ConfigResolverTests {
         #expect(opts.scalarStyle == .plain)
     }
 
-    @Test("configFromGlobalOptions extracts CLI flag values")
-    func testConfigFromGlobalOptions() {
-        // Note: We can't easily create GlobalOptions instances in unit tests
-        // because it has @Argument properties that require ArgumentParser.
-        // This functionality is tested via integration tests.
+    @Test("ResolvedConfig defaults match expected values")
+    func testResolvedConfigDefaultValues() {
+        let defaults = ResolvedConfig.defaults
 
-        // Test that defaults are sensible
-        #expect(ResolvedConfig.defaults.indent == 2)
-        #expect(ResolvedConfig.defaults.sortKeys == false)
-        #expect(ResolvedConfig.defaults.sequenceStyle == .any)
+        #expect(defaults.canonical == false)
+        #expect(defaults.indent == 2)
+        #expect(defaults.width == -1)
+        #expect(defaults.allowUnicode == false)
+        #expect(defaults.lineBreak == .ln)
+        #expect(defaults.explicitStart == false)
+        #expect(defaults.explicitEnd == false)
+        #expect(defaults.sortKeys == false)
+        #expect(defaults.sequenceStyle == .any)
+        #expect(defaults.mappingStyle == .any)
+        #expect(defaults.scalarStyle == .any)
     }
 }
