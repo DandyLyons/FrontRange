@@ -74,6 +74,13 @@ extension FrontRangeCLIEntry {
     var paths: [Path]
 
     func run() throws {
+      // Load configuration from files only (Replace doesn't use GlobalOptions)
+      let globalConfig = try ConfigLoader.loadGlobalConfig()
+      let projectConfig = try ConfigLoader.loadProjectConfig(from: Path.current)
+      let mergedConfig = ConfigLoader.mergeConfigs([globalConfig, projectConfig])
+      let resolvedConfig = ResolvedConfig(from: mergedConfig)
+      let serializationOptions = ConfigResolver.toSerializationOptions(resolvedConfig)
+
       // Validate input options
       guard data != nil || fromFile != nil else {
         throw ValidationError("Must specify either --data or --from-file")
@@ -105,11 +112,11 @@ extension FrontRangeCLIEntry {
 
       // Process each file
       for path in paths {
-        try replaceInFile(path: path, newFrontMatter: newFrontMatter)
+        try replaceInFile(path: path, newFrontMatter: newFrontMatter, serializationOptions: serializationOptions)
       }
     }
 
-    private func replaceInFile(path: Path, newFrontMatter: Yams.Node.Mapping) throws {
+    private func replaceInFile(path: Path, newFrontMatter: Yams.Node.Mapping, serializationOptions: SerializationOptions) throws {
       printIfDebug("ℹ️ Processing '\(path)'")
 
       // Prompt for confirmation (interactive)
@@ -134,7 +141,7 @@ extension FrontRangeCLIEntry {
       doc.frontMatter = newFrontMatter
 
       // Render and write back
-      let updatedContent = try doc.render()
+      let updatedContent = try doc.render(options: serializationOptions)
       try path.write(updatedContent)
 
       print("✓ Replaced front matter in '\(path)'")

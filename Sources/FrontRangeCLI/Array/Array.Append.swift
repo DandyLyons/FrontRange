@@ -8,6 +8,7 @@
 import ArgumentParser
 import Foundation
 import FrontRange
+import PathKit
 import Yams
 
 extension FrontRangeCLIEntry.Array {
@@ -60,6 +61,13 @@ extension FrontRangeCLIEntry.Array {
         printIfDebug("📝 Case-insensitive comparison enabled")
       }
 
+      // Resolve configuration from all sources
+      let resolvedConfig = try ConfigResolver.resolve(
+        globalOptions: options,
+        workingDirectory: Path.current
+      )
+      let serializationOptions = ConfigResolver.toSerializationOptions(resolvedConfig)
+
       let paths = try options.paths
 
       for path in paths {
@@ -85,7 +93,7 @@ extension FrontRangeCLIEntry.Array {
         doc.setValue(.sequence(updatedSequence), forKey: key)
 
         // Write back
-        let updatedContent = try doc.render()
+        let updatedContent = try doc.render(options: serializationOptions)
         try updatedContent.write(toFile: path.string, atomically: true, encoding: .utf8)
         printIfDebug("✅ Updated \(path.string)")
       }

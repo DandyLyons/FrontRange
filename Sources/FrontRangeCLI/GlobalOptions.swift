@@ -78,6 +78,41 @@ struct GlobalOptions: ParsableArguments {
   @Option(name: .long, help: "Keep files added in this month (YYYY-MM)")
   var addedMonth: String?
 
+  // MARK: - YAML Formatting Options
+
+  @Flag(name: .long, help: "Canonical YAML output")
+  var canonical: Bool = false
+
+  @Option(name: .long, help: "Indentation level (spaces)")
+  var indent: Int?
+
+  @Option(name: .long, help: "Line width for wrapping (-1 = unlimited)")
+  var width: Int?
+
+  @Flag(name: .long, help: "Allow Unicode characters")
+  var allowUnicode: Bool = false
+
+  @Option(name: .long, help: "Line break style (cr, ln, crln)")
+  var lineBreak: LineBreakOption?
+
+  @Flag(name: .long, help: "Explicit document start (---)")
+  var explicitStart: Bool = false
+
+  @Flag(name: .long, help: "Explicit document end (...)")
+  var explicitEnd: Bool = false
+
+  @Flag(name: .long, help: "Sort front matter keys alphabetically")
+  var sortKeys: Bool = false
+
+  @Option(name: .long, help: "Sequence/array style (any, block, flow)")
+  var sequenceStyle: SequenceStyleOption?
+
+  @Option(name: .long, help: "Mapping/object style (any, block, flow)")
+  var mappingStyle: MappingStyleOption?
+
+  @Option(name: .long, help: "Scalar/string style (any, plain, singleQuoted, doubleQuoted, literal, folded)")
+  var scalarStyle: ScalarStyleOption?
+
   /// The paths as input by the user (before following the user's input options).
   ///
   /// See `paths` for the processed paths after applying user options like recursion and extension filtering.

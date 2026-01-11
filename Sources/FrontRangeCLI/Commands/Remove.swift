@@ -24,14 +24,20 @@ extension FrontRangeCLIEntry {
     var key: String
     
     func run() throws {
-      
+      // Resolve configuration from all sources
+      let resolvedConfig = try ConfigResolver.resolve(
+        globalOptions: options,
+        workingDirectory: Path.current
+      )
+      let serializationOptions = ConfigResolver.toSerializationOptions(resolvedConfig)
+
       for path in try options.paths {
         printIfDebug("ℹ️ Removing key '\(key)' from file '\(path.string)'")
-        
+
         let content = try path.read(.utf8)
         var doc = try FrontMatteredDoc(parsing: content)
         doc.remove(key: key)
-        let updatedContent = try doc.render()
+        let updatedContent = try doc.render(options: serializationOptions)
         try updatedContent.write(to: URL(fileURLWithPath: path.string), atomically: true, encoding: .utf8)
       }
     }
