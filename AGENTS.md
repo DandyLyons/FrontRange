@@ -567,6 +567,233 @@ fr search 'draft == `false`' posts/ --modified-after 2024-01-01
 - **Platform-specific**: "Added date" only available on macOS via Spotlight metadata
 - **Graceful degradation**: Missing metadata returns nil instead of throwing errors
 
+## YAML Serialization Configuration
+
+FrontRange provides comprehensive configuration for controlling YAML output formatting. Users can customize YAML serialization through CLI flags, project-level config files, and global config files.
+
+### Configuration Precedence
+
+Configuration is resolved in the following order (highest to lowest priority):
+
+1. **CLI Flags** - Command-line arguments like `--indent 4`
+2. **Project Config** - `.frontrange.yaml` in the current directory
+3. **Global Config** - `~/.config/frontrange/config.yaml`
+4. **Defaults** - Built-in defaults from `SerializationOptions.defaults`
+
+### Configuration File Locations
+
+**Global Config:**
+- Path: `~/.config/frontrange/config.yaml`
+- Applies to all `fr` commands on the system
+- User-specific preferences
+
+**Project Config:**
+- Path: `.frontrange.yaml` in the current working directory
+- Applies to all files in this project
+- Team-shareable settings (commit to version control)
+
+### Configuration Options
+
+All YAML serialization options can be configured via config files or CLI flags:
+
+**Basic Formatting:**
+- `canonical` (bool): Use canonical YAML format (fully qualified style)
+- `indent` (int): Number of spaces for indentation (default: 2)
+- `width` (int): Maximum line width for wrapping (-1 = unlimited, default: 80)
+- `allowUnicode` (bool): Allow Unicode characters instead of escaping (default: false)
+
+**Document Markers:**
+- `explicitStart` (bool): Include explicit `---` document start marker (default: false)
+- `explicitEnd` (bool): Include explicit `...` document end marker (default: false)
+
+**Sorting:**
+- `sortKeys` (bool): Sort front matter keys alphabetically (default: false)
+
+**Line Breaks:**
+- `lineBreak` (string): Line break style - `cr`, `ln`, or `crln` (default: `ln`)
+
+**Styles:**
+- `sequenceStyle` (string): Array/sequence formatting - `any`, `block`, or `flow` (default: `any`)
+- `mappingStyle` (string): Object/mapping formatting - `any`, `block`, or `flow` (default: `any`)
+- `scalarStyle` (string): String/scalar formatting - `any`, `plain`, `singleQuoted`, `doubleQuoted`, `literal`, or `folded` (default: `any`)
+
+### Example Config Files
+
+**Global Config (`~/.config/frontrange/config.yaml`):**
+
+```yaml
+# Personal preferences for all projects
+indent: 2
+width: 100
+allowUnicode: true
+sortKeys: true
+lineBreak: ln
+```
+
+**Project Config (`.frontrange.yaml`):**
+
+```yaml
+# Team-wide settings for this project
+indent: 4
+width: 80
+sortKeys: true
+sequenceStyle: block
+mappingStyle: block
+scalarStyle: doubleQuoted
+explicitStart: false
+explicitEnd: false
+```
+
+### CLI Flag Overrides
+
+All configuration options can be overridden via CLI flags. CLI flags always take highest priority:
+
+```bash
+# Override project config to use 2-space indentation
+fr set --key title --value "Hello" post.md --indent 2
+
+# Force canonical YAML output
+fr set --key author --value "Alice" post.md --canonical
+
+# Use flow style for arrays (inline: [1, 2, 3])
+fr array append --key tags --value swift post.md --sequence-style flow
+
+# Sort keys alphabetically (overrides any config)
+fr set --key date --value "2024-01-01" post.md --sort-keys
+
+# Combine multiple formatting options
+fr set --key title --value "Post" post.md --indent 4 --width 120 --sort-keys
+```
+
+### Available CLI Flags
+
+All write commands (`set`, `remove`, `rename`, `replace`, `sort-keys`, `array append`, `array prepend`, `array remove`) support these formatting flags:
+
+- `--canonical` - Canonical YAML output
+- `--indent <INT>` - Indentation level (spaces)
+- `--width <INT>` - Line width for wrapping (-1 = unlimited)
+- `--allow-unicode` - Allow Unicode characters
+- `--line-break <cr|ln|crln>` - Line break style
+- `--explicit-start` - Explicit document start (---)
+- `--explicit-end` - Explicit document end (...)
+- `--sort-keys` - Sort front matter keys alphabetically
+- `--sequence-style <any|block|flow>` - Array formatting
+- `--mapping-style <any|block|flow>` - Object formatting
+- `--scalar-style <any|plain|singleQuoted|doubleQuoted|literal|folded>` - String formatting
+
+### Architecture
+
+**Core Components:**
+
+**SerializationOptions** (`Sources/FrontRange/SerializationOptions.swift`)
+- Struct containing all Yams serialization parameters
+- Provides `.defaults` static property for default values
+- Used by `FrontMatteredDoc.render(options:)` method
+
+**Config System** (`Sources/FrontRangeCLI/Config/`)
+- **Config.swift**: Defines the `Config` struct matching YAML config file structure
+- **ConfigLoader.swift**: Loads and parses config files from disk
+  - `loadGlobalConfig()` - Load `~/.config/frontrange/config.yaml`
+  - `loadProjectConfig(from:)` - Load `.frontrange.yaml` from working directory
+  - `mergeConfigs()` - Merge multiple configs with proper precedence
+- **ConfigResolver.swift**: Resolves final configuration from all sources
+  - `resolve(globalOptions:workingDirectory:)` - Combine CLI flags, project config, global config
+  - `toSerializationOptions()` - Convert resolved config to `SerializationOptions`
+
+**ResolvedConfig:**
+- Intermediate representation after merging all config sources
+- Type-safe with proper Swift types (not YAML Node types)
+- Handles precedence: CLI flags > project config > global config > defaults
+
+**Integration Pattern:**
+
+All write commands follow this pattern:
+
+```swift
+func run() throws {
+  // Resolve configuration from all sources
+  let resolvedConfig = try ConfigResolver.resolve(
+    globalOptions: options,
+    workingDirectory: Path.current
+  )
+  let serializationOptions = ConfigResolver.toSerializationOptions(resolvedConfig)
+
+  // Use resolved options when rendering
+  let updatedContent = try doc.render(options: serializationOptions)
+  try path.write(updatedContent)
+}
+```
+
+**Special Case - Replace Command:**
+
+The `replace` command doesn't use `GlobalOptions` (it has its own argument structure), so it loads config files directly:
+
+```swift
+func run() throws {
+  // Load configuration from files only
+  let globalConfig = try ConfigLoader.loadGlobalConfig()
+  let projectConfig = try ConfigLoader.loadProjectConfig(from: Path.current)
+  let mergedConfig = ConfigLoader.mergeConfigs([globalConfig, projectConfig])
+  let resolvedConfig = ResolvedConfig(from: mergedConfig)
+  let serializationOptions = ConfigResolver.toSerializationOptions(resolvedConfig)
+
+  // Use options for rendering
+  let updatedContent = try doc.render(options: serializationOptions)
+}
+```
+
+### Use Cases
+
+**1. Team Consistency:**
+Commit `.frontrange.yaml` to version control to ensure all team members use consistent YAML formatting:
+
+```yaml
+# .frontrange.yaml - committed to git
+indent: 2
+sortKeys: true
+sequenceStyle: block
+```
+
+**2. Personal Preferences:**
+Set global preferences in `~/.config/frontrange/config.yaml`:
+
+```yaml
+# Global config - personal preference
+allowUnicode: true
+width: 120
+```
+
+**3. One-off Overrides:**
+Override config for specific operations:
+
+```bash
+# Usually use 2-space indent, but need 4 for this file
+fr set --key title --value "Special" post.md --indent 4
+```
+
+**4. Migration/Cleanup:**
+Standardize YAML formatting across an entire project:
+
+```bash
+# Reformat all files with consistent settings
+for file in posts/*.md; do
+  fr sort-keys "$file" --indent 2 --sort-keys --sequence-style block
+done
+```
+
+### Testing
+
+**Test Coverage:**
+- `Tests/FrontRangeCLITests/Config/ConfigTests.swift` - Config struct tests
+- `Tests/FrontRangeCLITests/Config/ConfigLoaderTests.swift` - File loading and merging
+- `Tests/FrontRangeCLITests/Config/ConfigResolverTests.swift` - Precedence and resolution
+
+**Test Approach:**
+- Tests use temporary directories for config files
+- Verify precedence order (CLI > project > global > defaults)
+- Validate YAML parsing and error handling
+- Integration tests verify end-to-end formatting
+
 ## Dependencies
 
 - **Yams** - YAML parsing and serialization
