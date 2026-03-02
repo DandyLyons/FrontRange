@@ -114,7 +114,8 @@ extension FrontRangeCLIEntry {
 
       // Prompt for confirmation (interactive)
       print("⚠️  This will REPLACE the entire front matter in '\(path)'. Continue? (y/n): ", terminator: "")
-      fflush(stdout)
+      // Flush stdout to ensure prompt appears before readLine()
+      FileHandle.standardOutput.synchronizeFile()
 
       guard let response = readLine()?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) else {
         print("Cancelled (no input).")
